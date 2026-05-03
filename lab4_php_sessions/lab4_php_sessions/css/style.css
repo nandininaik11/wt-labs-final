@@ -1,0 +1,75 @@
+/* ============================================================
+   CSS/STYLE.CSS - Custom styles for Lab 4
+   THEORY: CSS (Cascading Style Sheets) controls the visual
+   appearance of HTML elements.
+   "Cascading" means styles inherit and override from top to bottom.
+   We use Bootstrap for most styles, this file adds custom touches.
+   ============================================================ */
+
+/* Apply box-sizing globally so padding doesn't add to width */
+* {
+    box-sizing: border-box;
+}
+
+/* Page background — light gray instead of plain white */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Add a smooth transition when hover states change */
+.card {
+    transition: box-shadow 0.2s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Lift card slightly when hovered (UX enhancement) */
+.card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+/* Style code blocks for theory explanations */
+pre {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    overflow-x: auto;
+}
+
+/* Make inline code stand out */
+code {
+    background-color: #fff3cd;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #c7254e;
+    font-size: 0.88em;
+}
+
+/* Form input focus styling */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* Smooth button transitions */
+.btn {
+    transition: all 0.2s ease;
+}
+
+/* Table styling improvements */
+.table th {
+    background-color: #f8f9fa;
+    font-size: 0.9rem;
+}
+
+.table td {
+    font-size: 0.88rem;
+    vertical-align: middle;
+}
+
+/* Alert customization */
+.alert {
+    border-radius: 8px;
+}

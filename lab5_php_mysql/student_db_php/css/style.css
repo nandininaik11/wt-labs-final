@@ -1,0 +1,61 @@
+/* ============================================================
+   FILE: css/style.css
+   PURPOSE: Custom styles for Student Database Manager
+   THEORY: CSS (Cascading Style Sheets) controls how HTML looks.
+           We use Bootstrap 5 for base styles, and this file
+           adds extra custom styling on top.
+   ============================================================ */
+
+/* Apply to whole page: background color, font */
+body {
+    background-color: #f0f4f8;  /* light blue-grey background */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Container max-width so content doesn't stretch too wide */
+.container {
+    max-width: 960px;
+}
+
+/* Card shadow effect - makes cards look lifted */
+.card {
+    border-radius: 10px;
+}
+
+/* Table header styling */
+thead.table-dark th {
+    background-color: #1a1a2e;
+    color: #ffffff;
+}
+
+/* Hover effect on table rows */
+.table-hover tbody tr:hover {
+    background-color: #e8f0fe;
+    transition: background-color 0.2s ease;
+}
+
+/* Button spacing */
+.btn {
+    margin: 2px;
+}
+
+/* Theory/info box code styling */
+code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #e83e8c;
+    font-size: 0.9em;
+}
+
+/* Alert box styling */
+.alert {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+}

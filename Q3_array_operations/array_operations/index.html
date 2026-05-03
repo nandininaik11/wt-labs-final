@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<!--
+  index.html — Array Operations Website
+  Lab Question 3 | Web Technology (WT)
+  ─────────────────────────────────────
+  WT Syllabus Coverage:
+    Unit I  — HTML5 structure, CSS (variables, flexbox, grid, animations)
+    Unit II — JavaScript: Arrays, Functions, Control Structures,
+               DOM manipulation, Events, Objects in JS
+  ─────────────────────────────────────
+  Operations Covered:
+    ✅ Reverse array
+    ✅ Bubble Sort  (manual algorithm)
+    ✅ Selection Sort (manual algorithm)
+    ✅ Insertion Sort (manual algorithm)
+    ✅ Built-in .sort()
+    ✅ Linear Search
+    ✅ Binary Search
+    ✅ Plus: Push, Pop, Shift, Unshift, Splice, Slice, Filter, Map
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport: makes page work properly on mobile screens -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Array Operations — JavaScript</title>
+
+  <!-- Google Fonts: Inter for clean, modern look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       CSS — WT Unit I: CSS3 Features
+       • Custom Properties (Variables)
+       • Flexbox Layout
+       • CSS Grid
+       • Animations (@keyframes)
+       • Transitions
+       • Pseudo-classes (:hover, :nth-child)
+       • Responsive Design (@media)
+       ═══════════════════════════════════════════════════════ */
+
+    /* CSS Custom Properties — define colors once, use everywhere */
+    :root {
+      --bg:        #0d1117;   /* dark background like GitHub */
+      --surface:   #161b22;   /* slightly lighter surface */
+      --card:      #21262d;   /* card background */
+      --border:    #30363d;   /* borders */
+      --primary:   #58a6ff;   /* blue accent */
+      --success:   #3fb950;   /* green */
+      --warning:   #d29922;   /* yellow */
+      --danger:    #f85149;   /* red */
+      --purple:    #bc8cff;   /* purple */
+      --text:      #e6edf3;   /* main text */
+      --muted:     #8b949e;   /* secondary text */
+      --code-bg:   #0d1117;   /* code block background */
+      --radius:    10px;
+      --shadow:    0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    /* CSS Reset */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      /* Subtle grid pattern in background */
+      background-image: radial-gradient(circle at 1px 1px, #21262d 1px, transparent 0);
+      background-size: 32px 32px;
+    }
+
+    /* ── Hero Header ── */
+    header {
+      background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 24px 32px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem); /* responsive font size */
+      font-weight: 800;
+      /* CSS gradient text effect */
+      background: linear-gradient(90deg, var(--primary), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    /* Tag pills in header */
+    .tag-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin-top: 16px;
+    }
+    .tag {
+      background: rgba(88,166,255,0.1);
+      border: 1px solid rgba(88,166,255,0.2);
+      color: var(--primary);
+      padding: 3px 12px; border-radius: 99px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+
+    /* ── Tab Navigation ── */
+    /* Flexbox: horizontal tab bar */
+    .tab-nav {
+      display: flex;
+      overflow-x: auto;   /* horizontal scroll on small screens */
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      gap: 2px;
+      position: sticky; top: 0; z-index: 50; /* sticks while scrolling */
+    }
+    .tab-btn {
+      padding: 14px 20px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.88rem; font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* ── Main Layout ── */
+    .container { max-width: 1000px; margin: 0 auto; padding: 28px 16px; }
+
+    /* ── Section: each tab's content ── */
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.25s ease; }
+    /* CSS animation keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--primary); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── Input Row ── */
+    .input-row {
+      display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+    .input-group label {
+      font-size: 0.75rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    input[type="text"], input[type="number"], select {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-family: 'Fira Code', monospace;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.15);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 20px; border: none; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      transition: all 0.18s; font-family: inherit; white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--primary);  color: #0d1117; }
+    .btn-primary:hover { background: #79b8ff; box-shadow: 0 4px 12px rgba(88,166,255,0.4); }
+    .btn-success { background: var(--success);  color: #0d1117; }
+    .btn-success:hover { background: #56d364; }
+    .btn-warning { background: var(--warning);  color: #0d1117; }
+    .btn-warning:hover { background: #e3b341; }
+    .btn-danger  { background: var(--danger);   color: #fff; }
+    .btn-purple  { background: var(--purple);   color: #0d1117; }
+    .btn-ghost   { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.1); }
+
+    /* ── Array Visual Bars ── */
+    /* This is the animated bar chart showing array elements */
+    .array-visual {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 160px;
+      padding: 12px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+    .bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      /* flex: 1 = each bar takes equal width */
+      flex: 1;
+      min-width: 30px;
+      max-width: 60px;
+    }
+    .bar {
+      width: 100%;
+      background: linear-gradient(180deg, var(--primary), #1f6feb);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.4s ease, background 0.3s; /* smooth animation on sort */
+      position: relative;
+    }
+    /* Color states for bars */
+    .bar.comparing { background: linear-gradient(180deg, var(--warning), #9e6a03); }
+    .bar.sorted    { background: linear-gradient(180deg, var(--success), #238636); }
+    .bar.found     { background: linear-gradient(180deg, #f78166, var(--danger)); }
+    .bar.pivot     { background: linear-gradient(180deg, var(--purple), #6e40c9); }
+
+    .bar-label {
+      font-size: 0.7rem; color: var(--muted);
+      font-family: 'Fira Code', monospace; font-weight: 500;
+    }
+    .bar-val {
+      font-size: 0.72rem; color: var(--text);
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* ── Array as Boxes (for smaller displays) ── */
+    .array-boxes {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+    }
+    .box {
+      background: var(--code-bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.25s;
+      position: relative;
+    }
+    .box .idx {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      font-size: 0.6rem; color: var(--muted);
+    }
+    .box.highlight { border-color: var(--warning); color: var(--warning); background: rgba(210,153,34,0.1); }
+    .box.found     { border-color: var(--success); color: var(--success); background: rgba(63,185,80,0.1); }
+    .box.sorted    { border-color: var(--primary); color: var(--primary); }
+    .box.pivot-box { border-color: var(--purple);  color: var(--purple); background: rgba(188,140,255,0.1); }
+
+    /* ── Output / Result Area ── */
+    .output-area {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88rem;
+      line-height: 1.8;
+      min-height: 60px;
+    }
+    .output-line { margin-bottom: 4px; }
+    .output-line .label { color: var(--muted); }
+    .output-line .value { color: var(--success); font-weight: 600; }
+    .output-line .step  { color: var(--warning); }
+    .output-line .found { color: var(--success); }
+    .output-line .notfound { color: var(--danger); }
+    .output-line .info  { color: var(--primary); }
+
+    /* ── Algorithm Info Badge ── */
+    .algo-info {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .complexity-badge {
+      background: rgba(88,166,255,0.08);
+      border: 1px solid rgba(88,166,255,0.2);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+    }
+    .complexity-badge .cb-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+    .complexity-badge .cb-val   { color: var(--primary); font-family: 'Fira Code', monospace; font-weight: 700; font-size: 0.92rem; margin-top: 2px; }
+
+    /* ── Code snippet block ── */
+    .code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .ck  { color: #ff7b72; } /* keyword */
+    .cf  { color: #d2a8ff; } /* function name */
+    .cs  { color: #a5d6ff; } /* string */
+    .cn  { color: #f0883e; } /* number */
+    .cc  { color: #8b949e; } /* comment */
+    .co  { color: #79c0ff; } /* operator/other */
+
+    /* ── Progress / Step indicator ── */
+    .step-counter {
+      font-size: 0.8rem; color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .step-counter span { color: var(--primary); font-weight: 700; }
+
+    /* ── Button Group ── */
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+    /* ── Divider ── */
+    .divider {
+      border: none; border-top: 1px solid var(--border); margin: 20px 0;
+    }
+
+    /* ── Theory Box ── */
+    .theory-box {
+      background: rgba(88,166,255,0.05);
+      border: 1px solid rgba(88,166,255,0.15);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .theory-box strong { color: var(--text); }
+
+    /* ── Alert ── */
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 14px; font-size: 0.88rem; font-weight: 500; }
+    .alert-success { background: rgba(63,185,80,0.12);  color: #56d364; border-left: 3px solid var(--success); }
+    .alert-danger  { background: rgba(248,81,73,0.12);  color: #f85149; border-left: 3px solid var(--danger);  }
+    .alert-info    { background: rgba(88,166,255,0.1);  color: var(--primary); border-left: 3px solid var(--primary); }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      header { padding: 24px 16px 20px; }
+      .card { padding: 16px; }
+      .btn  { padding: 9px 14px; font-size: 0.82rem; }
+      .tab-btn { padding: 12px 14px; font-size: 0.8rem; }
+    }
+
+    /* Utility */
+    .mt8  { margin-top: 8px; }
+    .mt16 { margin-top: 16px; }
+    .flex { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <h1>📊 Array Operations in JavaScript</h1>
+  <p>Lab Question 3 — Web Technology (WT) | Unit II: JavaScript Arrays</p>
+  <div class="tag-row">
+    <span class="tag">Reverse</span>
+    <span class="tag">Bubble Sort</span>
+    <span class="tag">Selection Sort</span>
+    <span class="tag">Insertion Sort</span>
+    <span class="tag">Linear Search</span>
+    <span class="tag">Binary Search</span>
+    <span class="tag">DOM Manipulation</span>
+  </div>
+</header>
+
+<!-- ── Tab Navigation ── -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('reverse')">↩️ Reverse</button>
+  <button class="tab-btn" onclick="showTab('bubble')">🫧 Bubble Sort</button>
+  <button class="tab-btn" onclick="showTab('selection')">🎯 Selection Sort</button>
+  <button class="tab-btn" onclick="showTab('insertion')">📌 Insertion Sort</button>
+  <button class="tab-btn" onclick="showTab('builtin')">⚡ Built-in Sort</button>
+  <button class="tab-btn" onclick="showTab('linear')">🔍 Linear Search</button>
+  <button class="tab-btn" onclick="showTab('binary')">🎯 Binary Search</button>
+  <button class="tab-btn" onclick="showTab('extras')">🛠️ More Operations</button>
+</nav>
+
+<div class="container">
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 1: REVERSE
+     ══════════════════════════════════════════════════════ -->
+<section class="section active" id="tab-reverse">
+  <div class="card">
+    <div class="card-title">↩️ Reverse Array</div>
+
+    <div class="theory-box">
+      <strong>Theory:</strong> Reversing an array means placing the last element first, second-last second, and so on.
+      Method 1: Use built-in <strong>array.reverse()</strong> — mutates original.
+      Method 2: Manual swap using a <strong>two-pointer technique</strong> — swap arr[0]↔arr[n-1], arr[1]↔arr[n-2], until middle.
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Enter Array (comma separated)</label>
+        <input type="text" id="rev-input" value="5, 3, 8, 1, 9, 2, 7, 4" placeholder="e.g. 5, 3, 8, 1, 9">
+      </div>
+      <button class="btn btn-primary" onclick="runReverse()">↩️ Reverse</button>
+      <button class="btn btn-ghost" onclick="resetRev()">Reset</button>
+    </div>
+
+    <!-- Array visualisation as boxes with index labels -->
+    <div class="step-counter">Original array: <span id="rev-count">8</span> elements</div>
+    <div style="padding-top: 20px;">
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px;font-family:'Fira Code',monospace">Index →</div>
+      <div class="array-boxes" id="rev-original"></div>
+    </div>
+
+    <div id="rev-result-area" style="display:none">
+      <hr class="divider">
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px;font-family:'Fira Code',monospace">Reversed →</div>
+      <div class="array-boxes" id="rev-reversed"></div>
+      <div class="output-area mt8" id="rev-output"></div>
+    </div>
+
+    <!-- Code snippet (shows the JS logic) -->
+    <details style="margin-top:16px">
+      <summary style="cursor:pointer;color:var(--primary);font-size:0.85rem;font-weight:600">📄 View JavaScript Code</summary>
+      <div class="code-snippet"><span class="cc">// Method 1: Built-in reverse() — modifies original array</span>
+<span class="ck">function</span> <span class="cf">reverseBuiltIn</span>(arr) {
+  <span class="ck">return</span> [...arr].<span class="cf">reverse</span>(); <span class="cc">// spread to avoid mutating original</span>
+}
+
+<span class="cc">// Method 2: Manual two-pointer swap</span>
+<span class="ck">function</span> <span class="cf">reverseManual</span>(arr) {
+  <span class="ck">let</span> result = [...arr];       <span class="cc">// copy array</span>
+  <span class="ck">let</span> left = <span class="cn">0</span>;
+  <span class="ck">let</span> right = result.length - <span class="cn">1</span>;
+
+  <span class="ck">while</span> (left &lt; right) {       <span class="cc">// until pointers meet</span>
+    <span class="cc">// Swap elements at left and right</span>
+    [result[left], result[right]] = [result[right], result[left]];
+    left++;   <span class="cc">// move left pointer right</span>
+    right--;  <span class="cc">// move right pointer left</span>
+  }
+  <span class="ck">return</span> result;
+}</div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 2: BUBBLE SORT
+     ══════════════════════════════════════════════════════ -->
+<section class="section" id="tab-bubble">
+  <div class="card">
+    <div class="card-title">🫧 Bubble Sort</div>
+
+    <div class="theory-box">
+      <strong>Theory:</strong> Compares adjacent pairs and swaps if they're in the wrong order. After each pass, the largest unsorted element "bubbles up" to its correct position.
+      <br><strong>Best case:</strong> O(n) — already sorted | <strong>Average/Worst:</strong> O(n²)
+    </div>
+
+    <div class="algo-info">
+      <div class="complexity-badge"><div class="cb-label">Time (Avg)</div><div class="cb-val">O(n²)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Time (Best)</div><div class="cb-val">O(n)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Space</div><div class="cb-val">O(1)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Stable</div><div class="cb-val">✅ Yes</div></div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Enter Numbers (comma separated)</label>
+        <input type="text" id="bub-input" value="64, 34, 25, 12, 22, 11, 90" placeholder="e.g. 64, 34, 25, 12">
+      </div>
+      <button class="btn btn-primary" onclick="runBubbleSort()">🫧 Sort</button>
+      <button class="btn btn-ghost"   onclick="resetBub()">Reset</button>
+    </div>
+
+    <div class="array-visual" id="bub-visual"></div>
+    <div class="step-counter">Steps: <span id="bub-steps">0</span> &nbsp;|&nbsp; Swaps: <span id="bub-swaps">0</span></div>
+    <div class="output-area mt8" id="bub-output"><span style="color:var(--muted)">Click "Sort" to see step-by-step process...</span></div>
+
+    <details style="margin-top:16px">
+      <summary style="cursor:pointer;color:var(--primary);font-size:0.85rem;font-weight:600">📄 View JavaScript Code</summary>
+      <div class="code-snippet"><span class="ck">function</span> <span class="cf">bubbleSort</span>(arr) {
+  <span class="ck">let</span> n = arr.length;
+  <span class="ck">let</span> steps = <span class="cn">0</span>, swaps = <span class="cn">0</span>;
+
+  <span class="ck">for</span> (<span class="ck">let</span> i = <span class="cn">0</span>; i &lt; n - <span class="cn">1</span>; i++) {
+    <span class="ck">let</span> swapped = <span class="ck">false</span>; <span class="cc">// optimization flag</span>
+
+    <span class="ck">for</span> (<span class="ck">let</span> j = <span class="cn">0</span>; j &lt; n - i - <span class="cn">1</span>; j++) {
+      steps++;
+      <span class="ck">if</span> (arr[j] > arr[j + <span class="cn">1</span>]) {
+        <span class="cc">// Swap adjacent elements</span>
+        [arr[j], arr[j+<span class="cn">1</span>]] = [arr[j+<span class="cn">1</span>], arr[j]];
+        swapped = <span class="ck">true</span>;
+        swaps++;
+      }
+    }
+    <span class="cc">// If no swap in entire pass → already sorted</span>
+    <span class="ck">if</span> (!swapped) <span class="ck">break</span>;
+  }
+  <span class="ck">return</span> { arr, steps, swaps };
+}</div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 3: SELECTION SORT
+     ══════════════════════════════════════════════════════ -->
+<section class="section" id="tab-selection">
+  <div class="card">
+    <div class="card-title">🎯 Selection Sort</div>
+
+    <div class="theory-box">
+      <strong>Theory:</strong> Finds the minimum element in the unsorted portion and places it at the beginning. After each pass, the sorted portion grows by one.
+      <br><strong>Time:</strong> Always O(n²) — never better, never worse.
+    </div>
+
+    <div class="algo-info">
+      <div class="complexity-badge"><div class="cb-label">Time (All)</div><div class="cb-val">O(n²)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Space</div><div class="cb-val">O(1)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Stable</div><div class="cb-val">❌ No</div></div>
+      <div class="complexity-badge"><div class="cb-label">Swaps</div><div class="cb-val">O(n)</div></div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Enter Numbers (comma separated)</label>
+        <input type="text" id="sel-input" value="29, 10, 14, 37, 13, 25, 8" placeholder="e.g. 29, 10, 14, 37">
+      </div>
+      <button class="btn btn-warning" onclick="runSelectionSort()">🎯 Sort</button>
+      <button class="btn btn-ghost"   onclick="resetSel()">Reset</button>
+    </div>
+
+    <div class="array-visual" id="sel-visual"></div>
+    <div class="step-counter">Passes: <span id="sel-passes">0</span> &nbsp;|&nbsp; Comparisons: <span id="sel-comps">0</span></div>
+    <div class="output-area mt8" id="sel-output"><span style="color:var(--muted)">Click "Sort" to see step-by-step...</span></div>
+
+    <details style="margin-top:16px">
+      <summary style="cursor:pointer;color:var(--primary);font-size:0.85rem;font-weight:600">📄 View JavaScript Code</summary>
+      <div class="code-snippet"><span class="ck">function</span> <span class="cf">selectionSort</span>(arr) {
+  <span class="ck">let</span> n = arr.length;
+  <span class="ck">let</span> comparisons = <span class="cn">0</span>;
+
+  <span class="ck">for</span> (<span class="ck">let</span> i = <span class="cn">0</span>; i &lt; n - <span class="cn">1</span>; i++) {
+    <span class="ck">let</span> minIdx = i; <span class="cc">// assume first unsorted is minimum</span>
+
+    <span class="cc">// Find actual minimum in rest of array</span>
+    <span class="ck">for</span> (<span class="ck">let</span> j = i + <span class="cn">1</span>; j &lt; n; j++) {
+      comparisons++;
+      <span class="ck">if</span> (arr[j] &lt; arr[minIdx]) {
+        minIdx = j; <span class="cc">// update min index</span>
+      }
+    }
+    <span class="cc">// Swap minimum to correct position</span>
+    <span class="ck">if</span> (minIdx !== i) {
+      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+    }
+  }
+  <span class="ck">return</span> { arr, comparisons };
+}</div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 4: INSERTION SORT
+     ══════════════════════════════════════════════════════ -->
+<section class="section" id="tab-insertion">
+  <div class="card">
+    <div class="card-title">📌 Insertion Sort</div>
+
+    <div class="theory-box">
+      <strong>Theory:</strong> Like sorting playing cards — pick one card at a time and insert it into its correct position in the already-sorted portion.
+      <br><strong>Best case:</strong> O(n) for nearly-sorted arrays. Efficient for small arrays.
+    </div>
+
+    <div class="algo-info">
+      <div class="complexity-badge"><div class="cb-label">Time (Best)</div><div class="cb-val">O(n)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Time (Worst)</div><div class="cb-val">O(n²)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Space</div><div class="cb-val">O(1)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Stable</div><div class="cb-val">✅ Yes</div></div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Enter Numbers (comma separated)</label>
+        <input type="text" id="ins-input" value="12, 11, 13, 5, 6, 8, 3" placeholder="e.g. 12, 11, 13, 5, 6">
+      </div>
+      <button class="btn btn-purple" onclick="runInsertionSort()">📌 Sort</button>
+      <button class="btn btn-ghost"  onclick="resetIns()">Reset</button>
+    </div>
+
+    <div class="array-visual" id="ins-visual"></div>
+    <div class="step-counter">Passes: <span id="ins-passes">0</span> &nbsp;|&nbsp; Shifts: <span id="ins-shifts">0</span></div>
+    <div class="output-area mt8" id="ins-output"><span style="color:var(--muted)">Click "Sort" to see step-by-step...</span></div>
+
+    <details style="margin-top:16px">
+      <summary style="cursor:pointer;color:var(--primary);font-size:0.85rem;font-weight:600">📄 View JavaScript Code</summary>
+      <div class="code-snippet"><span class="ck">function</span> <span class="cf">insertionSort</span>(arr) {
+  <span class="ck">let</span> n = arr.length;
+  <span class="ck">let</span> shifts = <span class="cn">0</span>;
+
+  <span class="ck">for</span> (<span class="ck">let</span> i = <span class="cn">1</span>; i &lt; n; i++) {
+    <span class="ck">let</span> key = arr[i];  <span class="cc">// element to be inserted</span>
+    <span class="ck">let</span> j = i - <span class="cn">1</span>;   <span class="cc">// start comparing with left neighbor</span>
+
+    <span class="cc">// Shift larger elements one position right</span>
+    <span class="ck">while</span> (j >= <span class="cn">0</span> && arr[j] > key) {
+      arr[j + <span class="cn">1</span>] = arr[j]; <span class="cc">// shift right</span>
+      j--;
+      shifts++;
+    }
+    arr[j + <span class="cn">1</span>] = key; <span class="cc">// insert key at correct position</span>
+  }
+  <span class="ck">return</span> { arr, shifts };
+}</div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 5: BUILT-IN SORT
+     ══════════════════════════════════════════════════════ -->
+<section class="section" id="tab-builtin">
+  <div class="card">
+    <div class="card-title">⚡ JavaScript Built-in .sort()</div>
+
+    <div class="theory-box">
+      <strong>Theory:</strong> JavaScript's built-in <strong>Array.prototype.sort()</strong> method. Without a comparator, it converts elements to strings (causes wrong numeric order!).
+      Always pass a comparator function: <code style="color:var(--primary)">arr.sort((a, b) => a - b)</code> for ascending.
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Enter Values (comma separated — try mixing text and numbers)</label>
+        <input type="text" id="builtin-input" value="10, 9, 100, 21, 3, 55, 8" placeholder="e.g. 10, 9, 100, 21">
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-success" onclick="runBuiltinSort('asc')">⬆️ Sort Ascending</button>
+      <button class="btn btn-danger"  onclick="runBuiltinSort('desc')">⬇️ Sort Descending</button>
+      <button class="btn btn-warning" onclick="runBuiltinSort('string')">🔤 Sort as Strings</button>
+      <button class="btn btn-purple"  onclick="runBuiltinSort('length')">📏 Sort by Length</button>
+    </div>
+
+    <div class="array-boxes" id="builtin-original" style="margin-top:8px"></div>
+    <div style="font-size:0.75rem;color:var(--muted);margin:8px 0 4px">Result ↓</div>
+    <div class="array-boxes" id="builtin-result"></div>
+    <div class="output-area mt8" id="builtin-output"><span style="color:var(--muted)">Click a sort button...</span></div>
+
+    <details style="margin-top:16px">
+      <summary style="cursor:pointer;color:var(--primary);font-size:0.85rem;font-weight:600">📄 View JavaScript Code</summary>
+      <div class="code-snippet"><span class="cc">// ⚠️ WITHOUT comparator — sorts as strings (WRONG for numbers!)</span>
+[<span class="cn">10</span>, <span class="cn">9</span>, <span class="cn">100</span>].sort();        <span class="cc">// → [10, 100, 9] ← WRONG!</span>
+
+<span class="cc">// ✅ Ascending (a - b): negative means a before b</span>
+[<span class="cn">10</span>, <span class="cn">9</span>, <span class="cn">100</span>].sort((<span class="co">a</span>, <span class="co">b</span>) => <span class="co">a</span> - <span class="co">b</span>); <span class="cc">// → [9, 10, 100] ✅</span>
+
+<span class="cc">// ✅ Descending (b - a)</span>
+[<span class="cn">10</span>, <span class="cn">9</span>, <span class="cn">100</span>].sort((<span class="co">a</span>, <span class="co">b</span>) => <span class="co">b</span> - <span class="co">a</span>); <span class="cc">// → [100, 10, 9]</span>
+
+<span class="cc">// ✅ Sort strings</span>
+[<span class="cs">'banana'</span>, <span class="cs">'apple'</span>].sort((<span class="co">a</span>, <span class="co">b</span>) => <span class="co">a</span>.localeCompare(<span class="co">b</span>));
+
+<span class="cc">// ✅ Sort by string length</span>
+words.sort((<span class="co">a</span>, <span class="co">b</span>) => <span class="co">a</span>.length - <span class="co">b</span>.length);</div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 6: LINEAR SEARCH
+     ══════════════════════════════════════════════════════ -->
+<section class="section" id="tab-linear">
+  <div class="card">
+    <div class="card-title">🔍 Linear Search</div>
+
+    <div class="theory-box">
+      <strong>Theory:</strong> Checks each element one by one from left to right until the target is found or the array ends.
+      Works on <strong>unsorted arrays</strong>. Simple but slow for large arrays.
+      <br><strong>Best case:</strong> O(1) — element at first position | <strong>Worst:</strong> O(n) — last position or not found.
+    </div>
+
+    <div class="algo-info">
+      <div class="complexity-badge"><div class="cb-label">Time (Best)</div><div class="cb-val">O(1)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Time (Worst)</div><div class="cb-val">O(n)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Sorted?</div><div class="cb-val">Not needed</div></div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Array (comma separated)</label>
+        <input type="text" id="lin-array" value="15, 4, 8, 22, 11, 7, 33, 19" placeholder="e.g. 15, 4, 8, 22, 11">
+      </div>
+      <div class="input-group" style="max-width:160px">
+        <label>Search for</label>
+        <input type="number" id="lin-target" value="11" placeholder="e.g. 11">
+      </div>
+      <button class="btn btn-primary" onclick="runLinearSearch()">🔍 Search</button>
+      <button class="btn btn-ghost"   onclick="resetLin()">Reset</button>
+    </div>
+
+    <div class="array-boxes" id="lin-boxes" style="padding-top:16px"></div>
+    <div class="step-counter mt8">Comparisons made: <span id="lin-comps">0</span></div>
+    <div class="output-area mt8" id="lin-output"><span style="color:var(--muted)">Enter array and target, then click Search...</span></div>
+
+    <details style="margin-top:16px">
+      <summary style="cursor:pointer;color:var(--primary);font-size:0.85rem;font-weight:600">📄 View JavaScript Code</summary>
+      <div class="code-snippet"><span class="ck">function</span> <span class="cf">linearSearch</span>(arr, target) {
+  <span class="ck">for</span> (<span class="ck">let</span> i = <span class="cn">0</span>; i &lt; arr.length; i++) {
+    <span class="ck">if</span> (arr[i] === target) {
+      <span class="ck">return</span> i;  <span class="cc">// return index where found</span>
+    }
+  }
+  <span class="ck">return</span> -<span class="cn">1</span>; <span class="cc">// return -1 if not found (convention)</span>
+}
+
+<span class="cc">// Usage:</span>
+<span class="ck">const</span> arr = [<span class="cn">15</span>, <span class="cn">4</span>, <span class="cn">8</span>, <span class="cn">22</span>, <span class="cn">11</span>];
+<span class="ck">const</span> idx = <span class="cf">linearSearch</span>(arr, <span class="cn">11</span>); <span class="cc">// → 4 (index)</span>
+<span class="ck">const</span> idx2 = <span class="cf">linearSearch</span>(arr, <span class="cn">99</span>); <span class="cc">// → -1 (not found)</span>
+
+<span class="cc">// Built-in equivalents:</span>
+arr.<span class="cf">indexOf</span>(<span class="cn">11</span>);  <span class="cc">// → 4</span>
+arr.<span class="cf">includes</span>(<span class="cn">11</span>); <span class="cc">// → true</span>
+arr.<span class="cf">find</span>(<span class="co">x</span> => <span class="co">x</span> === <span class="cn">11</span>); <span class="cc">// → 11 (value)</span></div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 7: BINARY SEARCH
+     ══════════════════════════════════════════════════════ -->
+<section class="section" id="tab-binary">
+  <div class="card">
+    <div class="card-title">🎯 Binary Search</div>
+
+    <div class="theory-box">
+      <strong>Theory:</strong> Works ONLY on sorted arrays. Like finding a word in a dictionary — open in the middle, decide left or right half, repeat.
+      Each step eliminates HALF the remaining elements → very fast for large arrays.
+      <br><strong>n=1000 elements:</strong> Linear needs up to 1000 steps, Binary needs only ~10!
+    </div>
+
+    <div class="algo-info">
+      <div class="complexity-badge"><div class="cb-label">Time (Best)</div><div class="cb-val">O(1)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Time (Worst)</div><div class="cb-val">O(log n)</div></div>
+      <div class="complexity-badge"><div class="cb-label">Sorted?</div><div class="cb-val">✅ Required</div></div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Sorted Array (auto-sorted on search)</label>
+        <input type="text" id="bin-array" value="2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91" placeholder="Sorted numbers">
+      </div>
+      <div class="input-group" style="max-width:160px">
+        <label>Search for</label>
+        <input type="number" id="bin-target" value="23" placeholder="e.g. 23">
+      </div>
+      <button class="btn btn-success" onclick="runBinarySearch()">🎯 Search</button>
+      <button class="btn btn-ghost"   onclick="resetBin()">Reset</button>
+    </div>
+
+    <div style="padding-top:16px">
+      <div class="array-boxes" id="bin-boxes"></div>
+    </div>
+    <div class="step-counter mt8">Iterations: <span id="bin-iters">0</span> &nbsp;|&nbsp; O(log n) = <span id="bin-logn">0</span></div>
+    <div class="output-area mt8" id="bin-output"><span style="color:var(--muted)">Array must be sorted. Binary search works by halving the search space each step.</span></div>
+
+    <details style="margin-top:16px">
+      <summary style="cursor:pointer;color:var(--primary);font-size:0.85rem;font-weight:600">📄 View JavaScript Code</summary>
+      <div class="code-snippet"><span class="ck">function</span> <span class="cf">binarySearch</span>(arr, target) {
+  <span class="ck">let</span> left  = <span class="cn">0</span>;
+  <span class="ck">let</span> right = arr.length - <span class="cn">1</span>;
+  <span class="ck">let</span> steps = <span class="cn">0</span>;
+
+  <span class="ck">while</span> (left &lt;= right) {
+    steps++;
+    <span class="cc">// Find middle index (avoid overflow vs (left+right)/2)</span>
+    <span class="ck">let</span> mid = Math.<span class="cf">floor</span>((left + right) / <span class="cn">2</span>);
+
+    <span class="ck">if</span> (arr[mid] === target) {
+      <span class="ck">return</span> { index: mid, steps };   <span class="cc">// found!</span>
+    } <span class="ck">else if</span> (arr[mid] &lt; target) {
+      left = mid + <span class="cn">1</span>;               <span class="cc">// search RIGHT half</span>
+    } <span class="ck">else</span> {
+      right = mid - <span class="cn">1</span>;              <span class="cc">// search LEFT half</span>
+    }
+  }
+  <span class="ck">return</span> { index: -<span class="cn">1</span>, steps };     <span class="cc">// not found</span>
+}</div>
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 8: MORE OPERATIONS
+     ══════════════════════════════════════════════════════ -->
+<section class="section" id="tab-extras">
+  <div class="card">
+    <div class="card-title">🛠️ More Array Operations</div>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Working Array</label>
+        <input type="text" id="ext-input" value="10, 20, 30, 40, 50" placeholder="Enter numbers">
+      </div>
+      <button class="btn btn-ghost" onclick="loadExtArray()">Load</button>
+    </div>
+
+    <div class="array-boxes" id="ext-boxes"></div>
+
+    <!-- Operation buttons grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:16px 0">
+      <button class="btn btn-primary" onclick="extOp('push')">➕ Push (add end)</button>
+      <button class="btn btn-danger"  onclick="extOp('pop')">➖ Pop (remove end)</button>
+      <button class="btn btn-success" onclick="extOp('unshift')">⬅️ Unshift (add start)</button>
+      <button class="btn btn-warning" onclick="extOp('shift')">➡️ Shift (remove start)</button>
+      <button class="btn btn-purple"  onclick="extOp('splice')">✂️ Splice (remove mid)</button>
+      <button class="btn btn-primary" onclick="extOp('slice')">🔪 Slice (copy part)</button>
+      <button class="btn btn-success" onclick="extOp('filter')">🔽 Filter (>25)</button>
+      <button class="btn btn-warning" onclick="extOp('map')">✖️ Map (×2)</button>
+      <button class="btn btn-purple"  onclick="extOp('reduce')">Σ Reduce (sum)</button>
+      <button class="btn btn-danger"  onclick="extOp('concat')">🔗 Concat</button>
+      <button class="btn btn-primary" onclick="extOp('flat')">📋 Every/Some</button>
+      <button class="btn btn-ghost"   onclick="extOp('reset')">🔄 Reset</button>
+    </div>
+
+    <div class="output-area" id="ext-output"><span style="color:var(--muted)">Click any operation above to see the result with explanation...</span></div>
+  </div>
+
+  <!-- Quick Reference Card -->
+  <div class="card">
+    <div class="card-title">📚 Array Methods Quick Reference</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;font-size:0.82rem;font-family:'Fira Code',monospace">
+      <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px">
+        <div style="color:var(--primary);font-weight:700;margin-bottom:8px">Mutating Methods</div>
+        <div style="color:var(--muted);line-height:2">push(x) — add to end<br>pop() — remove from end<br>unshift(x) — add to start<br>shift() — remove from start<br>splice(i,n) — remove n at i<br>reverse() — reverse in-place<br>sort(fn) — sort in-place<br>fill(x) — fill with value</div>
+      </div>
+      <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px">
+        <div style="color:var(--success);font-weight:700;margin-bottom:8px">Non-Mutating Methods</div>
+        <div style="color:var(--muted);line-height:2">slice(i,j) — returns subarray<br>concat(arr) — joins arrays<br>map(fn) — transforms each<br>filter(fn) — filters elements<br>find(fn) — finds one element<br>indexOf(x) — finds index<br>includes(x) — checks existence<br>reduce(fn) — aggregates</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /.container -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT — WT Unit II: Arrays, Functions, DOM, Events
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ══════════════════════════════════════════
+
+// parseArray() — converts comma-separated input string → number array
+// e.g. "5, 3, 8" → [5, 3, 8]
+function parseArray(inputId) {
+  // document.getElementById() — DOM method to get element by id
+  const raw = document.getElementById(inputId).value;
+  // split(',') splits string by comma → array of strings
+  // map() transforms each element with parseInt (string → integer)
+  // filter() removes NaN values (in case of empty entries)
+  return raw.split(',')
+            .map(s => parseFloat(s.trim()))
+            .filter(n => !isNaN(n));
+}
+
+// renderBars() — creates animated bar chart for array
+// height of each bar = proportional to its value
+function renderBars(containerId, arr, highlights = {}) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const max = Math.max(...arr); // spread operator gets max value
+  const MIN_HEIGHT = 20;        // minimum bar height in px
+  const MAX_HEIGHT = 130;       // maximum bar height in px
+
+  // Array.map() transforms each value into HTML string
+  // join('') combines array of strings into one string
+  container.innerHTML = arr.map((val, i) => {
+    // Calculate bar height as percentage of max value
+    const h = MIN_HEIGHT + ((val / max) * (MAX_HEIGHT - MIN_HEIGHT));
+    // Determine CSS class based on highlights object
+    const cls = highlights[i] || ''; // e.g. 'comparing', 'sorted', 'found'
+    return `
+      <div class="bar-wrap">
+        <div class="bar-val">${val}</div>
+        <div class="bar ${cls}" style="height:${h}px"></div>
+        <div class="bar-label">${i}</div>
+      </div>`;
+  }).join('');
+}
+
+// renderBoxes() — renders array as colored boxes with index labels
+function renderBoxes(containerId, arr, highlights = {}) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = arr.map((val, i) => {
+    const cls = highlights[i] || '';
+    return `<div class="box ${cls}">
+              <div class="idx">[${i}]</div>
+              ${val}
+            </div>`;
+  }).join('');
+}
+
+// addOutput() — appends a line to the output area
+function addOutput(id, html, clear = false) {
+  const el = document.getElementById(id);
+  if (clear) el.innerHTML = '';
+  el.innerHTML += `<div class="output-line">${html}</div>`;
+}
+
+// sleep() — creates a delay (used in sorting animations)
+// Returns a Promise that resolves after `ms` milliseconds
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// TAB NAVIGATION
+// showTab() — switches between sections
+function showTab(name) {
+  // Hide all sections: querySelectorAll returns all .section elements
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  // Remove active from all tab buttons
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+  // Show selected section — classList.add adds CSS class
+  document.getElementById('tab-' + name).classList.add('active');
+  // Find and activate corresponding button
+  // event.target is the clicked button; we find it by checking text isn't a clean solution
+  // Instead, we use data mapping
+  const tabNames = ['reverse','bubble','selection','insertion','builtin','linear','binary','extras'];
+  const idx = tabNames.indexOf(name);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+
+  // Auto-initialize visualizations when tab opens
+  if (name === 'reverse')   initRev();
+  if (name === 'bubble')    initBub();
+  if (name === 'selection') initSel();
+  if (name === 'insertion') initIns();
+  if (name === 'builtin')   initBuiltin();
+  if (name === 'linear')    initLin();
+  if (name === 'binary')    initBin();
+  if (name === 'extras')    loadExtArray();
+}
+
+// ══════════════════════════════════════════
+// REVERSE OPERATIONS
+// ══════════════════════════════════════════
+
+function initRev() {
+  const arr = parseArray('rev-input');
+  document.getElementById('rev-count').textContent = arr.length;
+  renderBoxes('rev-original', arr);
+  document.getElementById('rev-result-area').style.display = 'none';
+  // Add index labels manually
+  const orig = document.getElementById('rev-original');
+  if (orig) orig.querySelectorAll('.idx').forEach((el, i) => el.textContent = `[${i}]`);
+}
+
+function runReverse() {
+  const arr = parseArray('rev-input');
+  if (arr.length === 0) { alert('Please enter valid numbers!'); return; }
+
+  // ── METHOD 1: Built-in reverse() ──
+  // spread operator [...arr] creates a COPY (to not modify original)
+  const reversed = [...arr].reverse();
+
+  // ── METHOD 2: Manual two-pointer (also show in output) ──
+  let manual = [...arr];
+  const swapSteps = [];
+  let left = 0, right = manual.length - 1;
+
+  while (left < right) {
+    swapSteps.push(`Swap index [${left}]=${manual[left]} ↔ [${right}]=${manual[right]}`);
+    // Destructuring swap: [a, b] = [b, a] — no temp variable needed!
+    [manual[left], manual[right]] = [manual[right], manual[left]];
+    left++;
+    right--;
+  }
+
+  // Render original with normal boxes
+  renderBoxes('rev-original', arr);
+
+  // Render reversed with sorted (blue) highlight
+  const hls = {};
+  reversed.forEach((_, i) => hls[i] = 'sorted');
+  renderBoxes('rev-reversed', reversed, hls);
+
+  // Show result area
+  document.getElementById('rev-result-area').style.display = 'block';
+
+  // Build output text
+  addOutput('rev-output', `<span class="label">Original:  </span><span class="value">[${arr.join(', ')}]</span>`, true);
+  addOutput('rev-output', `<span class="label">Reversed:  </span><span class="value">[${reversed.join(', ')}]</span>`);
+  addOutput('rev-output', `<span class="label">Method:    </span><span class="info">[...arr].reverse() — built-in</span>`);
+  swapSteps.forEach(s => addOutput('rev-output', `<span class="step">  ↔ ${s}</span>`));
+  addOutput('rev-output', `<span class="label">Total swaps: </span><span class="value">${swapSteps.length}</span>`);
+}
+
+function resetRev() {
+  document.getElementById('rev-input').value = '5, 3, 8, 1, 9, 2, 7, 4';
+  initRev();
+}
+
+// Initialize on page load
+initRev();
+
+// ══════════════════════════════════════════
+// BUBBLE SORT
+// ══════════════════════════════════════════
+
+function initBub() {
+  const arr = parseArray('bub-input');
+  renderBars('bub-visual', arr);
+  document.getElementById('bub-steps').textContent = 0;
+  document.getElementById('bub-swaps').textContent = 0;
+  document.getElementById('bub-output').innerHTML = '<span style="color:var(--muted)">Click "Sort" to see step-by-step...</span>';
+}
+
+async function runBubbleSort() {
+  const arr = parseArray('bub-input');
+  if (arr.length < 2) { alert('Need at least 2 numbers!'); return; }
+
+  let a = [...arr]; // work on a copy
+  let n = a.length;
+  let totalSteps = 0, totalSwaps = 0;
+  const log = [];
+
+  addOutput('bub-output', `<span class="info">▶ Starting Bubble Sort on [${arr.join(', ')}]</span>`, true);
+
+  // OUTER LOOP: i = pass number (0 to n-2)
+  // After pass i, the last i elements are in correct position
+  for (let i = 0; i < n - 1; i++) {
+    let swapped = false;
+    log.push(`--- Pass ${i + 1}: comparing up to index ${n - i - 2} ---`);
+
+    // INNER LOOP: compare adjacent pairs
+    // Upper bound decreases each pass (last i elements already sorted)
+    for (let j = 0; j < n - i - 1; j++) {
+      totalSteps++;
+
+      // Show current comparison in visualization
+      const hls = {};
+      hls[j] = 'comparing';
+      hls[j + 1] = 'comparing';
+      // Mark already-sorted (right side)
+      for (let k = n - i; k < n; k++) hls[k] = 'sorted';
+      renderBars('bub-visual', a, hls);
+      document.getElementById('bub-steps').textContent = totalSteps;
+
+      // Wait briefly so user can see animation
+      await sleep(80);
+
+      if (a[j] > a[j + 1]) {
+        // SWAP using destructuring assignment
+        [a[j], a[j + 1]] = [a[j + 1], a[j]];
+        totalSwaps++;
+        swapped = true;
+        log.push(`  Swap: ${a[j+1]} > ${a[j]} → [${a.join(', ')}]`);
+      }
+    }
+
+    // If no swap occurred in this pass → array is sorted (optimization)
+    if (!swapped) {
+      log.push(`  No swaps in pass ${i+1} → Array already sorted! (Early exit)`);
+      break;
+    }
+  }
+
+  // Mark all bars as sorted (green)
+  const allSorted = {};
+  a.forEach((_, i) => allSorted[i] = 'sorted');
+  renderBars('bub-visual', a, allSorted);
+
+  document.getElementById('bub-swaps').textContent = totalSwaps;
+
+  // Display log
+  log.forEach(line => addOutput('bub-output', `<span class="step">${line}</span>`));
+  addOutput('bub-output', `<span class="value">✅ Sorted: [${a.join(', ')}]</span>`);
+  addOutput('bub-output', `<span class="info">Total steps: ${totalSteps} | Swaps: ${totalSwaps}</span>`);
+}
+
+function resetBub() {
+  document.getElementById('bub-input').value = '64, 34, 25, 12, 22, 11, 90';
+  initBub();
+}
+
+initBub();
+
+// ══════════════════════════════════════════
+// SELECTION SORT
+// ══════════════════════════════════════════
+
+function initSel() {
+  const arr = parseArray('sel-input');
+  renderBars('sel-visual', arr);
+  document.getElementById('sel-passes').textContent = 0;
+  document.getElementById('sel-comps').textContent = 0;
+  document.getElementById('sel-output').innerHTML = '<span style="color:var(--muted)">Click "Sort" to see step-by-step...</span>';
+}
+
+async function runSelectionSort() {
+  const arr = parseArray('sel-input');
+  if (arr.length < 2) { alert('Need at least 2 numbers!'); return; }
+
+  let a = [...arr];
+  let n = a.length;
+  let passes = 0, comps = 0;
+
+  addOutput('sel-output', `<span class="info">▶ Starting Selection Sort on [${arr.join(', ')}]</span>`, true);
+
+  for (let i = 0; i < n - 1; i++) {
+    passes++;
+    let minIdx = i; // assume current position has minimum
+
+    addOutput('sel-output', `<span class="step">Pass ${passes}: Finding min from index ${i}...</span>`);
+
+    // Find minimum in unsorted portion (i+1 to end)
+    for (let j = i + 1; j < n; j++) {
+      comps++;
+
+      const hls = {};
+      hls[minIdx] = 'pivot';  // current minimum → purple
+      hls[j] = 'comparing';   // element being compared → yellow
+      for (let k = 0; k < i; k++) hls[k] = 'sorted'; // already sorted → green
+      renderBars('sel-visual', a, hls);
+      document.getElementById('sel-passes').textContent = passes;
+      document.getElementById('sel-comps').textContent = comps;
+
+      await sleep(90);
+
+      if (a[j] < a[minIdx]) {
+        minIdx = j; // found new minimum
+      }
+    }
+
+    // Swap minimum to position i
+    if (minIdx !== i) {
+      addOutput('sel-output', `<span class="step">  Min found: ${a[minIdx]} at [${minIdx}] → swap with [${i}]</span>`);
+      [a[i], a[minIdx]] = [a[minIdx], a[i]];
+    } else {
+      addOutput('sel-output', `<span class="step">  Min is already at position ${i} — no swap needed</span>`);
+    }
+  }
+
+  const allSorted = {};
+  a.forEach((_, i) => allSorted[i] = 'sorted');
+  renderBars('sel-visual', a, allSorted);
+
+  addOutput('sel-output', `<span class="value">✅ Sorted: [${a.join(', ')}]</span>`);
+  addOutput('sel-output', `<span class="info">Passes: ${passes} | Comparisons: ${comps}</span>`);
+}
+
+function resetSel() {
+  document.getElementById('sel-input').value = '29, 10, 14, 37, 13, 25, 8';
+  initSel();
+}
+
+initSel();
+
+// ══════════════════════════════════════════
+// INSERTION SORT
+// ══════════════════════════════════════════
+
+function initIns() {
+  const arr = parseArray('ins-input');
+  renderBars('ins-visual', arr);
+  document.getElementById('ins-passes').textContent = 0;
+  document.getElementById('ins-shifts').textContent = 0;
+  document.getElementById('ins-output').innerHTML = '<span style="color:var(--muted)">Click "Sort" to see step-by-step...</span>';
+}
+
+async function runInsertionSort() {
+  const arr = parseArray('ins-input');
+  if (arr.length < 2) { alert('Need at least 2 numbers!'); return; }
+
+  let a = [...arr];
+  let n = a.length;
+  let passes = 0, shifts = 0;
+
+  addOutput('ins-output', `<span class="info">▶ Starting Insertion Sort on [${arr.join(', ')}]</span>`, true);
+
+  // Start from index 1 (first element is trivially sorted)
+  for (let i = 1; i < n; i++) {
+    passes++;
+    let key = a[i];   // the element we're going to insert
+    let j = i - 1;   // start comparing with left neighbor
+
+    addOutput('ins-output', `<span class="step">Pass ${passes}: Insert key=${key} into sorted portion</span>`);
+
+    const hls = {};
+    hls[i] = 'comparing'; // highlight the key element
+    renderBars('ins-visual', a, hls);
+    await sleep(100);
+
+    // Shift elements larger than key one position to the right
+    while (j >= 0 && a[j] > key) {
+      a[j + 1] = a[j]; // shift right
+      shifts++;
+      j--;
+
+      const hls2 = {};
+      hls2[j + 1] = 'comparing';
+      for (let k = 0; k < i && k <= j + 2; k++) if (k <= j + 1) hls2[k] = hls2[k] || '';
+      renderBars('ins-visual', a, hls2);
+      document.getElementById('ins-shifts').textContent = shifts;
+      await sleep(80);
+    }
+
+    a[j + 1] = key; // insert key at correct position
+    addOutput('ins-output', `<span class="step">  Inserted ${key} at index ${j+1} → [${a.join(', ')}]</span>`);
+
+    document.getElementById('ins-passes').textContent = passes;
+  }
+
+  const allSorted = {};
+  a.forEach((_, i) => allSorted[i] = 'sorted');
+  renderBars('ins-visual', a, allSorted);
+
+  addOutput('ins-output', `<span class="value">✅ Sorted: [${a.join(', ')}]</span>`);
+  addOutput('ins-output', `<span class="info">Passes: ${passes} | Shifts: ${shifts}</span>`);
+}
+
+function resetIns() {
+  document.getElementById('ins-input').value = '12, 11, 13, 5, 6, 8, 3';
+  initIns();
+}
+
+initIns();
+
+// ══════════════════════════════════════════
+// BUILT-IN SORT
+// ══════════════════════════════════════════
+
+function initBuiltin() {
+  const arr = parseArray('builtin-input');
+  renderBoxes('builtin-original', arr);
+  document.getElementById('builtin-result').innerHTML = '';
+  document.getElementById('builtin-output').innerHTML = '<span style="color:var(--muted)">Click a sort button...</span>';
+}
+
+function runBuiltinSort(mode) {
+  // Parse as strings to demonstrate default sort behavior
+  const rawVals = document.getElementById('builtin-input').value
+    .split(',').map(s => s.trim()).filter(s => s);
+  const numArr = rawVals.map(Number).filter(n => !isNaN(n));
+  const strArr = rawVals;
+
+  let result, desc, code;
+
+  if (mode === 'asc') {
+    result = [...numArr].sort((a, b) => a - b); // numeric ascending
+    desc = 'Numeric ascending: sort((a,b) => a - b)';
+    code = '.sort((a, b) => a - b)';
+  } else if (mode === 'desc') {
+    result = [...numArr].sort((a, b) => b - a); // numeric descending
+    desc = 'Numeric descending: sort((a,b) => b - a)';
+    code = '.sort((a, b) => b - a)';
+  } else if (mode === 'string') {
+    // Default sort — converts to strings first!
+    const noComp = [...numArr].sort();
+    result = noComp;
+    desc = '⚠️ Default sort() converts to strings! [10, 9, 100] → [10, 100, 9]';
+    code = '.sort() ← no comparator (wrong for numbers!)';
+  } else if (mode === 'length') {
+    result = [...strArr].sort((a, b) => a.length - b.length);
+    desc = 'Sort strings by length';
+    code = '.sort((a, b) => a.length - b.length)';
+  }
+
+  // Render original
+  renderBoxes('builtin-original', mode === 'length' ? strArr : numArr);
+
+  // Render result with sorted highlight
+  const hls = {};
+  result.forEach((_, i) => hls[i] = 'sorted');
+  renderBoxes('builtin-result', result, hls);
+
+  // Output
+  addOutput('builtin-output',
+    `<span class="label">Input:  </span><span class="value">[${(mode === 'length' ? strArr : numArr).join(', ')}]</span>`, true);
+  addOutput('builtin-output',
+    `<span class="label">Code:   </span><span class="info">arr${code}</span>`);
+  addOutput('builtin-output',
+    `<span class="label">Result: </span><span class="value">[${result.join(', ')}]</span>`);
+  addOutput('builtin-output',
+    `<span class="step">${desc}</span>`);
+}
+
+initBuiltin();
+
+// ══════════════════════════════════════════
+// LINEAR SEARCH
+// ══════════════════════════════════════════
+
+function initLin() {
+  const arr = parseArray('lin-array');
+  renderBoxes('lin-boxes', arr);
+  document.getElementById('lin-comps').textContent = 0;
+  document.getElementById('lin-output').innerHTML = '<span style="color:var(--muted)">Enter array and target, then click Search...</span>';
+}
+
+async function runLinearSearch() {
+  const arr    = parseArray('lin-array');
+  const target = parseFloat(document.getElementById('lin-target').value);
+
+  if (arr.length === 0 || isNaN(target)) {
+    alert('Please enter valid array and target!');
+    return;
+  }
+
+  addOutput('lin-output', `<span class="info">▶ Linear Search: looking for ${target} in [${arr.join(', ')}]</span>`, true);
+
+  let comparisons = 0;
+
+  // Check each element one by one — left to right
+  for (let i = 0; i < arr.length; i++) {
+    comparisons++;
+    document.getElementById('lin-comps').textContent = comparisons;
+
+    // Highlight current element being checked (yellow)
+    const hls = {};
+    hls[i] = 'highlight';
+    renderBoxes('lin-boxes', arr, hls);
+
+    addOutput('lin-output', `<span class="step">  Step ${comparisons}: arr[${i}] = ${arr[i]} ${arr[i] === target ? '==' : '≠'} ${target}</span>`);
+
+    await sleep(400); // pause so user can see each step
+
+    if (arr[i] === target) {
+      // Found! Highlight in green
+      hls[i] = 'found';
+      renderBoxes('lin-boxes', arr, hls);
+      addOutput('lin-output', `<span class="found">✅ FOUND! ${target} is at index [${i}]</span>`);
+      addOutput('lin-output', `<span class="info">Comparisons made: ${comparisons} out of ${arr.length}</span>`);
+      return;
+    }
+  }
+
+  // Not found after checking all elements
+  renderBoxes('lin-boxes', arr); // reset to normal
+  addOutput('lin-output', `<span class="notfound">❌ NOT FOUND. ${target} is not in the array.</span>`);
+  addOutput('lin-output', `<span class="info">Checked all ${comparisons} elements.</span>`);
+}
+
+function resetLin() {
+  document.getElementById('lin-array').value = '15, 4, 8, 22, 11, 7, 33, 19';
+  document.getElementById('lin-target').value = '11';
+  initLin();
+}
+
+initLin();
+
+// ══════════════════════════════════════════
+// BINARY SEARCH
+// ══════════════════════════════════════════
+
+function initBin() {
+  const arr = parseArray('bin-array').sort((a, b) => a - b);
+  renderBoxes('bin-boxes', arr);
+  document.getElementById('bin-iters').textContent = 0;
+  document.getElementById('bin-logn').textContent = Math.ceil(Math.log2(arr.length || 1));
+  document.getElementById('bin-output').innerHTML = '<span style="color:var(--muted)">Array must be sorted. Binary search works by halving the search space each step.</span>';
+}
+
+async function runBinarySearch() {
+  // Sort the array first (binary search REQUIRES sorted array)
+  const arr    = parseArray('bin-array').sort((a, b) => a - b);
+  const target = parseFloat(document.getElementById('bin-target').value);
+
+  if (arr.length === 0 || isNaN(target)) {
+    alert('Please enter valid array and target!');
+    return;
+  }
+
+  // Update display with sorted array
+  document.getElementById('bin-logn').textContent = Math.ceil(Math.log2(arr.length));
+
+  addOutput('bin-output',
+    `<span class="info">▶ Binary Search for ${target} in sorted [${arr.join(', ')}]</span>`, true);
+
+  let left  = 0;
+  let right = arr.length - 1;
+  let iters = 0;
+
+  while (left <= right) {
+    iters++;
+    document.getElementById('bin-iters').textContent = iters;
+
+    // Mid index calculation: floor((left + right) / 2)
+    let mid = Math.floor((left + right) / 2);
+
+    // Highlight: left=yellow, mid=purple, right=yellow
+    const hls = {};
+    for (let i = left; i <= right; i++) hls[i] = 'highlight';
+    hls[mid] = 'pivot-box'; // mid is purple
+    renderBoxes('bin-boxes', arr, hls);
+
+    addOutput('bin-output',
+      `<span class="step">  Iter ${iters}: left=${left}, right=${right}, mid=${mid} → arr[${mid}]=${arr[mid]}</span>`);
+
+    await sleep(600);
+
+    if (arr[mid] === target) {
+      // FOUND
+      const hf = {};
+      hf[mid] = 'found';
+      renderBoxes('bin-boxes', arr, hf);
+      addOutput('bin-output', `<span class="found">✅ FOUND! ${target} at index [${mid}]</span>`);
+      addOutput('bin-output',
+        `<span class="info">Binary search took ${iters} step(s). Linear would need up to ${arr.length}.</span>`);
+      return;
+    } else if (arr[mid] < target) {
+      // target is in RIGHT half
+      addOutput('bin-output',
+        `<span class="step">    ${arr[mid]} < ${target} → search RIGHT half (left=${mid+1})</span>`);
+      left = mid + 1;
+    } else {
+      // target is in LEFT half
+      addOutput('bin-output',
+        `<span class="step">    ${arr[mid]} > ${target} → search LEFT half (right=${mid-1})</span>`);
+      right = mid - 1;
+    }
+  }
+
+  // NOT FOUND
+  renderBoxes('bin-boxes', arr);
+  addOutput('bin-output', `<span class="notfound">❌ NOT FOUND. ${target} is not in the array.</span>`);
+  addOutput('bin-output', `<span class="info">Search exhausted in ${iters} step(s).</span>`);
+}
+
+function resetBin() {
+  document.getElementById('bin-array').value = '2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91';
+  document.getElementById('bin-target').value = '23';
+  initBin();
+}
+
+initBin();
+
+// ══════════════════════════════════════════
+// EXTRA ARRAY OPERATIONS
+// ══════════════════════════════════════════
+
+// Global working array for extras tab
+let extArr = [10, 20, 30, 40, 50];
+
+function loadExtArray() {
+  extArr = parseArray('ext-input');
+  if (extArr.length === 0) extArr = [10, 20, 30, 40, 50];
+  renderBoxes('ext-boxes', extArr);
+  addOutput('ext-output', `<span class="info">Array loaded: [${extArr.join(', ')}]</span>`, true);
+}
+
+function extOp(op) {
+  let result, desc, code;
+  const before = [...extArr]; // save state before operation
+
+  if (op === 'push') {
+    const val = Math.floor(Math.random() * 99) + 1; // random 1-99
+    extArr.push(val);
+    result = [...extArr];
+    desc = `push(${val}) — adds ${val} to END of array`;
+    code = `arr.push(${val}); // arr is now [${result.join(', ')}]`;
+  }
+  else if (op === 'pop') {
+    const popped = extArr.pop();
+    result = [...extArr];
+    desc = `pop() — removes and returns LAST element: ${popped}`;
+    code = `const val = arr.pop(); // val=${popped}, arr=[${result.join(', ')}]`;
+  }
+  else if (op === 'unshift') {
+    const val = Math.floor(Math.random() * 9) + 1;
+    extArr.unshift(val);
+    result = [...extArr];
+    desc = `unshift(${val}) — adds ${val} to BEGINNING of array`;
+    code = `arr.unshift(${val}); // arr is now [${result.join(', ')}]`;
+  }
+  else if (op === 'shift') {
+    const shifted = extArr.shift();
+    result = [...extArr];
+    desc = `shift() — removes and returns FIRST element: ${shifted}`;
+    code = `const val = arr.shift(); // val=${shifted}, arr=[${result.join(', ')}]`;
+  }
+  else if (op === 'splice') {
+    const idx = Math.floor(extArr.length / 2);
+    const removed = extArr.splice(idx, 1);
+    result = [...extArr];
+    desc = `splice(${idx}, 1) — removes 1 element at index ${idx}: [${removed}]`;
+    code = `arr.splice(${idx}, 1); // removed [${removed}], arr=[${result.join(', ')}]`;
+  }
+  else if (op === 'slice') {
+    const start = 1, end = Math.min(extArr.length, 4);
+    result = extArr.slice(start, end); // does NOT modify original
+    desc = `slice(${start}, ${end}) — returns NEW sub-array (does NOT modify original!)`;
+    code = `const sub = arr.slice(${start}, ${end}); // sub=[${result.join(', ')}], arr unchanged`;
+    renderBoxes('ext-boxes', extArr);
+    addOutput('ext-output',
+      `<span class="label">Before: </span><span class="value">[${before.join(', ')}]</span>`, true);
+    addOutput('ext-output',
+      `<span class="label">slice(${start},${end}): </span><span class="value">[${result.join(', ')}]</span>`);
+    addOutput('ext-output',
+      `<span class="label">Original unchanged: </span><span class="value">[${extArr.join(', ')}]</span>`);
+    addOutput('ext-output', `<span class="info">Code: ${code}</span>`);
+    return;
+  }
+  else if (op === 'filter') {
+    result = extArr.filter(x => x > 25); // non-mutating
+    desc = `filter(x => x > 25) — returns NEW array with elements > 25`;
+    code = `const big = arr.filter(x => x > 25); // big=[${result.join(', ')}]`;
+    renderBoxes('ext-boxes', extArr);
+    addOutput('ext-output',
+      `<span class="label">Original: </span><span class="value">[${extArr.join(', ')}]</span>`, true);
+    addOutput('ext-output',
+      `<span class="label">Filtered (>25): </span><span class="value">[${result.join(', ')}]</span>`);
+    addOutput('ext-output', `<span class="info">Code: ${code}</span>`);
+    return;
+  }
+  else if (op === 'map') {
+    result = extArr.map(x => x * 2); // non-mutating
+    desc = `map(x => x * 2) — transforms EACH element (doubles them)`;
+    code = `const doubled = arr.map(x => x * 2); // [${result.join(', ')}]`;
+    renderBoxes('ext-boxes', extArr);
+    addOutput('ext-output',
+      `<span class="label">Original: </span><span class="value">[${extArr.join(', ')}]</span>`, true);
+    addOutput('ext-output',
+      `<span class="label">Mapped (×2): </span><span class="value">[${result.join(', ')}]</span>`);
+    addOutput('ext-output', `<span class="info">Code: ${code}</span>`);
+    return;
+  }
+  else if (op === 'reduce') {
+    const sum = extArr.reduce((acc, x) => acc + x, 0);
+    const product = extArr.reduce((acc, x) => acc * x, 1);
+    renderBoxes('ext-boxes', extArr);
+    addOutput('ext-output',
+      `<span class="label">Array: </span><span class="value">[${extArr.join(', ')}]</span>`, true);
+    addOutput('ext-output',
+      `<span class="label">Sum (reduce +): </span><span class="value">${sum}</span>`);
+    addOutput('ext-output',
+      `<span class="label">Product (reduce ×): </span><span class="value">${product}</span>`);
+    addOutput('ext-output',
+      `<span class="info">Code: arr.reduce((acc, x) => acc + x, 0)</span>`);
+    return;
+  }
+  else if (op === 'concat') {
+    const extra = [99, 88];
+    result = extArr.concat(extra);
+    desc = `concat([${extra}]) — joins arrays into NEW array`;
+    code = `const joined = arr.concat([${extra}]); // [${result.join(', ')}]`;
+    renderBoxes('ext-boxes', extArr);
+    addOutput('ext-output',
+      `<span class="label">arr1: </span><span class="value">[${extArr.join(', ')}]</span>`, true);
+    addOutput('ext-output',
+      `<span class="label">arr2: </span><span class="value">[${extra.join(', ')}]</span>`);
+    addOutput('ext-output',
+      `<span class="label">Joined: </span><span class="value">[${result.join(', ')}]</span>`);
+    addOutput('ext-output', `<span class="info">Code: ${code}</span>`);
+    return;
+  }
+  else if (op === 'flat') {
+    const everyGT0 = extArr.every(x => x > 0);
+    const someGT50 = extArr.some(x => x > 50);
+    const noneNeg  = extArr.every(x => x >= 0);
+    renderBoxes('ext-boxes', extArr);
+    addOutput('ext-output',
+      `<span class="label">Array: </span><span class="value">[${extArr.join(', ')}]</span>`, true);
+    addOutput('ext-output',
+      `<span class="label">every(x>0): </span><span class="${everyGT0?'found':'notfound'}">${everyGT0} — ALL elements > 0?</span>`);
+    addOutput('ext-output',
+      `<span class="label">some(x>50): </span><span class="${someGT50?'found':'notfound'}">${someGT50} — ANY element > 50?</span>`);
+    addOutput('ext-output',
+      `<span class="label">every(x>=0): </span><span class="${noneNeg?'found':'notfound'}">${noneNeg} — ALL non-negative?</span>`);
+    return;
+  }
+  else if (op === 'reset') {
+    extArr = [10, 20, 30, 40, 50];
+    document.getElementById('ext-input').value = extArr.join(', ');
+    renderBoxes('ext-boxes', extArr);
+    addOutput('ext-output',
+      `<span class="info">Array reset to [${extArr.join(', ')}]</span>`, true);
+    return;
+  }
+
+  // For mutating operations: render updated array and show output
+  renderBoxes('ext-boxes', extArr);
+  addOutput('ext-output',
+    `<span class="label">Before: </span><span class="value">[${before.join(', ')}]</span>`, true);
+  addOutput('ext-output',
+    `<span class="label">After:  </span><span class="value">[${extArr.join(', ')}]</span>`);
+  addOutput('ext-output', `<span class="step">${desc}</span>`);
+  addOutput('ext-output', `<span class="info">Code: ${code}</span>`);
+
+  // Update the input box to reflect current array state
+  document.getElementById('ext-input').value = extArr.join(', ');
+}
+
+loadExtArray();
+
+// ── class not found workaround for css ──
+// When .found is applied inline in renderBoxes, CSS needs the class name
+// This tiny fix ensures 'found' and 'notfound' classes display correctly
+// in the output-area (they're different from box .found class)
+const style = document.createElement('style');
+style.textContent = `.found { color: var(--success) !important; }
+                     .notfound { color: var(--danger) !important; }`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>

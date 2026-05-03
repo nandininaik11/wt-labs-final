@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<!-- This declares the document type as HTML5 (latest version) -->
+
+<html lang="en">
+<!-- Opening tag for HTML document. lang="en" tells browser this page is in English -->
+
+<head>
+<!-- HEAD section contains meta information, title, and CSS - not visible on page -->
+
+    <meta charset="UTF-8">
+    <!-- Sets character encoding to UTF-8 (supports all languages, emojis, special characters) -->
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Makes website responsive on mobile. width=device-width means use phone's actual width -->
+    <!-- initial-scale=1.0 means don't zoom in or out by default -->
+    
+    <title>My Professional CV - Video Background</title>
+    <!-- Text shown in browser tab. CHANGE THIS to your name like "Rahul Sharma - CV" -->
+    
+    <!-- Bootstrap 5 CSS CDN (Content Delivery Network - loads from internet) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- This line loads Bootstrap CSS framework from internet. Provides pre-made styles -->
+    <!-- rel="stylesheet" means it's a CSS file for styling -->
+    
+    <!-- Font Awesome for Icons (email icon, phone icon, etc.) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Loads icon library. Gives us icons like envelope, phone, location marker -->
+    
+    <style>
+    
+        /* ============ VIDEO BACKGROUND STYLING ============ */
+        /* Comments in CSS start with /* and end with */ */
+        
+        .video-background {
+        /* .video-background is a CLASS name. Classes start with dot (.) */
+        /* This styles the div that contains the background video */
+        
+            position: fixed;
+            /* fixed means video stays in same position even when you scroll */
+            /* Try changing to "absolute" - video will scroll with page */
+            
+            top: 0;
+            /* Position video at very top of screen. 0 means no space from top */
+            /* Change to 50px to add 50 pixel gap from top */
+            
+            left: 0;
+            /* Position video at very left of screen. 0 means no space from left */
+            
+            width: 100%;
+            /* Make video container as wide as entire screen. 100% = full width */
+            /* Change to 50% to make it half-screen width */
+            
+            height: 100%;
+            /* Make video container as tall as entire screen. 100% = full height */
+            
+            overflow: hidden;
+            /* Hide any parts of video that go outside the container */
+            /* Prevents horizontal/vertical scrollbars from appearing */
+            
+            z-index: -2;
+            /* Stacking order. -2 means this is BEHIND everything else */
+            /* Negative numbers go to back. Positive go to front */
+            /* Change to 1 and video will appear OVER your content (you won't see text) */
+        }
+        
+        .video-background video {
+        /* Styles the actual <video> tag inside .video-background div */
+        
+            min-width: 100%;
+            /* Video must be AT LEAST as wide as container */
+            /* Ensures no black bars on sides */
+            
+            min-height: 100%;
+            /* Video must be AT LEAST as tall as container */
+            /* Ensures no black bars on top/bottom */
+            
+            width: auto;
+            /* Let browser automatically calculate width based on video ratio */
+            
+            height: auto;
+            /* Let browser automatically calculate height based on video ratio */
+            
+            position: absolute;
+            /* Allows us to position video freely using top, left properties */
+            
+            top: 50%;
+            /* Move video down by 50% of container height */
+            
+            left: 50%;
+            /* Move video right by 50% of container width */
+            
+            transform: translate(-50%, -50%);
+            /* Move video BACK by 50% of its OWN width and height */
+            /* This combination (top:50%, left:50%, translate(-50%,-50%)) perfectly centers the video */
+            /* Try removing this line - video will be off-center */
+        }
+        
+        /* ============ DARK OVERLAY FOR TEXT READABILITY ============ */
+        
+        .overlay {
+        /* Styles the dark semi-transparent layer between video and text */
+        /* Makes white text readable by darkening the background */
+        
+            position: fixed;
+            /* Overlay stays in position when scrolling, just like video */
+            
+            top: 0;
+            /* Position at top of screen */
+            
+            left: 0;
+            /* Position at left of screen */
+            
+            width: 100%;
+            /* Cover entire screen width */
+            
+            height: 100%;
+            /* Cover entire screen height */
+            
+            background: rgba(0, 0, 0, 0.6);
+            /* Semi-transparent black color */
+            /* rgba = Red, Green, Blue, Alpha(transparency) */
+            /* (0, 0, 0, 0.6) means Black color with 60% opacity */
+            /* Change 0.6 to 0.3 for lighter overlay (less dark) */
+            /* Change to 0.9 for darker overlay (more dark) */
+            /* Change (0,0,0) to (255,0,0) for red overlay */
+            
+            z-index: -1;
+            /* Stacking order -1 means: behind content but in front of video (which is -2) */
+        }
+        
+        /* ============ MAIN CONTENT STYLING ============ */
+        
+        .content {
+        /* Styles the main container that holds all CV sections */
+        
+            position: relative;
+            /* Allows z-index to work. Needed for layering */
+            
+            z-index: 1;
+            /* Stacking order 1 means: in front of overlay(-1) and video(-2) */
+            /* This is why you can see and read the text */
+            
+            color: white;
+            /* All text inside will be white color */
+            /* Change to "yellow" or "#FFD700" for gold text */
+            
+            padding: 50px 0;
+            /* Add space around content. 50px top/bottom, 0px left/right */
+            /* Change to "100px 0" for more vertical spacing */
+            
+            min-height: 100vh;
+            /* Minimum height is 100vh (100% of viewport height = full screen) */
+            /* Ensures content takes at least full screen height */
+        }
+        
+        /* ============ CV SECTIONS ============ */
+        
+        .cv-section {
+        /* Styles each section box (About, Skills, Experience, etc.) */
+        
+            background: rgba(255, 255, 255, 0.1);
+            /* Semi-transparent white background */
+            /* (255,255,255) = white, 0.1 = 10% opacity (very transparent) */
+            /* Change 0.1 to 0.3 for more visible white background */
+            
+            backdrop-filter: blur(10px);
+            /* Blurs whatever is behind this element (glassmorphism effect) */
+            /* 10px is blur amount. Change to 20px for more blur, 5px for less */
+            
+            border-radius: 15px;
+            /* Rounds the corners of the box. 15px is roundness amount */
+            /* Change to 0px for square corners, 50px for very round corners */
+            
+            padding: 40px;
+            /* Space inside the box. 40px on all sides */
+            /* Makes content not touch the edges */
+            /* Change to 20px for less space, 60px for more space */
+            
+            margin-bottom: 30px;
+            /* Space BELOW each section box. Creates gap between sections */
+            /* Change to 50px for bigger gaps between sections */
+            
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            /* Adds shadow below box for depth effect */
+            /* 0 = horizontal offset, 8px = vertical offset, 32px = blur, 0.3 = darkness */
+            /* Change 8px to 15px for shadow farther down */
+            
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            /* Smooth animation when hovering. 0.3s = animation takes 0.3 seconds */
+            /* "ease" makes animation start slow, speed up, then slow down */
+        }
+        
+        .cv-section:hover {
+        /* Styles applied when you move mouse over a cv-section */
+        /* :hover is a pseudo-class that activates on mouse-over */
+        
+            transform: translateY(-5px);
+            /* Move box UP by 5 pixels when mouse hovers over it */
+            /* Creates a "lift" effect. Change to -10px for bigger lift */
+            /* Change to translateY(5px) to move DOWN instead */
+            
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            /* Bigger, darker shadow when hovering (makes lift effect more realistic) */
+        }
+        
+        /* ============ HEADINGS ============ */
+        
+        h1, h2, h3 {
+        /* Styles ALL h1, h2, and h3 headings at once (separated by commas) */
+        
+            color: #FFD700;
+            /* Gold color for headings. #FFD700 is hex color code for gold */
+            /* Change to #FF0000 for red, #00FF00 for green, #0000FF for blue */
+            /* Or use color names: "red", "blue", "purple" */
+            
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            /* Adds shadow to text for readability and depth */
+            /* 2px right, 2px down, 4px blur, 0.7 darkness */
+            /* Change first value to 5px to move shadow more to right */
+            
+            margin-bottom: 20px;
+            /* Space below headings. 20 pixels gap before next element */
+        }
+        
+        h1 { 
+            font-size: 3rem; 
+            /* 3rem = 3 times the root font size (usually 16px, so 48px) */
+            /* Change to 4rem for bigger, 2rem for smaller */
+            
+            font-weight: 700; 
+            /* Boldness. 400=normal, 700=bold, 900=extra bold */
+        }
+        
+        h2 { 
+            font-size: 2rem; 
+            /* 2rem = 32px (if root is 16px) */
+            
+            font-weight: 600; 
+            /* Semi-bold */
+        }
+        
+        h3 { 
+            font-size: 1.5rem; 
+            /* 1.5rem = 24px */
+            
+            font-weight: 500; 
+            /* Medium weight */
+        }
+        
+        /* ============ PROFILE IMAGE ============ */
+        
+        .profile-img {
+        /* Styles the profile picture at top of CV */
+        
+            border-radius: 50%;
+            /* Makes image circular. 50% = perfect circle */
+            /* Change to 10px for slightly rounded square */
+            /* Change to 0% for perfect square */
+            
+            border: 5px solid #FFD700;
+            /* Border around image. 5px thick, solid style, gold color */
+            /* Change 5px to 10px for thicker border */
+            /* Change #FFD700 to #FF0000 for red border */
+            
+            width: 200px;
+            /* Image width is 200 pixels */
+            /* Change to 150px for smaller, 300px for bigger */
+            
+            height: 200px;
+            /* Image height is 200 pixels (same as width = perfect circle) */
+            
+            object-fit: cover;
+            /* If image is rectangular, this crops it to fit square without distortion */
+            /* "cover" = fills entire space, may crop edges */
+            /* Change to "contain" to show full image (may have white space) */
+            
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            /* Gold glow/shadow around image for emphasis */
+        }
+        
+        /* ============ SMOOTH SCROLLING ============ */
+        
+        html {
+        /* Applies to entire HTML document */
+        
+            scroll-behavior: smooth;
+            /* When clicking anchor links, page scrolls smoothly instead of jumping */
+            /* Remove this line for instant jumping (old style) */
+        }
+        
+        /* ============ RESPONSIVE ADJUSTMENTS ============ */
+        
+        @media (max-width: 768px) {
+        /* MEDIA QUERY: These styles ONLY apply when screen is 768px or smaller */
+        /* This makes website look good on phones and tablets */
+        
+            h1 { 
+                font-size: 2rem; 
+                /* On mobile, make h1 smaller (2rem instead of 3rem) */
+            }
+            
+            h2 { 
+                font-size: 1.5rem; 
+                /* Make h2 smaller on mobile */
+            }
+            
+            .cv-section { 
+                padding: 25px; 
+                /* Less padding on mobile (25px instead of 40px) */
+                /* Saves space on small screens */
+            }
+            
+            .profile-img { 
+                width: 150px; 
+                height: 150px; 
+                /* Smaller profile image on mobile (150px instead of 200px) */
+            }
+        }
+        
+        /* ============ SKILLS PROGRESS BARS ============ */
+        
+        .skill-bar {
+        /* Container for each skill progress bar */
+        
+            background: rgba(255, 255, 255, 0.2);
+            /* Light white background (20% opacity) */
+            
+            border-radius: 10px;
+            /* Rounded corners */
+            
+            height: 25px;
+            /* Bar height is 25 pixels */
+            /* Change to 30px for taller bars */
+            
+            margin-bottom: 15px;
+            /* Space between each skill bar */
+            
+            overflow: hidden;
+            /* Hides anything that goes outside the rounded corners */
+        }
+        
+        .skill-progress {
+        /* The colored fill inside the skill bar (shows skill level) */
+        
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            /* Gradient color from gold (#FFD700) to orange (#FFA500) */
+            /* 90deg means gradient goes left to right */
+            /* Change to 180deg for top to bottom gradient */
+            /* Change colors: first color, second color */
+            
+            height: 100%;
+            /* Fill entire height of parent (.skill-bar) */
+            
+            display: flex;
+            /* Use flexbox for centering text inside */
+            
+            align-items: center;
+            /* Center text vertically */
+            
+            justify-content: center;
+            /* Center text horizontally */
+            
+            font-weight: bold;
+            /* Make percentage text bold */
+            
+            color: #000;
+            /* Black text color */
+            /* Change to #FFF for white text */
+            
+            transition: width 2s ease;
+            /* Smooth animation when bar fills. Takes 2 seconds */
+            /* Change 2s to 1s for faster animation */
+        }
+        
+        /* ============ CONTACT ICONS ============ */
+        
+        .contact-icon {
+        /* Styles for icons next to email, phone, location */
+        
+            font-size: 1.2rem;
+            /* Icon size. 1.2 times root font size */
+            /* Change to 1.5rem for bigger icons */
+            
+            margin-right: 10px;
+            /* Space between icon and text (10 pixels) */
+            
+            color: #FFD700;
+            /* Gold color for icons */
+        }
+        
+    </style>
+    <!-- End of CSS styles -->
+    
+</head>
+<!-- End of HEAD section -->
+
+<body>
+<!-- BODY section contains all visible content on the webpage -->
+
+    <!-- ============ VIDEO BACKGROUND ============ -->
+    <div class="video-background">
+    <!-- DIV is a container. class="video-background" applies the CSS styles we wrote above -->
+    
+        <video autoplay loop muted playsinline>
+        <!-- VIDEO tag embeds video -->
+        <!-- autoplay = starts automatically -->
+        <!-- loop = restarts when finished -->
+        <!-- muted = no sound (required for autoplay) -->
+        <!-- playsinline = doesn't go fullscreen on iPhone -->
+        
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            <!-- SOURCE tag specifies video file -->
+            <!-- src = URL of video file -->
+            <!-- CHANGE THIS: Replace with your own video URL or local file path -->
+            <!-- For local file: src="my-video.mp4" (put video in same folder as cv.html) -->
+            <!-- type="video/mp4" tells browser this is MP4 format -->
+            
+            Your browser does not support HTML5 video.
+            <!-- This text shows ONLY if browser doesn't support video -->
+            <!-- Users with modern browsers (Chrome, Firefox, Safari, Edge) won't see this -->
+        </video>
+        
+    </div>
+    <!-- Closing tag for video-background div -->
+    
+    <!-- ============ DARK OVERLAY ============ -->
+    <div class="overlay"></div>
+    <!-- Empty div that creates dark transparent layer over video -->
+    <!-- Styled by .overlay CSS class we wrote earlier -->
+    <!-- Makes white text easier to read -->
+    
+    <!-- ============ MAIN CONTENT ============ -->
+    <div class="content">
+    <!-- This div contains ALL your CV content -->
+    
+        <div class="container">
+        <!-- Bootstrap's .container class: centers content and adds side margins -->
+        <!-- Provides responsive width (940px on desktop, 720px on tablet, full width on mobile) -->
+        
+            <!-- ============ HEADER SECTION ============ -->
+            <div class="row cv-section">
+            <!-- .row = Bootstrap row for grid system -->
+            <!-- .cv-section = our custom styling (glassmorphism box) -->
+            
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                <!-- .col-md-4 = Takes 4 columns out of 12 (33% width) on medium screens and larger -->
+                <!-- On mobile (<768px), automatically becomes full width (100%) -->
+                <!-- .text-center = Centers text horizontally -->
+                <!-- .mb-3 = margin-bottom 3 units on mobile -->
+                <!-- .mb-md-0 = margin-bottom 0 on medium+ screens (removes bottom margin on desktop) -->
+                
+                    <img src="https://via.placeholder.com/200" alt="Profile Picture" class="profile-img">
+                    <!-- IMG tag displays image -->
+                    <!-- src = image source URL -->
+                    <!-- CHANGE THIS: Replace with your photo URL or local file -->
+                    <!-- For local: src="my-photo.jpg" (put image in same folder as cv.html) -->
+                    <!-- alt = alternative text (shows if image fails to load, helps screen readers) -->
+                    <!-- class="profile-img" applies our circular styling from CSS -->
+                    
+                </div>
+                
+                <div class="col-md-8">
+                <!-- Takes 8 columns (67% width) on medium+ screens -->
+                <!-- Stacks below image on mobile -->
+                
+                    <h1>JOHN DOE</h1>
+                    <!-- h1 = Heading level 1 (largest, most important) -->
+                    <!-- CHANGE THIS to your actual name -->
+                    
+                    <h3 class="mb-3">Full Stack Web Developer</h3>
+                    <!-- h3 = Heading level 3 (smaller than h1) -->
+                    <!-- .mb-3 = margin-bottom of 3 units (space below heading) -->
+                    <!-- CHANGE THIS to your job title/role -->
+                    <p class="mb-2">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        john.doe@email.com
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone contact-icon"></i>
+                        +91-9876543210
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        Pune, Maharashtra, India
+                    </p>
+                    <p>
+                        <i class="fab fa-linkedin contact-icon"></i>
+                        linkedin.com/in/johndoe
+                    </p>
+                </div>
+            </div>
+            
+            <!-- ============ ABOUT ME SECTION ============ -->
+            <div class="row cv-section">
+                <div class="col-12">
+                    <h2><i class="fas fa-user me-3"></i>About Me</h2>
+                    <p style="font-size: 1.1rem; line-height: 1.8;">
+                        Passionate and results-driven Full Stack Web Developer with 5+ years of experience 
+                        in designing, developing, and deploying responsive web applications. Proficient in 
+                        modern frontend frameworks (React, Vue.js), backend technologies (Node.js, PHP, 
+                        Spring Boot), and database systems (MySQL, MongoDB). Strong problem-solving skills 
+                        with a keen eye for detail and commitment to writing clean, maintainable code.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- ============ SKILLS SECTION (3 COLUMNS) ============ -->
+            <div class="row cv-section">
+                <div class="col-12 mb-4">
+                    <h2><i class="fas fa-code me-3"></i>Technical Skills</h2>
+                </div>
+                
+                <!-- Frontend Skills -->
+                <div class="col-md-4 mb-3">
+                    <h4><i class="fab fa-html5 me-2"></i>Frontend</h4>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 90%;">HTML5/CSS3 - 90%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 85%;">JavaScript/jQuery - 85%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 80%;">React.js - 80%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 75%;">Bootstrap - 75%</div>
+                    </div>
+                </div>
+                
+                <!-- Backend Skills -->
+                <div class="col-md-4 mb-3">
+                    <h4><i class="fas fa-server me-2"></i>Backend</h4>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 85%;">PHP & Laravel - 85%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 80%;">Node.js & Express - 80%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 75%;">Spring Boot - 75%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 70%;">Python/Django - 70%</div>
+                    </div>
+                </div>
+                
+                <!-- Database Skills -->
+                <div class="col-md-4 mb-3">
+                    <h4><i class="fas fa-database me-2"></i>Database</h4>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 85%;">MySQL - 85%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 75%;">MongoDB - 75%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 70%;">PostgreSQL - 70%</div>
+                    </div>
+                    
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: 65%;">Redis - 65%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ============ EXPERIENCE SECTION (2 COLUMNS) ============ -->
+            <div class="row cv-section">
+                <div class="col-12 mb-4">
+                    <h2><i class="fas fa-briefcase me-3"></i>Work Experience</h2>
+                </div>
+                
+                <!-- Job 1 -->
+                <div class="col-md-6 mb-3">
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+                        <h4>Senior Full Stack Developer</h4>
+                        <p class="text-warning mb-2"><i class="fas fa-building me-2"></i>Tech Corp Pvt Ltd</p>
+                        <p class="mb-3"><i class="far fa-calendar me-2"></i>Jan 2020 - Present</p>
+                        <ul>
+                            <li>Led a team of 5 developers in building enterprise web applications</li>
+                            <li>Developed 20+ responsive websites using React and Node.js</li>
+                            <li>Improved application performance by 40% through code optimization</li>
+                            <li>Implemented CI/CD pipelines using Jenkins and Docker</li>
+                            <li>Mentored junior developers and conducted code reviews</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Job 2 -->
+                <div class="col-md-6 mb-3">
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+                        <h4>Junior Web Developer</h4>
+                        <p class="text-warning mb-2"><i class="fas fa-building me-2"></i>StartUp Inc</p>
+                        <p class="mb-3"><i class="far fa-calendar me-2"></i>Jun 2018 - Dec 2019</p>
+                        <ul>
+                            <li>Built responsive landing pages and e-commerce websites</li>
+                            <li>Collaborated with UI/UX designers to implement mockups</li>
+                            <li>Maintained and updated legacy PHP applications</li>
+                            <li>Integrated third-party APIs (Payment gateways, Google Maps)</li>
+                            <li>Participated in Agile sprint planning and daily standups</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ============ EDUCATION SECTION ============ -->
+            <div class="row cv-section">
+                <div class="col-12">
+                    <h2><i class="fas fa-graduation-cap me-3"></i>Education</h2>
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+                        <h4>Bachelor of Technology in Computer Science & Engineering</h4>
+                        <p class="text-warning mb-2"><i class="fas fa-university me-2"></i>Vishwakarma Institute of Technology, Pune</p>
+                        <p><i class="far fa-calendar me-2"></i>2014 - 2018 | CGPA: 8.5/10</p>
+                        <p class="mt-3">
+                            <strong>Relevant Coursework:</strong> Data Structures, Algorithms, Database Management Systems, 
+                            Web Technologies, Software Engineering, Operating Systems, Computer Networks
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ============ PROJECTS SECTION ============ -->
+            <div class="row cv-section">
+                <div class="col-12 mb-4">
+                    <h2><i class="fas fa-project-diagram me-3"></i>Major Projects</h2>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+                        <h4>E-Commerce Platform</h4>
+                        <p><strong>Tech Stack:</strong> React, Node.js, MongoDB, Stripe API</p>
+                        <ul>
+                            <li>Built full-featured online shopping platform</li>
+                            <li>Implemented user authentication and authorization</li>
+                            <li>Integrated payment gateway and order management</li>
+                            <li>Achieved 10,000+ monthly active users</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+                        <h4>Social Media Dashboard</h4>
+                        <p><strong>Tech Stack:</strong> Vue.js, Laravel, MySQL, Redis</p>
+                        <ul>
+                            <li>Developed analytics dashboard for social media metrics</li>
+                            <li>Real-time data visualization using Chart.js</li>
+                            <li>Implemented caching with Redis for better performance</li>
+                            <li>RESTful API design for third-party integrations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ============ CERTIFICATIONS ============ -->
+            <div class="row cv-section">
+                <div class="col-12">
+                    <h2><i class="fas fa-certificate me-3"></i>Certifications</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul style="font-size: 1.1rem;">
+                                <li class="mb-2">AWS Certified Solutions Architect - Associate</li>
+                                <li class="mb-2">MongoDB Certified Developer</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul style="font-size: 1.1rem;">
+                                <li class="mb-2">Google Cloud Professional Cloud Architect</li>
+                                <li class="mb-2">Oracle Certified Java Programmer</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- ============ BOOTSTRAP JS & JQUERY ============ -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- ============ CUSTOM JQUERY ANIMATIONS ============ -->
+    <script>
+        $(document).ready(function() {
+            // Initially hide all cv-sections
+            $('.cv-section').css('opacity', '0');
+            
+            // Show first section immediately
+            $('.cv-section:first').css('opacity', '1');
+            
+            // Fade in sections on scroll
+            $(window).scroll(function() {
+                $('.cv-section').each(function() {
+                    var elementTop = $(this).offset().top;
+                    var elementBottom = elementTop + $(this).outerHeight();
+                    var viewportTop = $(window).scrollTop();
+                    var viewportBottom = viewportTop + $(window).height();
+                    
+                    // If element is in viewport
+                    if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                        $(this).animate({ opacity: 1 }, 800);
+                    }
+                });
+            });
+            
+            // Animate skill bars on page load
+            setTimeout(function() {
+                $('.skill-progress').each(function() {
+                    $(this).css('width', $(this).css('width'));
+                });
+            }, 500);
+            
+            // Smooth scroll for anchor links (if any)
+            $('a[href^="#"]').click(function(e) {
+                e.preventDefault();
+                var target = $(this.hash);
+                if (target.length) {
+                    $('html, body').animate({
+                        scrollTop: target.offset().top - 50
+                    }, 800);
+                }
+            });
+        });
+    </script>
+    
+</body>
+</html>
