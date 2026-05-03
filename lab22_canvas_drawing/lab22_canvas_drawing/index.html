@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<!-- DOCTYPE tells browser this is an HTML5 document -->
+<html lang="en">
+<!-- lang="en" helps screen readers and search engines know the language -->
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- UTF-8 charset: supports all characters including special symbols -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- viewport meta tag makes the page RESPONSIVE on mobile devices
+       width=device-width : page width = screen width
+       initial-scale=1.0  : no zoom on load -->
+
+  <title>Lab 22 – Canvas Drawing App</title>
+
+  <style>
+    /* ========================================================
+       CSS SECTION
+       CSS (Cascading Style Sheets) controls the visual look.
+       Cascading means styles can override each other by priority.
+    ======================================================== */
+
+    /* CSS Custom Properties (Variables) — define once, reuse everywhere */
+    :root {
+      --bg: #0f0f14;           /* dark background */
+      --panel: #1a1a24;        /* panel background */
+      --border: #2e2e42;       /* subtle border color */
+      --accent: #6c63ff;       /* main purple accent */
+      --accent2: #ff6584;      /* secondary pink accent */
+      --text: #e8e8f0;         /* main text color */
+      --muted: #8888aa;        /* muted/secondary text */
+      --green: #43e97b;        /* success / line tool color */
+      --yellow: #f7971e;       /* rect tool color */
+      --radius: 10px;          /* border-radius for cards */
+    }
+
+    /* Box-sizing: border-box means padding/border are INCLUDED in width/height
+       This prevents layout surprises */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;   /* monospace = all chars same width */
+      min-height: 100vh;                       /* vh = viewport height unit */
+      display: flex;
+      flex-direction: column;                  /* stack children vertically */
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      background: var(--panel);
+      border-bottom: 2px solid var(--accent);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;                         /* wraps on small screens */
+      gap: 10px;
+    }
+
+    header h1 {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);  /* clamp(min, preferred, max)
+                                                  responsive font scaling */
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+    }
+
+    /* ---- MAIN LAYOUT ---- */
+    main {
+      flex: 1;                  /* flex:1 → takes remaining vertical space */
+      display: flex;
+      flex-wrap: wrap;          /* responsive: wraps toolbar below canvas on mobile */
+      gap: 16px;
+      padding: 16px;
+    }
+
+    /* ---- TOOLBAR (left panel) ---- */
+    .toolbar {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 200px;
+      flex: 0 0 220px;         /* don't grow/shrink; fixed 220px */
+    }
+
+    .toolbar h2 {
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    /* Tool buttons */
+    .tool-btn {
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      cursor: pointer;                /* pointer cursor on hover */
+      text-align: left;
+      transition: all 0.2s ease;     /* smooth animation on state change */
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* :hover pseudo-class — styles applied when mouse is over element */
+    .tool-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(108, 99, 255, 0.08);
+    }
+
+    /* .active class added by JS when tool is selected */
+    .tool-btn.active {
+      border-color: var(--accent);
+      background: rgba(108, 99, 255, 0.18);
+      color: var(--accent);
+    }
+
+    .tool-btn.active.rect  { border-color: var(--yellow); color: var(--yellow); background: rgba(247,151,30,0.12); }
+    .tool-btn.active.line  { border-color: var(--green);  color: var(--green);  background: rgba(67,233,123,0.10); }
+    .tool-btn.active.circle{ border-color: var(--accent2);color: var(--accent2);background: rgba(255,101,132,0.10); }
+
+    /* Label + color input row */
+    label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);   /* colors the range slider thumb */
+    }
+
+    /* Clear button */
+    .clear-btn {
+      background: rgba(255, 101, 132, 0.12);
+      border: 2px solid var(--accent2);
+      color: var(--accent2);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: auto;            /* pushes to bottom of toolbar */
+    }
+
+    .clear-btn:hover {
+      background: rgba(255, 101, 132, 0.25);
+    }
+
+    /* ---- CANVAS AREA ---- */
+    .canvas-wrap {
+      flex: 1;                   /* takes all remaining horizontal space */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;              /* prevents flex overflow */
+    }
+
+    .canvas-container {
+      position: relative;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #1c1c28;
+      /* Responsive: canvas fills available space */
+      width: 100%;
+      aspect-ratio: 16 / 9;     /* maintains 16:9 ratio responsively */
+    }
+
+    /* ---- THE CANVAS ELEMENT ----
+       <canvas> is an HTML5 element providing a bitmap drawing surface.
+       JavaScript uses its 2D Context API to draw shapes, lines, text, images.
+       width/height set the drawing buffer resolution (in JS for accuracy) */
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;         /* crosshair cursor while drawing */
+    }
+
+    /* Preview overlay while dragging */
+    #preview-canvas {
+      position: absolute;        /* stacked exactly on top of main canvas */
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;      /* clicks pass through to the canvas below */
+    }
+
+    /* Status bar below canvas */
+    .status-bar {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .status-bar span { color: var(--accent); }
+
+    /* ---- INFO SECTION (theory box) ---- */
+    .info-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.7;
+      flex: 0 0 100%;            /* full width row below main content */
+    }
+
+    .info-box h3 { color: var(--accent); margin-bottom: 8px; font-size: 0.85rem; letter-spacing: 1px; }
+    .info-box code {
+      background: rgba(108,99,255,0.15);
+      color: var(--accent);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ---- RESPONSIVE BREAKPOINTS ---- */
+    /* @media queries — apply CSS only when screen matches the condition */
+    @media (max-width: 700px) {
+      main { flex-direction: column; }          /* stack vertically on mobile */
+      .toolbar { flex: unset; min-width: unset; flex-direction: row; flex-wrap: wrap; }
+      .canvas-container { aspect-ratio: 4 / 3; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>⬛ Canvas Drawing — Lab Q22</h1>
+    <span class="badge">HTML5 Canvas API</span>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <main>
+
+    <!-- LEFT TOOLBAR -->
+    <aside class="toolbar">
+      <h2>Tools</h2>
+
+      <!-- Each button has a data-tool attribute — read by JS to know which tool is active -->
+      <button class="tool-btn active" data-tool="line" id="btn-line">
+        ╱ Line
+      </button>
+      <button class="tool-btn rect" data-tool="rect" id="btn-rect">
+        ▭ Rectangle
+      </button>
+      <button class="tool-btn circle" data-tool="circle" id="btn-circle">
+        ◯ Circle
+      </button>
+      <button class="tool-btn" data-tool="freehand" id="btn-freehand">
+        ✏ Freehand
+      </button>
+      <button class="tool-btn" data-tool="point" id="btn-point">
+        • Point
+      </button>
+
+      <label>
+        Stroke Color
+        <!-- input type="color" → native browser color picker -->
+        <input type="color" id="strokeColor" value="#6c63ff" />
+      </label>
+
+      <label>
+        Fill Color
+        <input type="color" id="fillColor" value="#ff6584" />
+      </label>
+
+      <label>
+        Line Width: <span id="widthVal">3</span>px
+        <!-- input type="range" → slider. min/max/value are HTML attributes -->
+        <input type="range" id="lineWidth" min="1" max="20" value="3" />
+      </label>
+
+      <!-- Clear canvas button -->
+      <button class="clear-btn" id="clearBtn">✕ Clear Canvas</button>
+    </aside>
+
+    <!-- CANVAS AREA -->
+    <section class="canvas-wrap">
+      <div class="canvas-container" id="canvasContainer">
+        <!-- Main canvas: permanent drawings are saved here -->
+        <canvas id="mainCanvas"></canvas>
+        <!-- Preview canvas: live preview while dragging, cleared each mousemove -->
+        <canvas id="previewCanvas"></canvas>
+      </div>
+
+      <!-- Status bar: shows live mouse coordinates and shape count -->
+      <div class="status-bar">
+        <div>🖱 X: <span id="coordX">0</span> &nbsp; Y: <span id="coordY">0</span></div>
+        <div>Tool: <span id="currentTool">Line</span></div>
+        <div>Shapes drawn: <span id="shapeCount">0</span></div>
+      </div>
+
+      <!-- Theory box -->
+      <div class="info-box">
+        <h3>📖 How Canvas Works</h3>
+        The <code>&lt;canvas&gt;</code> tag is an HTML5 element that provides a drawable region.
+        JavaScript gets a <code>2D rendering context</code> via <code>canvas.getContext('2d')</code>.
+        Drawing is done by calling methods like <code>beginPath()</code>, <code>moveTo()</code>,
+        <code>lineTo()</code>, <code>rect()</code>, <code>arc()</code>, <code>stroke()</code>, <code>fill()</code>.
+        Mouse events (<code>mousedown</code>, <code>mousemove</code>, <code>mouseup</code>) track user interaction.
+        A second transparent <em>preview canvas</em> sits on top and shows a live preview while dragging.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================
+       JAVASCRIPT SECTION
+       All drawing logic lives here.
+       JavaScript runs in the browser and manipulates the DOM and Canvas.
+  ================================================================ -->
+  <script>
+    // ---- 1. GET REFERENCES TO DOM ELEMENTS ----
+    // document.getElementById() returns the HTML element with that id
+    const mainCanvas    = document.getElementById('mainCanvas');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const container     = document.getElementById('canvasContainer');
+
+    // getContext('2d') returns a CanvasRenderingContext2D object
+    // This object has ALL the drawing methods (fillRect, stroke, arc, etc.)
+    const ctx     = mainCanvas.getContext('2d');    // for permanent shapes
+    const pCtx    = previewCanvas.getContext('2d'); // for live preview
+
+    // Control elements
+    const strokeColorInput = document.getElementById('strokeColor');
+    const fillColorInput   = document.getElementById('fillColor');
+    const lineWidthInput   = document.getElementById('lineWidth');
+    const clearBtn         = document.getElementById('clearBtn');
+    const coordX           = document.getElementById('coordX');
+    const coordY           = document.getElementById('coordY');
+    const currentToolEl    = document.getElementById('currentTool');
+    const shapeCountEl     = document.getElementById('shapeCount');
+    const widthVal         = document.getElementById('widthVal');
+
+    // ---- 2. STATE VARIABLES ----
+    // Variables that track the current state of the drawing app
+    let currentTool = 'line';   // which tool is active
+    let isDrawing   = false;    // is the mouse button currently held down?
+    let startX      = 0;        // X coordinate where drawing started
+    let startY      = 0;        // Y coordinate where drawing started
+    let shapeCount  = 0;        // total number of shapes drawn
+
+    // ---- 3. RESIZE CANVAS TO MATCH CONTAINER ----
+    // The canvas drawing buffer size must match its CSS display size.
+    // If they don't match, drawings look blurry or scaled.
+    function resizeCanvas() {
+      const w = container.clientWidth;    // CSS pixel width of container
+      const h = container.clientHeight;   // CSS pixel height of container
+
+      // Set the actual drawing buffer dimensions
+      mainCanvas.width    = w;
+      mainCanvas.height   = h;
+      previewCanvas.width = w;
+      previewCanvas.height= h;
+    }
+
+    // Run once on load, and again whenever the browser window is resized
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // ---- 4. TOOL BUTTONS — EVENT LISTENERS ----
+    // querySelectorAll returns a NodeList of all matching elements
+    // forEach loops through each one
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      // addEventListener('click', callback) — runs callback on click event
+      btn.addEventListener('click', () => {
+        // Remove 'active' class from ALL tool buttons
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+
+        // Add 'active' to the clicked button
+        btn.classList.add('active');
+
+        // Read the data-tool attribute to know which tool was picked
+        currentTool = btn.dataset.tool;
+
+        // Update the status bar text (capitalize first letter)
+        currentToolEl.textContent = currentTool.charAt(0).toUpperCase() + currentTool.slice(1);
+      });
+    });
+
+    // ---- 5. UTILITY: GET MOUSE POSITION RELATIVE TO CANVAS ----
+    // e = mouse event object. getBoundingClientRect() gives canvas position on screen.
+    function getPos(e) {
+      const rect = mainCanvas.getBoundingClientRect(); // position of canvas on page
+      // Scale factor: canvas may have a different internal resolution vs CSS size
+      const scaleX = mainCanvas.width  / rect.width;
+      const scaleY = mainCanvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,  // clientX = mouse X from viewport left
+        y: (e.clientY - rect.top)  * scaleY
+      };
+    }
+
+    // ---- 6. APPLY CURRENT STYLES TO A CONTEXT ----
+    function applyStyles(context) {
+      context.strokeStyle = strokeColorInput.value;  // border/line color
+      context.fillStyle   = fillColorInput.value;    // fill color
+      context.lineWidth   = parseInt(lineWidthInput.value); // line thickness
+      context.lineCap     = 'round';   // round line endings
+      context.lineJoin    = 'round';   // round corners where lines meet
+    }
+
+    // ---- 7. DRAW SHAPES ----
+    // Each function draws a specific shape on a given context
+    function drawLine(context, x1, y1, x2, y2) {
+      // beginPath() starts a new path (clears any previous path data)
+      context.beginPath();
+      context.moveTo(x1, y1);   // move to start point (no drawing)
+      context.lineTo(x2, y2);   // draw line to end point
+      context.stroke();          // actually render the line (using strokeStyle)
+    }
+
+    function drawRect(context, x1, y1, x2, y2) {
+      const w = x2 - x1;   // width  (can be negative if drawn right-to-left)
+      const h = y2 - y1;   // height (can be negative if drawn bottom-to-top)
+      context.beginPath();
+      context.rect(x1, y1, w, h);  // define rectangle path
+      context.fill();               // fill interior with fillStyle
+      context.stroke();             // draw border with strokeStyle
+    }
+
+    function drawCircle(context, x1, y1, x2, y2) {
+      // Calculate center and radius from drag start/end
+      const cx = (x1 + x2) / 2;  // center X = midpoint
+      const cy = (y1 + y2) / 2;  // center Y = midpoint
+      // radius = half the diagonal distance
+      const radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2;
+      context.beginPath();
+      // arc(cx, cy, radius, startAngle, endAngle)
+      // 0 to 2*PI = full circle
+      context.arc(cx, cy, radius, 0, Math.PI * 2);
+      context.fill();
+      context.stroke();
+    }
+
+    function drawPoint(context, x, y) {
+      // A point is just a small filled circle
+      context.beginPath();
+      context.arc(x, y, parseInt(lineWidthInput.value) + 2, 0, Math.PI * 2);
+      context.fill();
+    }
+
+    // ---- 8. FREEHAND PATH — stored separately ----
+    // Freehand drawing uses moveTo on mousedown, then lineTo on each mousemove
+    let freehandPath = [];   // array to store points while mouse is held
+
+    // ---- 9. MOUSE EVENT HANDLERS ----
+
+    // mousedown — fires when mouse button is pressed down
+    mainCanvas.addEventListener('mousedown', (e) => {
+      const pos = getPos(e);
+      isDrawing = true;          // set flag: mouse is held
+      startX = pos.x;
+      startY = pos.y;
+
+      if (currentTool === 'point') {
+        // Points are drawn immediately on click — no drag needed
+        applyStyles(ctx);
+        drawPoint(ctx, startX, startY);
+        shapeCount++;
+        shapeCountEl.textContent = shapeCount;
+        isDrawing = false;
+      }
+
+      if (currentTool === 'freehand') {
+        // Start a new path on the main canvas
+        applyStyles(ctx);
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        freehandPath = [{ x: startX, y: startY }];
+      }
+    });
+
+    // mousemove — fires every time mouse moves (whether button held or not)
+    mainCanvas.addEventListener('mousemove', (e) => {
+      const pos = getPos(e);
+
+      // Update coordinate display in status bar
+      coordX.textContent = Math.round(pos.x);
+      coordY.textContent = Math.round(pos.y);
+
+      // Only draw preview if mouse button is held
+      if (!isDrawing) return;
+
+      if (currentTool === 'freehand') {
+        // For freehand: draw directly onto main canvas in real time
+        applyStyles(ctx);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        // Restart path from current point to avoid thick accumulation
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        return;
+      }
+
+      // For line/rect/circle: show live preview on the PREVIEW canvas
+      // First, clear the previous preview
+      pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+      // Apply styles to preview context
+      applyStyles(pCtx);
+      pCtx.globalAlpha = 0.7;    // slightly transparent preview
+
+      // Draw preview of current tool
+      if (currentTool === 'line')   drawLine(pCtx, startX, startY, pos.x, pos.y);
+      if (currentTool === 'rect')   drawRect(pCtx, startX, startY, pos.x, pos.y);
+      if (currentTool === 'circle') drawCircle(pCtx, startX, startY, pos.x, pos.y);
+
+      pCtx.globalAlpha = 1.0;    // reset alpha
+    });
+
+    // mouseup — fires when mouse button is released
+    mainCanvas.addEventListener('mouseup', (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+
+      const pos = getPos(e);
+
+      if (currentTool === 'freehand') {
+        // Freehand was drawn in real-time, just close the path
+        ctx.closePath();
+        shapeCount++;
+        shapeCountEl.textContent = shapeCount;
+        return;
+      }
+
+      // Clear the preview canvas
+      pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+      // Draw the final shape permanently on the MAIN canvas
+      applyStyles(ctx);
+
+      if (currentTool === 'line')   { drawLine(ctx, startX, startY, pos.x, pos.y); shapeCount++; }
+      if (currentTool === 'rect')   { drawRect(ctx, startX, startY, pos.x, pos.y); shapeCount++; }
+      if (currentTool === 'circle') { drawCircle(ctx, startX, startY, pos.x, pos.y); shapeCount++; }
+
+      shapeCountEl.textContent = shapeCount;
+    });
+
+    // mouseleave — fires when mouse exits the canvas area
+    mainCanvas.addEventListener('mouseleave', (e) => {
+      if (isDrawing && (currentTool === 'line' || currentTool === 'rect' || currentTool === 'circle')) {
+        // Commit the shape even if mouse left canvas
+        mainCanvas.dispatchEvent(new MouseEvent('mouseup', e));
+      }
+      isDrawing = false;
+      pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    });
+
+    // ---- 10. CLEAR BUTTON ----
+    clearBtn.addEventListener('click', () => {
+      // clearRect(x, y, width, height) erases a rectangular area of the canvas
+      ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+      pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      shapeCount = 0;
+      shapeCountEl.textContent = shapeCount;
+    });
+
+    // ---- 11. LIVE LINE WIDTH DISPLAY ----
+    lineWidthInput.addEventListener('input', () => {
+      widthVal.textContent = lineWidthInput.value;
+    });
+
+  </script>
+
+</body>
+</html>
