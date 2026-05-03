@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Online Bookstore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+          rel="stylesheet">
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="bg-light">
+    <!--
+        NAVIGATION BAR
+    -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="bi bi-book"></i> Online Bookstore
+            </a>
+            <button class="navbar-toggler" type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/catalog}">Catalog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/login}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/register}">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <!--
+        REGISTRATION FORM SECTION
+        =========================
+    -->
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <div class="card shadow-sm">
+                    
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-person-plus"></i>
+                            Create Account
+                        </h3>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        
+                        <!--
+                            ERROR MESSAGE
+                            =============
+                            Displayed if registration fails
+                            (e.g., username already exists)
+                        -->
+                        <div th:if="${error}" 
+                             class="alert alert-danger alert-dismissible fade show">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" 
+                                    class="btn-close" 
+                                    data-bs-dismiss="alert">
+                            </button>
+                        </div>
+                        
+                        
+                        <!--
+                            REGISTRATION FORM
+                            =================
+                            
+                            THYMELEAF FORM BINDING:
+                            -----------------------
+                            th:object="${user}"
+                            - Binds form to User object from model
+                            - User object was added in controller:
+                              model.addAttribute("user", new User())
+                            
+                            th:action="@{/register-process}"
+                            - Form submits to /register-process
+                            - POST request handled by AuthController
+                            
+                            method="post"
+                            - HTTP POST (not GET)
+                            - Secure for sensitive data
+                        -->
+                        <form th:object="${user}" 
+                              th:action="@{/register-process}" 
+                              method="post" 
+                              novalidate>
+                            <!--
+                                novalidate - Disable HTML5 validation
+                                Use server-side validation instead
+                                (More secure and reliable)
+                            -->
+                            
+                            
+                            <!--
+                                FULL NAME FIELD
+                                ===============
+                            -->
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">
+                                    <i class="bi bi-person-fill"></i>
+                                    Full Name *
+                                </label>
+                                
+                                <!--
+                                    THYMELEAF FIELD BINDING:
+                                    ------------------------
+                                    th:field="*{fullName}"
+                                    - Binds to user.fullName property
+                                    - * (asterisk) means "field from current object"
+                                    - Automatically generates:
+                                      • id="fullName"
+                                      • name="fullName"
+                                      • value="${user.fullName}"
+                                    
+                                    th:errorclass="is-invalid"
+                                    - Adds class "is-invalid" if validation error
+                                    - Bootstrap class for error styling (red border)
+                                -->
+                                <input type="text" 
+                                       class="form-control" 
+                                       th:field="*{fullName}" 
+                                       th:errorclass="is-invalid" 
+                                       placeholder="Enter your full name">
+                                
+                                <!--
+                                    VALIDATION ERROR MESSAGE
+                                    ------------------------
+                                    th:if="${#fields.hasErrors('fullName')}"
+                                    - Shows only if fullName has validation error
+                                    
+                                    #fields - Thymeleaf utility object
+                                    hasErrors('fullName') - Checks if field has errors
+                                    
+                                    th:errors="*{fullName}"
+                                    - Displays the error message
+                                    - Message comes from @NotBlank annotation:
+                                      @NotBlank(message = "Full name is required")
+                                    
+                                    invalid-feedback - Bootstrap error message style
+                                -->
+                                <div th:if="${#fields.hasErrors('fullName')}" 
+                                     class="invalid-feedback" 
+                                     th:errors="*{fullName}">
+                                </div>
+                            </div>
+                            
+                            
+                            <!--
+                                USERNAME FIELD
+                                ==============
+                            -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="bi bi-person-badge"></i>
+                                    Username *
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       th:field="*{username}" 
+                                       th:errorclass="is-invalid" 
+                                       placeholder="Choose a username">
+                                <div th:if="${#fields.hasErrors('username')}" 
+                                     class="invalid-feedback" 
+                                     th:errors="*{username}">
+                                </div>
+                                <!--
+                                    Validation from User entity:
+                                    @NotBlank(message = "Username is required")
+                                    @Size(min = 3, max = 50, message = "...")
+                                -->
+                            </div>
+                            
+                            
+                            <!--
+                                EMAIL FIELD
+                                ===========
+                            -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="bi bi-envelope"></i>
+                                    Email *
+                                </label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       th:field="*{email}" 
+                                       th:errorclass="is-invalid" 
+                                       placeholder="Enter your email">
+                                <div th:if="${#fields.hasErrors('email')}" 
+                                     class="invalid-feedback" 
+                                     th:errors="*{email}">
+                                </div>
+                                <!--
+                                    Validation:
+                                    @NotBlank(message = "Email is required")
+                                    @Email(message = "Please provide a valid email")
+                                -->
+                            </div>
+                            
+                            
+                            <!--
+                                PASSWORD FIELD
+                                ==============
+                            -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="bi bi-lock"></i>
+                                    Password *
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       th:field="*{password}" 
+                                       th:errorclass="is-invalid" 
+                                       placeholder="Create a password (min 6 characters)">
+                                <div th:if="${#fields.hasErrors('password')}" 
+                                     class="invalid-feedback" 
+                                     th:errors="*{password}">
+                                </div>
+                                <!--
+                                    Validation:
+                                    @NotBlank(message = "Password is required")
+                                    @Size(min = 6, message = "Password must be at least 6 characters")
+                                -->
+                            </div>
+                            
+                            
+                            <!--
+                                PHONE NUMBER FIELD
+                                ==================
+                            -->
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">
+                                    <i class="bi bi-telephone"></i>
+                                    Phone Number
+                                </label>
+                                <input type="tel" 
+                                       class="form-control" 
+                                       th:field="*{phoneNumber}" 
+                                       th:errorclass="is-invalid" 
+                                       placeholder="Enter your phone number">
+                                <div th:if="${#fields.hasErrors('phoneNumber')}" 
+                                     class="invalid-feedback" 
+                                     th:errors="*{phoneNumber}">
+                                </div>
+                                <!--
+                                    Validation:
+                                    @Pattern(regexp = "^(\\+\\d{1,3}[- ]?)?\\d{10}$", 
+                                             message = "Please provide a valid phone number")
+                                -->
+                            </div>
+                            
+                            
+                            <!--
+                                ADDRESS FIELD
+                                =============
+                            -->
+                            <div class="mb-3">
+                                <label for="address" class="form-label">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Address
+                                </label>
+                                <!--
+                                    textarea - Multi-line text input
+                                    rows="3" - Initial height (3 lines)
+                                -->
+                                <textarea class="form-control" 
+                                          th:field="*{address}" 
+                                          rows="3" 
+                                          placeholder="Enter your address">
+                                </textarea>
+                            </div>
+                            
+                            
+                            <!--
+                                SUBMIT BUTTON
+                                =============
+                            -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" 
+                                        class="btn btn-primary btn-lg">
+                                    <i class="bi bi-person-plus"></i>
+                                    Register
+                                </button>
+                            </div>
+                            
+                        </form>
+                        
+                        
+                        <!--
+                            LOGIN LINK
+                            ==========
+                        -->
+                        <div class="text-center mt-3">
+                            <p class="text-muted">
+                                Already have an account?
+                                <a th:href="@{/login}" 
+                                   class="text-decoration-none">
+                                    Login here
+                                </a>
+                            </p>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <!--
+        BOOTSTRAP JAVASCRIPT
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    
+    
+    <!--
+        THEORY: Thymeleaf Form Binding
+        -------------------------------
+        
+        1. OBJECT BINDING:
+           Form level: th:object="${user}"
+           - Binds entire form to User object
+           - All fields use relative path with *{...}
+        
+        2. FIELD BINDING:
+           Field level: th:field="*{username}"
+           - Binds input to user.username
+           - Generates: id, name, value attributes
+           
+           Before th:field:
+           <input id="username" name="username" value="">
+           
+           With th:field="*{username}":
+           <input id="username" name="username" value="john">
+           (if user.username = "john")
+        
+        3. ERROR STYLING:
+           th:errorclass="is-invalid"
+           - Adds "is-invalid" class if validation fails
+           - Bootstrap uses this for red border
+        
+        4. ERROR MESSAGES:
+           th:if="${#fields.hasErrors('username')}"
+           th:errors="*{username}"
+           - Shows validation error message
+           - Message from @NotBlank, @Email, etc.
+        
+        
+        THEORY: Server-Side Validation Flow
+        ------------------------------------
+        
+        1. User submits form
+        2. Spring binds form data to User object
+        3. @Valid triggers Bean Validation
+        4. Validators check annotations:
+           @NotBlank, @Email, @Size, @Pattern
+        5. Results stored in BindingResult
+        6. If errors:
+           - Return to registration form
+           - Errors displayed via th:errors
+           - Form retains entered values
+        7. If no errors:
+           - userService.registerUser(user)
+           - Redirect to login page
+        
+        
+        THEORY: Bootstrap Form Validation
+        ----------------------------------
+        
+        Valid input:
+        <input class="form-control">
+        - Normal gray border
+        
+        Invalid input (when validation fails):
+        <input class="form-control is-invalid">
+        - Red border
+        - Red error message below
+        
+        Valid input (after validation):
+        <input class="form-control is-valid">
+        - Green border
+        - Green checkmark
+        
+        Error message:
+        <div class="invalid-feedback">
+          Error message here
+        </div>
+        - Only shows when input has "is-invalid"
+        - Red text below input
+        
+        
+        THEORY: Input Types
+        -------------------
+        
+        type="text"
+        - Regular text input
+        - For: name, username, address
+        
+        type="email"
+        - Email format input
+        - Browser may validate format
+        - Shows @ keyboard on mobile
+        
+        type="password"
+        - Password input (masked)
+        - Shows dots instead of characters
+        
+        type="tel"
+        - Telephone number
+        - Shows numeric keyboard on mobile
+        
+        type="number"
+        - Numeric input
+        - For: age, quantity, etc.
+        
+        type="date"
+        - Date picker
+        - For: birthdate, booking date
+        
+        
+        THEORY: Thymeleaf Utility Objects
+        ----------------------------------
+        
+        #fields - Form/validation utilities
+        ${#fields.hasErrors('username')}
+        ${#fields.errors('username')}
+        
+        #strings - String utilities
+        ${#strings.isEmpty(text)}
+        ${#strings.contains(text, 'search')}
+        ${#strings.toUpperCase(text)}
+        
+        #dates - Date formatting
+        ${#dates.format(date, 'dd-MM-yyyy')}
+        ${#dates.day(date)}
+        
+        #numbers - Number formatting
+        ${#numbers.formatDecimal(price, 1, 2)}
+        
+        #lists - List utilities
+        ${#lists.size(myList)}
+        ${#lists.isEmpty(myList)}
+        
+        #sets - Set utilities
+        #maps - Map utilities
+        #arrays - Array utilities
+    -->
+</body>
+</html>

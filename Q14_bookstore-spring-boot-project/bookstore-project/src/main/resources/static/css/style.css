@@ -1,0 +1,476 @@
+/*
+ * CUSTOM STYLESHEET FOR ONLINE BOOKSTORE
+ * =======================================
+ * This file contains custom CSS styles that complement Bootstrap
+ */
+
+/*
+ * THEORY: CSS Syntax
+ * ------------------
+ * 
+ * selector {
+ *   property: value;
+ * }
+ * 
+ * selector - Targets HTML elements
+ * property - CSS property to style
+ * value - Value for that property
+ */
+
+
+/*
+ * GLOBAL STYLES
+ * =============
+ */
+
+/* 
+ * Reset body margin and set minimum height
+ * 
+ * body - Targets <body> element
+ * min-height: 100vh - Minimum height = 100% of viewport height
+ * display: flex - Uses flexbox layout
+ * flex-direction: column - Stack children vertically
+ */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/*
+ * Ensure main content pushes footer to bottom
+ * flex: 1 - Takes remaining space, pushes footer down
+ */
+.container {
+    flex: 1;
+}
+
+
+/*
+ * NAVIGATION BAR STYLES
+ * =====================
+ */
+
+/*
+ * Add space below navbar
+ * Fixed navbar overlaps content, so add padding to body
+ */
+body {
+    padding-top: 56px; /* Height of navbar */
+}
+
+/*
+ * Brand/logo styling
+ */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+    transition: transform 0.3s ease; /* Smooth animation */
+}
+
+/*
+ * :hover - Pseudo-class for mouse hover state
+ * Slightly grows logo on hover
+ */
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+
+/*
+ * HERO SECTION STYLES
+ * ===================
+ */
+
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* 
+     * linear-gradient - Creates gradient background
+     * 135deg - Diagonal direction
+     * #667eea to #764ba2 - Purple gradient
+     */
+    min-height: 400px;
+    display: flex;
+    align-items: center; /* Vertically center content */
+}
+
+/*
+ * Button hover effect in hero section
+ */
+.hero-section .btn {
+    transition: all 0.3s ease;
+    /* Smooth transition for all properties */
+}
+
+.hero-section .btn:hover {
+    transform: translateY(-3px); /* Move up slightly */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Add shadow */
+}
+
+
+/*
+ * CARD STYLES
+ * ===========
+ */
+
+/*
+ * Smooth hover effect for cards
+ */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 8px; /* Rounded corners */
+}
+
+/*
+ * Card grows and adds shadow on hover
+ */
+.card:hover {
+    transform: translateY(-5px); /* Move up */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Larger shadow */
+}
+
+/*
+ * Book card image container
+ * Prevents image overflow and maintains aspect ratio
+ */
+.card-img-top {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+/*
+ * Slight zoom effect on image hover
+ */
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+
+/*
+ * FORM STYLES
+ * ===========
+ */
+
+/*
+ * Focus state for form inputs
+ * Adds glow effect when input is focused
+ */
+.form-control:focus {
+    border-color: #667eea; /* Purple border */
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25); /* Purple glow */
+}
+
+/*
+ * Invalid input styling (validation errors)
+ */
+.form-control.is-invalid {
+    border-color: #dc3545; /* Red border */
+}
+
+/*
+ * Valid input styling (passed validation)
+ */
+.form-control.is-valid {
+    border-color: #28a745; /* Green border */
+}
+
+
+/*
+ * BUTTON STYLES
+ * =============
+ */
+
+/*
+ * Add transition to all buttons
+ */
+.btn {
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+/*
+ * Primary button hover effect
+ */
+.btn-primary:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/*
+ * Disabled button styling
+ */
+.btn:disabled {
+    opacity: 0.6; /* Semi-transparent */
+    cursor: not-allowed; /* Show "not allowed" cursor */
+}
+
+
+/*
+ * BADGE STYLES
+ * ============
+ */
+
+/*
+ * Make badges slightly rounded
+ */
+.badge {
+    border-radius: 20px;
+    padding: 0.35em 0.65em;
+    font-weight: 500;
+}
+
+
+/*
+ * LIST GROUP STYLES
+ * =================
+ */
+
+/*
+ * Active list item styling
+ */
+.list-group-item.active {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/*
+ * List item hover effect
+ */
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+    border-left: 3px solid #667eea;
+    padding-left: 1rem;
+}
+
+
+/*
+ * ALERT STYLES
+ * ============
+ */
+
+/*
+ * Add icon spacing in alerts
+ */
+.alert i {
+    margin-right: 0.5rem;
+}
+
+/*
+ * Slide-in animation for alerts
+ */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert {
+    animation: slideIn 0.5s ease;
+}
+
+
+/*
+ * FOOTER STYLES
+ * =============
+ */
+
+footer {
+    margin-top: auto; /* Push footer to bottom */
+}
+
+
+/*
+ * RESPONSIVE STYLES
+ * =================
+ * Media queries for different screen sizes
+ */
+
+/*
+ * @media - Applies styles only when condition is met
+ * max-width: 768px - For screens smaller than 768px (tablets and phones)
+ */
+@media (max-width: 768px) {
+    
+    /* Smaller hero section on mobile */
+    .hero-section {
+        min-height: 300px;
+        padding: 2rem 0;
+    }
+    
+    /* Smaller hero heading on mobile */
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    /* Stack buttons vertically on mobile */
+    .hero-section .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Smaller navbar brand on mobile */
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+}
+
+/*
+ * For very small screens (phones in portrait)
+ */
+@media (max-width: 576px) {
+    
+    /* Reduce padding on small screens */
+    body {
+        padding-top: 56px;
+    }
+    
+    /* Smaller card padding */
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Smaller buttons on mobile */
+    .btn-lg {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+    
+}
+
+
+/*
+ * UTILITY CLASSES
+ * ===============
+ * Reusable helper classes
+ */
+
+/*
+ * Text shadow for better readability on images
+ */
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/*
+ * Smooth scrolling behavior
+ */
+html {
+    scroll-behavior: smooth;
+}
+
+
+/*
+ * LOADING SPINNER (Optional)
+ * ==========================
+ */
+
+/*
+ * Can be added to forms for loading state
+ */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+
+/*
+ * THEORY: CSS Selectors
+ * ----------------------
+ * 
+ * Element selector:
+ * body { } - Targets all <body> elements
+ * 
+ * Class selector:
+ * .card { } - Targets all elements with class="card"
+ * 
+ * ID selector:
+ * #header { } - Targets element with id="header"
+ * 
+ * Descendant selector:
+ * .card img { } - Targets <img> inside .card
+ * 
+ * Child selector:
+ * .card > img { } - Targets direct child <img> of .card
+ * 
+ * Pseudo-class:
+ * :hover - Mouse hover state
+ * :focus - Keyboard focus state
+ * :active - Click state
+ * :disabled - Disabled state
+ * 
+ * Attribute selector:
+ * [type="text"] - Targets elements with type="text"
+ * 
+ * Multiple selectors:
+ * h1, h2, h3 { } - Targets all h1, h2, and h3
+ * 
+ * 
+ * THEORY: CSS Box Model
+ * ----------------------
+ * 
+ * Every HTML element is a box with:
+ * 
+ * Content - The actual content (text, image)
+ * Padding - Space between content and border
+ * Border - Border around padding
+ * Margin - Space outside border
+ * 
+ * [Margin]
+ *   [Border]
+ *     [Padding]
+ *       [Content]
+ * 
+ * 
+ * THEORY: Flexbox Layout
+ * -----------------------
+ * 
+ * display: flex
+ * - Enables flexbox layout
+ * - Children become flex items
+ * 
+ * flex-direction:
+ * - row: Horizontal (default)
+ * - column: Vertical
+ * 
+ * justify-content:
+ * - flex-start: Start
+ * - center: Center
+ * - space-between: Space between items
+ * 
+ * align-items:
+ * - flex-start: Top
+ * - center: Middle
+ * - flex-end: Bottom
+ * 
+ * 
+ * THEORY: Responsive Design
+ * --------------------------
+ * 
+ * Media Queries:
+ * @media (max-width: 768px) { }
+ * - Applies styles for screens ≤ 768px
+ * 
+ * Breakpoints:
+ * 576px - Small phones
+ * 768px - Tablets
+ * 992px - Laptops
+ * 1200px - Desktops
+ * 
+ * Mobile-First Approach:
+ * 1. Design for mobile first
+ * 2. Add styles for larger screens
+ * 
+ * @media (min-width: 768px) { }
+ * - Applies styles for screens ≥ 768px
+ */

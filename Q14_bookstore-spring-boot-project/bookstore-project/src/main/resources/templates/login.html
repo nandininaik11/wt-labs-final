@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Online Bookstore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+          rel="stylesheet">
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="bg-light">
+    <!--
+        NAVIGATION BAR (Same as home page)
+    -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="bi bi-book"></i> Online Bookstore
+            </a>
+            <button class="navbar-toggler" type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/catalog}">Catalog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/login}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/register}">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <!--
+        LOGIN FORM SECTION
+        ==================
+    -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <!--
+                justify-content-center - Centers columns horizontally
+                col-md-6 - 50% width on medium+ screens
+                col-lg-5 - 42% width on large+ screens (narrower form)
+            -->
+            <div class="col-md-6 col-lg-5">
+                
+                <!--
+                    CARD COMPONENT
+                    --------------
+                    Bootstrap card for form container
+                    Gives nice border and shadow
+                -->
+                <div class="card shadow-sm">
+                    
+                    <!--
+                        CARD HEADER
+                        -----------
+                        bg-primary - Primary blue background
+                        text-white - White text
+                    -->
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Login
+                        </h3>
+                    </div>
+                    
+                    <!--
+                        CARD BODY
+                        ---------
+                        Main content area of card
+                    -->
+                    <div class="card-body p-4">
+                        
+                        <!--
+                            ERROR MESSAGE
+                            =============
+                            Displayed if login fails
+                            
+                            th:if="${error}" - Thymeleaf conditional
+                            Shows this div only if ${error} exists and is not empty
+                            
+                            ${error} comes from:
+                            model.addAttribute("error", "Invalid username...")
+                            in AuthController
+                        -->
+                        <div th:if="${error}" 
+                             class="alert alert-danger alert-dismissible fade show">
+                            <!--
+                                alert - Bootstrap alert component
+                                alert-danger - Red error style
+                                alert-dismissible - Can be closed
+                                fade show - Animation classes
+                            -->
+                            
+                            <!-- Error icon and message -->
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            
+                            <!--
+                                th:text="${error}" - Display error message
+                                Thymeleaf replaces content with ${error} value
+                            -->
+                            <span th:text="${error}"></span>
+                            
+                            <!--
+                                Close button for alert
+                                data-bs-dismiss="alert" - Bootstrap JS dismisses alert
+                            -->
+                            <button type="button" 
+                                    class="btn-close" 
+                                    data-bs-dismiss="alert">
+                            </button>
+                        </div>
+                        
+                        
+                        <!--
+                            SUCCESS MESSAGE
+                            ===============
+                            Displayed after logout or successful registration
+                        -->
+                        <div th:if="${message}" 
+                             class="alert alert-success alert-dismissible fade show">
+                            <!--
+                                alert-success - Green success style
+                            -->
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span th:text="${message}"></span>
+                            <button type="button" 
+                                    class="btn-close" 
+                                    data-bs-dismiss="alert">
+                            </button>
+                        </div>
+                        
+                        
+                        <!--
+                            LOGIN FORM
+                            ==========
+                            
+                            THYMELEAF FORM ATTRIBUTES:
+                            --------------------------
+                            th:action="@{/login-process}"
+                            - Form submits to /login-process
+                            - @{...} generates URL (handles context path)
+                            - This URL is intercepted by Spring Security
+                            
+                            method="post"
+                            - HTTP POST method (not GET)
+                            - POST is secure for sensitive data (username/password)
+                            - Data not visible in URL
+                        -->
+                        <form th:action="@{/login-process}" method="post">
+                            
+                            <!--
+                                USERNAME FIELD
+                                ==============
+                            -->
+                            <div class="mb-3">
+                                <!--
+                                    form-label - Bootstrap label styling
+                                -->
+                                <label for="username" class="form-label">
+                                    <i class="bi bi-person"></i>
+                                    Username
+                                </label>
+                                
+                                <!--
+                                    INPUT FIELD ATTRIBUTES:
+                                    ----------------------
+                                    type="text" - Text input (not password)
+                                    class="form-control" - Bootstrap input styling
+                                    id="username" - Matches label's "for" attribute
+                                    name="username" - Parameter name sent to server
+                                    required - HTML5 validation (cannot be empty)
+                                    autofocus - Cursor starts here when page loads
+                                    
+                                    IMPORTANT: name="username" must match:
+                                    .usernameParameter("username") in SecurityConfig
+                                -->
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       name="username" 
+                                       placeholder="Enter your username" 
+                                       required 
+                                       autofocus>
+                            </div>
+                            
+                            
+                            <!--
+                                PASSWORD FIELD
+                                ==============
+                            -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="bi bi-lock"></i>
+                                    Password
+                                </label>
+                                
+                                <!--
+                                    type="password" - Masks characters (shows dots)
+                                    name="password" - Must match SecurityConfig
+                                -->
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       placeholder="Enter your password" 
+                                       required>
+                            </div>
+                            
+                            
+                            <!--
+                                REMEMBER ME CHECKBOX
+                                ====================
+                                (Optional feature)
+                            -->
+                            <div class="mb-3 form-check">
+                                <!--
+                                    form-check-input - Bootstrap checkbox styling
+                                -->
+                                <input type="checkbox" 
+                                       class="form-check-input" 
+                                       id="rememberMe" 
+                                       name="remember-me">
+                                <!--
+                                    form-check-label - Bootstrap label for checkbox
+                                -->
+                                <label class="form-check-label" for="rememberMe">
+                                    Remember me
+                                </label>
+                            </div>
+                            
+                            
+                            <!--
+                                SUBMIT BUTTON
+                                =============
+                            -->
+                            <div class="d-grid gap-2">
+                                <!--
+                                    d-grid - Display as grid
+                                    gap-2 - Gap between elements
+                                    
+                                    Makes button full width
+                                -->
+                                
+                                <!--
+                                    type="submit" - Submits the form
+                                    btn-primary - Primary blue button
+                                    btn-lg - Large button
+                                -->
+                                <button type="submit" 
+                                        class="btn btn-primary btn-lg">
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                    Login
+                                </button>
+                            </div>
+                            
+                        </form>
+                        
+                        
+                        <!--
+                            REGISTRATION LINK
+                            =================
+                            For users who don't have account
+                        -->
+                        <div class="text-center mt-3">
+                            <!--
+                                text-muted - Gray text (less prominent)
+                            -->
+                            <p class="text-muted">
+                                Don't have an account?
+                                <!--
+                                    Link to registration page
+                                -->
+                                <a th:href="@{/register}" 
+                                   class="text-decoration-none">
+                                    Register here
+                                </a>
+                                <!--
+                                    text-decoration-none - Remove underline
+                                -->
+                            </p>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <!--
+        BOOTSTRAP JAVASCRIPT
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    
+    
+    <!--
+        THEORY: Form Security
+        ---------------------
+        
+        1. HTTPS:
+           - Always use HTTPS in production
+           - Encrypts data in transit
+           - Prevents man-in-the-middle attacks
+        
+        2. CSRF Protection:
+           - Spring Security adds CSRF token automatically
+           - Token is validated on form submission
+           - Prevents Cross-Site Request Forgery
+        
+        3. Password Field:
+           - type="password" masks input
+           - Browser autocomplete can be disabled:
+             autocomplete="off"
+        
+        4. POST vs GET:
+           - Always use POST for sensitive data
+           - GET shows parameters in URL:
+             /login?username=john&password=secret123 (BAD!)
+           - POST sends data in request body (not visible)
+        
+        5. Server-Side Validation:
+           - Never trust client-side validation alone
+           - HTML5 required attribute can be bypassed
+           - Server must validate again
+        
+        
+        THEORY: Spring Security Login Flow
+        -----------------------------------
+        
+        1. User submits form to /login-process
+        2. UsernamePasswordAuthenticationFilter intercepts
+        3. Extracts username and password parameters
+        4. Creates UsernamePasswordAuthenticationToken
+        5. AuthenticationManager authenticates:
+           a) UserDetailsService loads user from database
+           b) PasswordEncoder verifies password hash
+           c) Returns authenticated principal
+        6. SecurityContextHolder stores authentication
+        7. Redirects to success URL (/catalog)
+        
+        If authentication fails:
+        - Redirects to /login?error=true
+        - Error message displayed
+        
+        
+        THEORY: Thymeleaf Conditional Rendering
+        ----------------------------------------
+        
+        th:if="${condition}"
+        - Shows element only if condition is true
+        - Condition can be:
+          • Boolean: ${user.enabled}
+          • Not null: ${error}
+          • Not empty: ${#strings.isEmpty(message)}
+          • Comparison: ${count > 0}
+        
+        Example:
+        <div th:if="${error}">...</div>
+        - Shows only if error exists and is not null/empty
+        
+        th:unless="${condition}"
+        - Opposite of th:if
+        - Shows element only if condition is false
+        
+        Example:
+        <div th:unless="${user.enabled}">
+          Account disabled
+        </div>
+        
+        
+        THEORY: Bootstrap Alert Component
+        ----------------------------------
+        
+        Types:
+        alert-primary   - Blue (informational)
+        alert-success   - Green (success)
+        alert-danger    - Red (error)
+        alert-warning   - Yellow (warning)
+        alert-info      - Light blue (information)
+        
+        Dismissible alerts:
+        <div class="alert alert-danger alert-dismissible">
+          Error message
+          <button class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        Animation:
+        fade show - Fade in animation
+        
+        Icons:
+        Use Bootstrap Icons to enhance alerts:
+        <i class="bi bi-exclamation-triangle-fill"></i> Error
+        <i class="bi bi-check-circle-fill"></i> Success
+        <i class="bi bi-info-circle-fill"></i> Info
+    -->
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog - Online Bookstore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+          rel="stylesheet">
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <!--
+        NAVIGATION BAR
+    -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="bi bi-book"></i> Online Bookstore
+            </a>
+            <button class="navbar-toggler" type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/catalog}">Catalog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/login}">Login</a>
+                    </li>
+                    <li class:nav-item">
+                        <a class="nav-link" th:href="@{/register}">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <!--
+        PAGE HEADER
+        ===========
+    -->
+    <div class="bg-primary text-white py-4">
+        <div class="container">
+            <h1 class="mb-0">
+                <i class="bi bi-grid"></i>
+                Book Catalog
+            </h1>
+        </div>
+    </div>
+    
+    
+    <!--
+        MAIN CONTENT
+        ============
+    -->
+    <div class="container my-4">
+        
+        <div class="row">
+            
+            <!--
+                SIDEBAR - FILTERS
+                =================
+                col-lg-3 - 25% width on large screens
+                col-md-4 - 33% width on medium screens
+            -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-funnel"></i>
+                            Filters
+                        </h5>
+                    </div>
+                    
+                    <div class="card-body">
+                        
+                        <!--
+                            SEARCH FORM
+                            ===========
+                        -->
+                        <form th:action="@{/catalog}" method="get" class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-search"></i>
+                                Search Books
+                            </label>
+                            
+                            <div class="input-group">
+                                <!--
+                                    input-group - Groups input and button
+                                    
+                                    name="search" - Query parameter
+                                    URL becomes: /catalog?search=java
+                                -->
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="search" 
+                                       placeholder="Title or Author" 
+                                       th:value="${searchKeyword}">
+                                <!--
+                                    th:value="${searchKeyword}"
+                                    - Preserves search term after search
+                                    - Shows what user searched for
+                                -->
+                                
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        
+                        <!--
+                            CATEGORY FILTER
+                            ===============
+                        -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-folder"></i>
+                                Category
+                            </label>
+                            
+                            <!--
+                                CATEGORY LIST
+                                =============
+                                Display all categories as links
+                            -->
+                            <div class="list-group">
+                                
+                                <!--
+                                    "All Books" link - Shows all books
+                                -->
+                                <a th:href="@{/catalog}" 
+                                   class="list-group-item list-group-item-action"
+                                   th:classappend="${selectedCategory == null ? 'active' : ''}">
+                                    <!--
+                                        th:classappend - Conditionally add class
+                                        ${selectedCategory == null ? 'active' : ''}
+                                        - If no category selected, add "active" class
+                                        - active = highlighted (blue background)
+                                    -->
+                                    All Books
+                                    <!--
+                                        BOOK COUNT BADGE
+                                        ----------------
+                                        Shows total number of books
+                                    -->
+                                    <span class="badge bg-secondary float-end" 
+                                          th:text="${bookCount}">
+                                    </span>
+                                    <!--
+                                        th:text="${bookCount}"
+                                        - Displays the book count
+                                        - Value comes from controller:
+                                          model.addAttribute("bookCount", books.size())
+                                        
+                                        float-end - Float to right side
+                                        badge - Bootstrap badge component
+                                        bg-secondary - Gray background
+                                    -->
+                                </a>
+                                
+                                <!--
+                                    CATEGORY LOOP
+                                    =============
+                                    th:each - Thymeleaf iteration
+                                    Loops through each category in categories list
+                                    
+                                    Syntax: th:each="variable : ${collection}"
+                                    
+                                    For each iteration:
+                                    - Creates new <a> element
+                                    - category variable contains current category name
+                                -->
+                                <a th:each="category : ${categories}" 
+                                   th:href="@{/catalog(category=${category})}" 
+                                   class="list-group-item list-group-item-action"
+                                   th:classappend="${selectedCategory == category ? 'active' : ''}"
+                                   th:text="${category}">
+                                </a>
+                                <!--
+                                    th:href="@{/catalog(category=${category})}"
+                                    - Generates: /catalog?category=Fiction
+                                    - Parentheses ( ) add query parameters
+                                    
+                                    th:text="${category}"
+                                    - Displays category name (Fiction, Science, etc.)
+                                    
+                                    th:classappend="${selectedCategory == category ? 'active' : ''}"
+                                    - If this category is selected, add "active" class
+                                    - Highlights the current category
+                                -->
+                                
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+            
+            
+            <!--
+                MAIN CONTENT - BOOK GRID
+                ========================
+                col-lg-9 - 75% width on large screens
+                col-md-8 - 67% width on medium screens
+            -->
+            <div class="col-lg-9 col-md-8">
+                
+                <!--
+                    RESULTS HEADER
+                    ==============
+                -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <!--
+                        d-flex - Display as flexbox
+                        justify-content-between - Space between items
+                        align-items-center - Vertically center
+                    -->
+                    
+                    <h4 class="mb-0">
+                        <!--
+                            CONDITIONAL TEXT
+                            ----------------
+                            Shows different text based on search/filter
+                        -->
+                        <span th:if="${searchKeyword}">
+                            <!--
+                                If search is active:
+                                "Search Results for 'java'"
+                            -->
+                            Search Results for 
+                            '<span th:text="${searchKeyword}"></span>'
+                        </span>
+                        
+                        <span th:if="${selectedCategory}">
+                            <!--
+                                If category is selected:
+                                "Category: Fiction"
+                            -->
+                            Category: 
+                            <span th:text="${selectedCategory}"></span>
+                        </span>
+                        
+                        <span th:if="${!searchKeyword and !selectedCategory}">
+                            <!--
+                                If no filter:
+                                "All Books"
+                            -->
+                            All Books
+                        </span>
+                    </h4>
+                    
+                    <!--
+                        BOOK COUNT
+                        ----------
+                    -->
+                    <span class="text-muted">
+                        <span th:text="${bookCount}"></span> books found
+                    </span>
+                </div>
+                
+                
+                <!--
+                    NO RESULTS MESSAGE
+                    ==================
+                    Shown if no books found
+                -->
+                <div th:if="${books.isEmpty()}" 
+                     class="alert alert-info">
+                    <!--
+                        ${books.isEmpty()}
+                        - Checks if books list is empty
+                        - Shows this message only if no books
+                    -->
+                    <i class="bi bi-info-circle"></i>
+                    No books found matching your criteria.
+                </div>
+                
+                
+                <!--
+                    BOOKS GRID
+                    ==========
+                    Display books in responsive grid
+                -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <!--
+                        RESPONSIVE COLUMNS
+                        ------------------
+                        row-cols-1 - 1 column on extra small screens (mobile)
+                        row-cols-md-2 - 2 columns on medium screens (tablet)
+                        row-cols-lg-3 - 3 columns on large screens (desktop)
+                        g-4 - Gap size 4 between cards
+                        
+                        Result:
+                        Mobile: 1 book per row (vertical stack)
+                        Tablet: 2 books per row
+                        Desktop: 3 books per row
+                    -->
+                    
+                    <!--
+                        BOOK CARD LOOP
+                        ==============
+                        Creates a card for each book
+                        
+                        th:each="book : ${books}"
+                        - Loops through books list
+                        - book variable contains current Book object
+                    -->
+                    <div th:each="book : ${books}" class="col">
+                        
+                        <!--
+                            BOOK CARD
+                            =========
+                            Bootstrap card component for each book
+                        -->
+                        <div class="card h-100 shadow-sm">
+                            <!--
+                                h-100 - Height 100%
+                                Makes all cards same height
+                            -->
+                            
+                            <!--
+                                BOOK COVER IMAGE
+                                ================
+                            -->
+                            <img th:src="${book.imageUrl != null ? book.imageUrl : 'https://via.placeholder.com/300x400?text=No+Image'}" 
+                                 class="card-img-top" 
+                                 alt="Book Cover"
+                                 style="height: 300px; object-fit: cover;">
+                            <!--
+                                th:src - Thymeleaf attribute for <img src="...">
+                                
+                                ${book.imageUrl != null ? book.imageUrl : '...'}
+                                - Ternary operator (conditional)
+                                - If book has imageUrl, use it
+                                - Otherwise, use placeholder image
+                                
+                                object-fit: cover
+                                - Scales image to cover entire area
+                                - Prevents distortion
+                            -->
+                            
+                            <!--
+                                CARD BODY
+                                =========
+                            -->
+                            <div class="card-body">
+                                
+                                <!--
+                                    BOOK TITLE
+                                    ----------
+                                    th:text="${book.title}"
+                                    - Displays book.getTitle()
+                                -->
+                                <h5 class="card-title" 
+                                    th:text="${book.title}">
+                                    Book Title
+                                </h5>
+                                
+                                <!--
+                                    BOOK AUTHOR
+                                    -----------
+                                -->
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-person"></i>
+                                    <span th:text="${book.author}">Author</span>
+                                </p>
+                                
+                                <!--
+                                    BOOK CATEGORY
+                                    -------------
+                                -->
+                                <p class="mb-2">
+                                    <span class="badge bg-info">
+                                        <span th:text="${book.category}">Category</span>
+                                    </span>
+                                </p>
+                                
+                                <!--
+                                    BOOK DESCRIPTION
+                                    ----------------
+                                    Truncated to prevent too-long cards
+                                -->
+                                <p class="card-text small text-muted" 
+                                   th:text="${#strings.abbreviate(book.description, 100)}">
+                                    Description...
+                                </p>
+                                <!--
+                                    #strings.abbreviate(text, maxLength)
+                                    - Thymeleaf utility function
+                                    - Truncates text to maxLength
+                                    - Adds "..." if truncated
+                                    - Example: "This is a long description..." → "This is a long..."
+                                -->
+                                
+                                <!--
+                                    BOOK PRICE
+                                    ----------
+                                -->
+                                <h4 class="text-primary">
+                                    <!--
+                                        ${book.formattedPrice}
+                                        - Calls book.getFormattedPrice()
+                                        - Returns: "₹499.00"
+                                        - Defined in Book entity as custom method
+                                    -->
+                                    <span th:text="${book.formattedPrice}">
+                                        ₹0.00
+                                    </span>
+                                </h4>
+                                
+                                <!--
+                                    STOCK STATUS
+                                    ------------
+                                    Shows if book is in stock
+                                -->
+                                <p class="mb-2">
+                                    <!--
+                                        CONDITIONAL BADGE
+                                        -----------------
+                                        Different badge based on stock
+                                    -->
+                                    <span th:if="${book.isInStock()}" 
+                                          class="badge bg-success">
+                                        <!--
+                                            ${book.isInStock()}
+                                            - Calls book.isInStock() method
+                                            - Returns true if stockQuantity > 0
+                                        -->
+                                        <i class="bi bi-check-circle"></i>
+                                        In Stock
+                                    </span>
+                                    
+                                    <span th:unless="${book.isInStock()}" 
+                                          class="badge bg-danger">
+                                        <!--
+                                            th:unless - Opposite of th:if
+                                            Shows if condition is false
+                                        -->
+                                        <i class="bi bi-x-circle"></i>
+                                        Out of Stock
+                                    </span>
+                                </p>
+                                
+                            </div>
+                            
+                            <!--
+                                CARD FOOTER
+                                ===========
+                                Action buttons
+                            -->
+                            <div class="card-footer bg-white">
+                                <button class="btn btn-primary w-100" 
+                                        th:disabled="${!book.isInStock()}">
+                                    <!--
+                                        th:disabled - Conditionally disable button
+                                        ${!book.isInStock()} - Disable if out of stock
+                                        
+                                        w-100 - Width 100% (full width button)
+                                    -->
+                                    <i class="bi bi-cart-plus"></i>
+                                    Add to Cart
+                                </button>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    
+    <!--
+        BOOTSTRAP JAVASCRIPT
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+    
+    
+    <!--
+        THEORY: Thymeleaf Iteration
+        ----------------------------
+        
+        th:each="variable : ${collection}"
+        
+        Examples:
+        
+        1. SIMPLE LIST:
+           <li th:each="item : ${items}" th:text="${item}"></li>
+           
+           If items = ["A", "B", "C"]
+           Output:
+           <li>A</li>
+           <li>B</li>
+           <li>C</li>
+        
+        2. OBJECT LIST:
+           <div th:each="book : ${books}">
+             <h3 th:text="${book.title}"></h3>
+             <p th:text="${book.author}"></p>
+           </div>
+        
+        3. WITH ITERATION STATUS:
+           <div th:each="book, iterStat : ${books}">
+             <p th:text="${iterStat.count}">Item number</p>
+             <h3 th:text="${book.title}"></h3>
+           </div>
+           
+           iterStat properties:
+           - index: 0-based index (0, 1, 2...)
+           - count: 1-based count (1, 2, 3...)
+           - size: Total items
+           - current: Current item
+           - even: true if even index
+           - odd: true if odd index
+           - first: true if first item
+           - last: true if last item
+        
+        
+        THEORY: Thymeleaf URL Expressions
+        ----------------------------------
+        
+        @{...} - URL expression
+        
+        1. SIMPLE URL:
+           th:href="@{/catalog}"
+           → href="/catalog"
+        
+        2. WITH QUERY PARAMETER:
+           th:href="@{/catalog(category=${cat})}"
+           → href="/catalog?category=Fiction"
+        
+        3. MULTIPLE PARAMETERS:
+           th:href="@{/catalog(category=${cat}, minPrice=${min})}"
+           → href="/catalog?category=Fiction&minPrice=100"
+        
+        4. PATH VARIABLE:
+           th:href="@{/book/{id}(id=${book.id})}"
+           → href="/book/123"
+        
+        5. EXTERNAL URL:
+           th:href="@{https://example.com}"
+           → href="https://example.com"
+        
+        
+        THEORY: Conditional Rendering
+        ------------------------------
+        
+        th:if="${condition}"
+        - Shows element if condition is true
+        
+        th:unless="${condition}"
+        - Shows element if condition is false
+        - Opposite of th:if
+        
+        th:switch / th:case
+        - Multiple conditions (like switch statement)
+        
+        <div th:switch="${book.category}">
+          <p th:case="'Fiction'">Fiction book</p>
+          <p th:case="'Science'">Science book</p>
+          <p th:case="*">Other category</p>
+        </div>
+        
+        
+        THEORY: Bootstrap Card Component
+        ---------------------------------
+        
+        Structure:
+        <div class="card">
+          <img class="card-img-top">
+          <div class="card-body">
+            <h5 class="card-title">Title</h5>
+            <p class="card-text">Text</p>
+          </div>
+          <div class="card-footer">Footer</div>
+        </div>
+        
+        Variations:
+        - card-header: Top section
+        - card-body: Main content
+        - card-footer: Bottom section
+        
+        Styles:
+        - shadow-sm: Small shadow
+        - border-primary: Primary color border
+        - text-white bg-dark: Dark card
+        
+        Layout:
+        - h-100: Full height (equal height cards)
+        - w-100: Full width
+    -->
+</body>
+</html>
