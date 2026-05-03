@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<!-- HTML5 DOCTYPE — tells browser to use modern rendering mode -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- RESPONSIVE: viewport ensures mobile scaling works correctly -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 28 – React Dark Mode Toggle</title>
+
+  <!-- Google Fonts: Syne (display headings) + Plus Jakarta Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!--
+    ================================================================
+    REACT CDN IMPORTS
+    In a real Vite / Create React App project these are npm packages:
+      npm install react react-dom
+    
+    Here we load them from CDN (unpkg.com) so the project runs by
+    simply opening index.html — no build step or npm needed.
+    
+    react.development.js    → React core: components, hooks, JSX runtime
+    react-dom.development.js → ReactDOM: renders Virtual DOM to real DOM
+    babel.min.js            → Transpiles JSX → plain JS in the browser
+    
+    SYLLABUS → Unit V: "Introduction to React"
+    ================================================================
+  -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* ============================================================
+       BASE CSS — structural styles that work for BOTH themes.
+       Theme-specific colors are applied as inline styles by React.
+       SYLLABUS → Unit I: CSS, Responsive Design
+    ============================================================ */
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+
+    html, body, #root { height: 100%; }
+
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* The entire app container — React sets background/color here */
+    .app {
+      min-height: 100vh;
+      /* CSS transition: smoothly animates background/color changes */
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* ---- HEADER ---- */
+    .header {
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid;
+      transition: background-color 0.4s ease, border-color 0.4s ease;
+    }
+
+    .header-brand {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .lab-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1.5px solid;
+      opacity: 0.7;
+    }
+
+    /* ---- MAIN ---- */
+    .main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ---- HERO BLOCK ---- */
+    .hero {
+      text-align: center;
+      padding: 44px 20px 36px;
+    }
+
+    /* Animated moon/sun icon */
+    .hero-icon {
+      font-size: clamp(3.5rem, 10vw, 5.5rem);
+      display: block;
+      margin-bottom: 20px;
+      animation: floatY 3s ease-in-out infinite;
+    }
+
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    .hero h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.7rem, 5vw, 2.8rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.15;
+    }
+
+    .hero p {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      max-width: 400px;
+      margin: 0 auto 28px;
+      opacity: 0.6;
+    }
+
+    /* ====================================================
+       TASK 1: THE TOGGLE BUTTON
+       Clicking this button calls setIsDark() in React.
+       SYLLABUS → Unit V: Events, useState
+    ==================================================== */
+    .toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 28px;
+      border-radius: 50px;
+      border: 2px solid;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition:
+        background-color 0.35s ease,
+        color 0.35s ease,
+        border-color 0.35s ease,
+        transform 0.15s ease,
+        box-shadow 0.25s ease;
+    }
+
+    .toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    }
+
+    .toggle-btn:active { transform: scale(0.97); }
+
+    /* The pill-shaped switch track inside the button */
+    .switch-track {
+      width: 42px; height: 22px;
+      border-radius: 11px;
+      position: relative;
+      border: 2px solid;
+      flex-shrink: 0;
+      transition: background-color 0.35s ease, border-color 0.35s ease;
+    }
+
+    /* The sliding thumb circle */
+    .switch-thumb {
+      position: absolute;
+      top: 2px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      transition: left 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      /* cubic-bezier = bouncy spring easing */
+    }
+
+    /* ---- CARD ---- */
+    .card {
+      border-radius: 14px;
+      padding: 22px 24px;
+      border: 1.5px solid;
+      transition:
+        background-color 0.4s ease,
+        border-color 0.4s ease;
+    }
+
+    .card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .card p {
+      font-size: 0.84rem;
+      line-height: 1.65;
+      opacity: 0.65;
+    }
+
+    .card-icon {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    /* ---- GRID — 2 cols on desktop, 1 on mobile ---- */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    /* ====================================================
+       TASK 4: THEME DISPLAY BANNER
+       Shows current theme mode clearly to the user.
+    ==================================================== */
+    .theme-banner {
+      border-radius: 14px;
+      padding: 18px 22px;
+      border: 1.5px solid;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      transition: background-color 0.4s ease, border-color 0.4s ease;
+    }
+
+    .theme-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background-color 0.4s ease;
+    }
+
+    .theme-banner-text strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .theme-banner-text span {
+      font-size: 0.78rem;
+      opacity: 0.6;
+    }
+
+    .theme-pill {
+      margin-left: auto;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1.5px solid;
+      transition:
+        background-color 0.4s ease,
+        color 0.4s ease,
+        border-color 0.4s ease;
+    }
+
+    /* ---- STATE TABLE ---- */
+    .state-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 14px;
+    }
+
+    .state-table th {
+      text-align: left;
+      padding: 9px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.55;
+      border-bottom: 1.5px solid;
+    }
+
+    .state-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid;
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+    }
+
+    .state-table tr:last-child td { border-bottom: none; }
+
+    .code-tag {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 5px;
+      font-size: 0.77rem;
+      font-weight: 600;
+    }
+
+    /* ---- FORM ---- */
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.55;
+      margin-bottom: 5px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      padding: 10px 13px;
+      border-radius: 8px;
+      border: 1.5px solid;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      transition:
+        background-color 0.4s ease,
+        border-color 0.4s ease,
+        color 0.4s ease;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: #6c63ff;
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+    }
+
+    /* ---- FOOTER ---- */
+    .footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 0.73rem;
+      opacity: 0.38;
+      border-top: 1px solid;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 480px) {
+      .header { padding: 12px 16px; }
+      .main   { padding: 20px 12px 40px; }
+      .hero   { padding: 28px 12px 24px; }
+      .toggle-btn { padding: 11px 20px; font-size: 0.87rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <!--
+    #root div — React mounts the entire application here.
+    ReactDOM.createRoot('#root').render(<App />) fills this div.
+    SYLLABUS → Unit V: Render function
+  -->
+  <div id="root"></div>
+
+  <!--
+    type="text/babel" — Babel processes this script and converts JSX to JS.
+    In a real Vite project: files are .jsx and Vite's SWC/Babel handles this.
+    SYLLABUS → Unit V: JSX
+  -->
+  <script type="text/babel">
+
+    /*
+    ================================================================
+    LAB Q28 — React Dark Mode Toggle using useState Hook
+    
+    FIVE TASKS COVERED:
+    Task 1: Toggle button (ThemeToggle component, onClick handler)
+    Task 2: useState() stores current theme (isDark boolean)
+    Task 3: Background + text colors change dynamically (theme object)
+    Task 4: Current theme displayed (hero h2, theme banner, pill)
+    Task 5: Persist theme via localStorage + useEffect
+    
+    CONCEPTS USED (Unit V Syllabus):
+    - React functional components
+    - JSX (HTML-like syntax in JavaScript)
+    - useState() hook — manage component state
+    - useEffect() hook — side effects (localStorage, title)
+    - Props — parent passes data to child components
+    - Events — onClick triggers state update
+    - Conditional rendering — {isDark ? A : B}
+    - Dynamic inline styles — style={{ color: theme.text }}
+    - Component re-render — state change → automatic re-render
+    ================================================================
+    */
+
+    // Destructure hooks from the global React object.
+    // In a Vite/CRA project: import { useState, useEffect } from 'react';
+    const { useState, useEffect } = React;
+
+    /* =============================================================
+       THEME CONFIGURATION OBJECT
+       All colors for light and dark themes stored as objects.
+       JavaScript Objects → { key: value } pairs.
+       SYLLABUS → Unit II: Objects in JS
+    ============================================================= */
+    const THEMES = {
+      light: {
+        /* --- backgrounds --- */
+        appBg:      '#f4f0e6',      /* warm cream page background */
+        headerBg:   '#ffffff',
+        cardBg:     '#ffffff',
+        cardAltBg:  '#faf6ef',
+        inputBg:    '#f8f4ed',
+        bannerBg:   'rgba(212,98,42,0.06)',
+        /* --- text --- */
+        text:       '#1c1008',
+        muted:      '#8a7462',
+        /* --- borders --- */
+        border:     '#e4d8c4',
+        borderLight:'#ede5d4',
+        /* --- toggle button --- */
+        btnBg:      '#1c1008',
+        btnText:    '#f4f0e6',
+        btnBorder:  '#1c1008',
+        /* --- switch inside button --- */
+        trackBg:    '#c0b09a',
+        trackBorder:'#9a8472',
+        thumbBg:    '#f4f0e6',
+        thumbLeft:  '2px',          /* thumb on LEFT = light mode = OFF */
+        /* --- accents / pills --- */
+        accent:     '#d4622a',
+        pillBg:     'rgba(212,98,42,0.1)',
+        pillText:   '#d4622a',
+        pillBorder: 'rgba(212,98,42,0.3)',
+        /* --- code tags --- */
+        tagBg:      'rgba(212,98,42,0.1)',
+        tagText:    '#d4622a',
+        /* --- dot --- */
+        dot:        '#d4622a',
+      },
+      dark: {
+        appBg:      '#0c0c18',      /* deep navy-black */
+        headerBg:   '#13131f',
+        cardBg:     '#16162a',
+        cardAltBg:  '#111120',
+        inputBg:    '#111120',
+        bannerBg:   'rgba(108,99,255,0.08)',
+        text:       '#eaeaf8',
+        muted:      '#8888aa',
+        border:     '#28284a',
+        borderLight:'#202038',
+        btnBg:      '#eaeaf8',
+        btnText:    '#0c0c18',
+        btnBorder:  '#eaeaf8',
+        trackBg:    '#6c63ff',
+        trackBorder:'#6c63ff',
+        thumbBg:    '#ffffff',
+        thumbLeft:  '22px',         /* thumb on RIGHT = dark mode = ON */
+        accent:     '#a89cff',
+        pillBg:     'rgba(108,99,255,0.14)',
+        pillText:   '#a89cff',
+        pillBorder: 'rgba(108,99,255,0.35)',
+        tagBg:      'rgba(108,99,255,0.14)',
+        tagText:    '#a89cff',
+        dot:        '#a89cff',
+      },
+    };
+
+    /* =============================================================
+       CHILD COMPONENT: ThemeToggle
+       A reusable component for the toggle button (Task 1).
+       
+       Receives PROPS from parent (App):
+         isDark   → boolean: current theme state
+         onToggle → function: what to do when clicked
+         theme    → object: current color values
+       
+       Props = data flow from PARENT to CHILD.
+       SYLLABUS → Unit V: Props, Pass data parent to child
+    ============================================================= */
+    function ThemeToggle({ isDark, onToggle, theme }) {
+      return (
+        /*
+          onClick={onToggle} — React event handler.
+          When clicked, it calls the onToggle function (which is
+          setIsDark(!isDark) defined in the parent App component).
+          SYLLABUS → Unit V: Events
+        */
+        <button
+          className="toggle-btn"
+          onClick={onToggle}
+          aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          style={{
+            backgroundColor: theme.btnBg,
+            color:           theme.btnText,
+            borderColor:     theme.btnBorder,
+          }}
+        >
+          {/* Switch track (the pill inside the button) */}
+          <span
+            className="switch-track"
+            style={{
+              backgroundColor: theme.trackBg,
+              borderColor:     theme.trackBorder,
+            }}
+          >
+            {/* Switch thumb — shifts left/right based on theme */}
+            <span
+              className="switch-thumb"
+              style={{
+                left:            theme.thumbLeft,
+                backgroundColor: theme.thumbBg,
+              }}
+            />
+          </span>
+
+          {/*
+            CONDITIONAL RENDERING in JSX:
+            {isDark ? 'value if true' : 'value if false'}
+            This is the ternary operator used inside JSX.
+            SYLLABUS → Unit II: Control Structures
+                        Unit V:  JSX, Conditional rendering
+          */}
+          {isDark ? '☀️ Switch to Light Mode' : '🌙 Switch to Dark Mode'}
+        </button>
+      );
+    }
+
+    /* =============================================================
+       CHILD COMPONENT: InfoCard
+       Demonstrates reusable components and props.
+       SYLLABUS → Unit V: React component, Props, Component composition
+    ============================================================= */
+    function InfoCard({ icon, title, body, theme }) {
+      return (
+        <div
+          className="card"
+          style={{
+            backgroundColor: theme.cardBg,
+            borderColor:     theme.border,
+            color:           theme.text,
+          }}
+        >
+          <span className="card-icon">{icon}</span>
+          <h3>{title}</h3>
+          <p>{body}</p>
+        </div>
+      );
+    }
+
+    /* =============================================================
+       ROOT COMPONENT: App
+       Contains ALL state and orchestrates the app.
+       
+       TASK 2 — useState() is defined here.
+       TASK 5 — useEffect() persists to localStorage.
+       TASK 3 — theme object drives all dynamic colors.
+       TASK 4 — theme displayed in hero + banner + pill.
+       SYLLABUS → Unit V: State, Component lifecycle, useState, useEffect
+    ============================================================= */
+    function App() {
+
+      /* -----------------------------------------------------------
+         TASK 2 + TASK 5: useState with localStorage persistence
+         
+         useState(initialValue) → [stateVariable, setterFunction]
+         
+         Initial value:
+           localStorage.getItem('labTheme') === 'dark'
+           → Returns true if user previously chose dark mode.
+           → Returns false (default: light) if nothing saved yet.
+         
+         This achieves Task 5: theme persists across page refreshes.
+         SYLLABUS → Unit V: useState hook, State
+      ----------------------------------------------------------- */
+      const [isDark, setIsDark] = useState(
+        () => localStorage.getItem('labTheme') === 'dark'
+        // Arrow function as initializer: only runs once on mount
+        // (lazy initialization — efficient for reading localStorage)
+      );
+
+      // Extra state variables to show re-render behavior:
+      const [toggleCount, setToggleCount] = useState(0);
+      const [clock, setClock] = useState(new Date().toLocaleTimeString());
+
+      /* -----------------------------------------------------------
+         TASK 5: useEffect — runs AFTER render when isDark changes.
+         
+         useEffect(callback, [dependencies])
+         
+         Every time isDark changes → saves new value to localStorage
+         AND updates the browser tab title.
+         
+         SYLLABUS → Unit V: Component lifecycle (componentDidUpdate)
+      ----------------------------------------------------------- */
+      useEffect(
+        function() {
+          // Save theme choice to localStorage (persists across refreshes)
+          localStorage.setItem('labTheme', isDark ? 'dark' : 'light');
+          // Update browser tab title dynamically
+          document.title = isDark
+            ? '🌙 Dark Mode — Lab 28'
+            : '☀️ Light Mode — Lab 28';
+        },
+        [isDark]   // dependency array: only re-run when isDark changes
+      );
+
+      // Live clock — updates every second (shows useEffect with cleanup)
+      useEffect(
+        function() {
+          // setInterval: runs every 1000ms
+          const timer = setInterval(
+            () => setClock(new Date().toLocaleTimeString()),
+            1000
+          );
+          // Cleanup: clear interval when component unmounts (prevents memory leak)
+          return () => clearInterval(timer);
+        },
+        []         // [] = runs ONCE after first render (like componentDidMount)
+      );
+
+      /* -----------------------------------------------------------
+         TASK 3: Dynamic Colors
+         Pick the right theme object based on isDark boolean.
+         ALL style={{ }} props below read from this object.
+      ----------------------------------------------------------- */
+      const theme = isDark ? THEMES.dark : THEMES.light;
+
+      /* -----------------------------------------------------------
+         Toggle handler — called when button is clicked.
+         setIsDark(prev => !prev) flips the boolean.
+         React automatically re-renders the component with new state.
+         SYLLABUS → Unit V: Events, State
+      ----------------------------------------------------------- */
+      function handleToggle() {
+        setIsDark(prev => !prev);
+        setToggleCount(c => c + 1);
+      }
+
+      /* -----------------------------------------------------------
+         JSX RETURN
+         The component's rendered HTML output.
+         JSX looks like HTML but is actually JavaScript.
+         Babel converts <div className="x"> to React.createElement().
+         SYLLABUS → Unit V: JSX, Render function
+      ----------------------------------------------------------- */
+      return (
+        /* TASK 3: .app div gets background + text color from theme */
+        <div
+          className="app"
+          style={{ backgroundColor: theme.appBg, color: theme.text }}
+        >
+
+          {/* ====== HEADER ====== */}
+          <header
+            className="header"
+            style={{
+              backgroundColor: theme.headerBg,
+              borderColor:     theme.border,
+            }}
+          >
+            <div
+              className="header-brand"
+              style={{ color: theme.text }}
+            >
+              {/* Conditional icon + title */}
+              {isDark ? '🌙' : '☀️'} React Theme Switcher
+            </div>
+            <span
+              className="lab-badge"
+              style={{ borderColor: theme.border, color: theme.muted }}
+            >
+              Lab 28 · useState Hook
+            </span>
+          </header>
+
+          {/* ====== MAIN ====== */}
+          <main className="main">
+
+            {/* ─── HERO ─── */}
+            <section className="hero">
+              {/* Large animated icon changes with theme */}
+              <span className="hero-icon">
+                {isDark ? '🌕' : '🌞'}
+              </span>
+
+              {/* TASK 4: Display current theme mode */}
+              <h2 style={{ color: theme.text }}>
+                Currently in{' '}
+                <em style={{ color: theme.accent, fontStyle: 'normal' }}>
+                  {isDark ? 'Dark' : 'Light'} Mode
+                </em>
+              </h2>
+
+              <p style={{ color: theme.muted }}>
+                React's <code>useState()</code> hook stores the theme. Clicking
+                the button calls <code>setIsDark()</code> — React re-renders
+                everything instantly with the new colors.
+              </p>
+
+              {/* TASK 1: Toggle button — child component with props */}
+              <ThemeToggle
+                isDark={isDark}
+                onToggle={handleToggle}
+                theme={theme}
+              />
+            </section>
+
+            {/* TASK 4: THEME STATUS BANNER */}
+            <div
+              className="theme-banner"
+              style={{
+                backgroundColor: theme.bannerBg,
+                borderColor:     theme.border,
+              }}
+            >
+              <div
+                className="theme-dot"
+                style={{ backgroundColor: theme.dot }}
+              />
+              <div className="theme-banner-text">
+                <strong style={{ color: theme.text }}>
+                  Active Theme: {isDark ? 'Dark Mode 🌙' : 'Light Mode ☀️'}
+                </strong>
+                <span style={{ color: theme.muted }}>
+                  Saved in localStorage — survives page refresh (Task 5)
+                </span>
+              </div>
+              <span
+                className="theme-pill"
+                style={{
+                  backgroundColor: theme.pillBg,
+                  color:           theme.pillText,
+                  borderColor:     theme.pillBorder,
+                }}
+              >
+                {isDark ? 'DARK' : 'LIGHT'}
+              </span>
+            </div>
+
+            {/* REACT STATE INSPECTOR CARD */}
+            <div
+              className="card"
+              style={{
+                backgroundColor: theme.cardAltBg,
+                borderColor:     theme.border,
+                color:           theme.text,
+              }}
+            >
+              <span className="card-icon">⚛️</span>
+              <h3>React State Inspector</h3>
+              <p style={{ marginBottom: '12px' }}>
+                These are the live useState() values. They update every time
+                you click the toggle button.
+              </p>
+
+              {/* TABLE showing state variables — HTML table element */}
+              <table
+                className="state-table"
+                style={{ color: theme.text }}
+              >
+                <thead>
+                  <tr>
+                    {/* <th> = table header cells */}
+                    <th style={{ borderColor: theme.border }}>Variable</th>
+                    <th style={{ borderColor: theme.border }}>Hook Used</th>
+                    <th style={{ borderColor: theme.border }}>Live Value</th>
+                    <th style={{ borderColor: theme.border }}>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* isDark row — TASK 2 state variable */}
+                  <tr>
+                    <td style={{ borderColor: theme.borderLight }}>isDark</td>
+                    <td style={{ borderColor: theme.borderLight }}>useState(false)</td>
+                    <td style={{ borderColor: theme.borderLight }}>
+                      <span className="code-tag" style={{ backgroundColor: theme.tagBg, color: theme.tagText }}>
+                        {String(isDark)}
+                      </span>
+                    </td>
+                    <td style={{ borderColor: theme.borderLight }}>Boolean</td>
+                  </tr>
+                  {/* toggleCount row */}
+                  <tr>
+                    <td style={{ borderColor: theme.borderLight }}>toggleCount</td>
+                    <td style={{ borderColor: theme.borderLight }}>useState(0)</td>
+                    <td style={{ borderColor: theme.borderLight }}>
+                      <span className="code-tag" style={{ backgroundColor: theme.tagBg, color: theme.tagText }}>
+                        {toggleCount}
+                      </span>
+                    </td>
+                    <td style={{ borderColor: theme.borderLight }}>Number</td>
+                  </tr>
+                  {/* clock row — useEffect */}
+                  <tr>
+                    <td style={{ borderColor: theme.borderLight }}>clock</td>
+                    <td style={{ borderColor: theme.borderLight }}>useState + useEffect</td>
+                    <td style={{ borderColor: theme.borderLight }}>
+                      <span className="code-tag" style={{ backgroundColor: theme.tagBg, color: theme.tagText }}>
+                        {clock}
+                      </span>
+                    </td>
+                    <td style={{ borderColor: theme.borderLight }}>String</td>
+                  </tr>
+                  {/* localStorage row — Task 5 */}
+                  <tr>
+                    <td>localStorage key</td>
+                    <td>useEffect([isDark])</td>
+                    <td>
+                      <span className="code-tag" style={{ backgroundColor: theme.tagBg, color: theme.tagText }}>
+                        "{isDark ? 'dark' : 'light'}"
+                      </span>
+                    </td>
+                    <td>String (persisted)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* INFO CARDS GRID — reusable InfoCard child components */}
+            <div className="grid-2">
+              <InfoCard
+                icon="🔁"
+                title="useState() — Task 2"
+                body={`useState(false) initialises isDark as false (Light). setIsDark(!isDark) flips it. Re-render count: ${toggleCount + 1}. Each setState triggers a full re-render.`}
+                theme={theme}
+              />
+              <InfoCard
+                icon="🎨"
+                title="Dynamic Colors — Task 3"
+                body="All colors come from a THEMES object. React reads theme.bg, theme.text etc. and applies them as inline style={{ }}. No class swapping — pure React."
+                theme={theme}
+              />
+              <InfoCard
+                icon="📢"
+                title="Theme Display — Task 4"
+                body={`The hero heading, banner, and pill all display "${isDark ? 'Dark Mode' : 'Light Mode'}". Conditional rendering {isDark ? A : B} updates them automatically.`}
+                theme={theme}
+              />
+              <InfoCard
+                icon="💾"
+                title="Persistence — Task 5"
+                body="useEffect() writes to localStorage on every isDark change. useState's initialiser reads it back on page load. Refresh the page — your theme stays!"
+                theme={theme}
+              />
+            </div>
+
+            {/* SAMPLE FORM — shows theme applied to form controls */}
+            <div
+              className="card"
+              style={{
+                backgroundColor: theme.cardBg,
+                borderColor:     theme.border,
+                color:           theme.text,
+              }}
+            >
+              <span className="card-icon">📝</span>
+              <h3 style={{ marginBottom: '16px' }}>
+                Sample Form — All Controls Follow the Theme
+              </h3>
+              <div className="field">
+                <label style={{ color: theme.muted }}>Full Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Rahul Sharma"
+                  style={{
+                    backgroundColor: theme.inputBg,
+                    borderColor:     theme.border,
+                    color:           theme.text,
+                  }}
+                />
+              </div>
+              <div className="field">
+                <label style={{ color: theme.muted }}>Email Address</label>
+                <input
+                  type="email"
+                  placeholder="e.g. rahul@college.edu"
+                  style={{
+                    backgroundColor: theme.inputBg,
+                    borderColor:     theme.border,
+                    color:           theme.text,
+                  }}
+                />
+              </div>
+              <div className="field">
+                <label style={{ color: theme.muted }}>Department</label>
+                <select
+                  style={{
+                    backgroundColor: theme.inputBg,
+                    borderColor:     theme.border,
+                    color:           theme.text,
+                  }}
+                >
+                  <option>Computer Science</option>
+                  <option>Information Technology</option>
+                  <option>Electronics</option>
+                </select>
+              </div>
+            </div>
+
+          </main>
+
+          {/* FOOTER */}
+          <footer
+            className="footer"
+            style={{ borderColor: theme.border, color: theme.muted }}
+          >
+            Lab 28 · React useState Dark Mode Toggle · Web Technology
+          </footer>
+
+        </div>
+      ); // end return
+    } // end App component
+
+    /* =============================================================
+       RENDER — Mount React App into the DOM
+       
+       ReactDOM.createRoot(element) — creates a React 18 root.
+       .render(<App />) — renders App component into #root div.
+       
+       React builds a Virtual DOM tree from the JSX, diffs it with
+       the real DOM, and only updates what changed (reconciliation).
+       SYLLABUS → Unit V: Render function, React component
+    ============================================================= */
+    const rootEl = document.getElementById('root');
+    const root   = ReactDOM.createRoot(rootEl);
+    root.render(<App />);
+
+  </script>
+</body>
+</html>

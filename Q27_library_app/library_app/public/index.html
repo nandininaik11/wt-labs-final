@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<!--
+  public/index.html — Library Management System Frontend
+  WT Syllabus:
+    Unit I  — HTML5 structure, forms, tables
+    Unit I  — CSS (variables, flexbox, grid, animations)
+    Unit II — JavaScript, DOM, Fetch API, form validation
+    Unit VI — Consuming a Node.js REST API from the browser
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- viewport: makes page mobile responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Library Management System</title>
+
+    <!-- Google Fonts (external CSS resource) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ══════════════════════════════════════════════════
+           CSS — WT Unit I: CSS3 Modern Features
+           ══════════════════════════════════════════════════ */
+
+        /* CSS Custom Properties (Variables) — define once, reuse anywhere */
+        :root {
+            --primary:    #4f46e5;   /* indigo */
+            --primary-d:  #3730a3;   /* darker indigo */
+            --success:    #059669;   /* green */
+            --danger:     #dc2626;   /* red */
+            --warning:    #d97706;   /* amber */
+            --bg:         #f8fafc;
+            --card:       #ffffff;
+            --border:     #e2e8f0;
+            --text:       #0f172a;
+            --muted:      #64748b;
+            --radius:     12px;
+            --shadow:     0 4px 24px rgba(79,70,229,0.08);
+        }
+
+        /* Box-sizing reset — padding doesn't add to element width */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Navigation (Flexbox layout) ── */
+        /* Flexbox: display:flex puts items in a row */
+        nav {
+            background: linear-gradient(135deg, var(--primary-d), var(--primary));
+            color: white;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;               /* flex container */
+            align-items: center;         /* vertically center children */
+            justify-content: space-between; /* logo left, links right */
+            position: sticky; top: 0;   /* stick to top on scroll */
+            z-index: 100;
+            box-shadow: 0 2px 16px rgba(79,70,229,0.3);
+        }
+        .brand { font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: background 0.2s; /* smooth hover */
+        }
+        .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.28); }
+
+        /* ── Container ── */
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
+
+        /* ── Stats Grid (CSS Grid) ── */
+        /* CSS Grid: display:grid arranges items in rows AND columns */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            /* auto-fit: as many columns as fit; minmax: min 200px, max 1fr */
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon { font-size: 2.2rem; }
+        .stat-num  { font-size: 2rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .stat-lbl  { font-size: 0.83rem; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+        /* ── Section Tabs ── */
+        .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--card); padding: 6px; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); width: fit-content; }
+        .tab { padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.92rem; font-weight: 600; color: var(--muted); background: transparent; transition: all 0.2s; }
+        .tab.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(79,70,229,0.4); }
+
+        /* ── Card ── */
+        .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; border: 1px solid var(--border); margin-bottom: 24px; }
+        .card-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+        /* ── Form ── */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 0; }
+        .form-group.full { grid-column: 1 / -1; } /* span both columns */
+        label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        input, select {
+            width: 100%; padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px; font-size: 0.97rem;
+            font-family: inherit; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff; color: var(--text);
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+        }
+        input.error { border-color: var(--danger); }
+
+        /* ── Buttons ── */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 11px 24px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: inherit; text-decoration: none; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-d); box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
+        .btn-danger  { background: var(--danger);  color: #fff; }
+        .btn-danger:hover  { background: #b91c1c; }
+        .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+
+        /* ── Alert / Toast ── */
+        .toast { position: fixed; top: 80px; right: 20px; z-index: 999; padding: 14px 20px; border-radius: 10px; font-weight: 600; font-size: 0.92rem; max-width: 340px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; transform: translateX(400px); transition: transform 0.3s ease; }
+        .toast.show { transform: translateX(0); } /* CSS transition on class add */
+        .toast-success { background: #d1fae5; color: #065f46; border-left: 4px solid var(--success); }
+        .toast-error   { background: #fee2e2; color: #991b1b; border-left: 4px solid var(--danger); }
+
+        /* ── Search Bar ── */
+        .search-bar { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+        .search-bar input { flex: 1; min-width: 200px; }
+        .search-bar select { width: 160px; }
+
+        /* ── Books Table ── */
+        .table-wrap { overflow-x: auto; } /* horizontal scroll on small screens */
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f1f5f9; padding: 12px 16px; text-align: left; font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.93rem; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:hover { background: #f8fafc; }
+
+        /* ── Genre Badge ── */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 0.76rem; font-weight: 700; }
+        .badge-Fiction      { background: #dbeafe; color: #1d4ed8; }
+        .badge-Technology   { background: #d1fae5; color: #065f46; }
+        .badge-Science      { background: #fce7f3; color: #9d174d; }
+        .badge-History      { background: #fef3c7; color: #92400e; }
+        .badge-Dystopian    { background: #ede9fe; color: #4c1d95; }
+        .badge-Classic      { background: #fef9c3; color: #713f12; }
+        .badge-Biography    { background: #e0f2fe; color: #075985; }
+        .badge-General      { background: #f1f5f9; color: #475569; }
+
+        /* ── Loading Spinner ── */
+        /* CSS animation: @keyframes defines animation steps */
+        .spinner { display: inline-block; width: 36px; height: 36px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading { text-align: center; padding: 60px; color: var(--muted); }
+
+        /* ── Empty State ── */
+        .empty { text-align: center; padding: 60px; color: var(--muted); }
+        .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+        /* ── Book Count ── */
+        .result-info { font-size: 0.85rem; color: var(--muted); margin-bottom: 14px; font-weight: 500; }
+
+        /* ── Section Visibility ── */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Fade-in animation for sections */
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        .section.active { animation: fadeIn 0.25s ease; }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            nav { padding: 0 14px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: 1; }
+            .container { padding: 16px; }
+            .brand span:last-child { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav>
+    <div class="brand">
+        <span>📚</span>
+        <span>Library Management System</span>
+    </div>
+    <div class="nav-links">
+        <button class="nav-btn active" onclick="showSection('books')">📖 Books</button>
+        <button class="nav-btn" onclick="showSection('add')">➕ Add Book</button>
+        <button class="nav-btn" onclick="showSection('stats')">📊 Dashboard</button>
+    </div>
+</nav>
+
+<!-- ── Toast Notification ── -->
+<!-- Shows success/error messages briefly in corner -->
+<div class="toast" id="toast"></div>
+
+<div class="container">
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 1: View All Books
+         ══════════════════════════════════════════════ -->
+    <section class="section active" id="section-books">
+
+        <!-- Search & Filter Bar -->
+        <div class="search-bar">
+            <!-- oninput: fires as user types (real-time search) -->
+            <input type="text" id="searchInput" placeholder="🔍  Search by title or author..."
+                   oninput="handleSearch()">
+            <select id="genreFilter" onchange="handleSearch()">
+                <option value="">All Genres</option>
+                <option>Fiction</option>
+                <option>Technology</option>
+                <option>Science</option>
+                <option>History</option>
+                <option>Dystopian</option>
+                <option>Classic</option>
+                <option>Biography</option>
+                <option>General</option>
+            </select>
+            <button class="btn btn-primary" onclick="loadBooks()">🔄 Refresh</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📖 Book Collection</div>
+            <!-- Result count text (updated by JS) -->
+            <div class="result-info" id="resultInfo"></div>
+            <div class="table-wrap">
+                <!-- Table populated dynamically by JavaScript -->
+                <table id="booksTable">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Year</th>
+                            <th>Genre</th>
+                            <th>Copies</th>
+                            <th>Added On</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <!-- tbody is filled by JavaScript insertAdjacentHTML() -->
+                    <tbody id="booksBody">
+                        <tr><td colspan="8">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p style="margin-top:12px">Loading books...</p>
+                            </div>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 2: Add New Book
+         ══════════════════════════════════════════════ -->
+    <section class="section" id="section-add">
+        <div class="card" style="max-width:640px">
+            <div class="card-title">➕ Add New Book</div>
+
+            <!-- Form: no action/method because JS handles submission (Fetch API) -->
+            <form id="addBookForm" onsubmit="submitBook(event)">
+                <div class="form-grid">
+                    <!-- Book Title -->
+                    <div class="form-group full"> <!-- full = span 2 columns -->
+                        <label for="title">Book Title *</label>
+                        <input type="text" id="title" name="title"
+                               placeholder="e.g. The Great Gatsby" required>
+                    </div>
+                    <!-- Author -->
+                    <div class="form-group full">
+                        <label for="author">Author Name *</label>
+                        <input type="text" id="author" name="author"
+                               placeholder="e.g. F. Scott Fitzgerald" required>
+                    </div>
+                    <!-- Year + Genre side by side -->
+                    <div class="form-group">
+                        <label for="year">Publication Year *</label>
+                        <input type="number" id="year" name="year"
+                               placeholder="e.g. 1925" min="1000" max="2025" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="genre">Genre</label>
+                        <select id="genre" name="genre">
+                            <option value="General">General</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Science">Science</option>
+                            <option value="History">History</option>
+                            <option value="Dystopian">Dystopian</option>
+                            <option value="Classic">Classic</option>
+                            <option value="Biography">Biography</option>
+                        </select>
+                    </div>
+                    <!-- Copies -->
+                    <div class="form-group">
+                        <label for="copies">Number of Copies</label>
+                        <input type="number" id="copies" name="copies"
+                               value="1" min="1" max="100">
+                    </div>
+                </div>
+
+                <!-- Error message placeholder -->
+                <div id="formError" style="color:var(--danger);font-size:0.88rem;margin-top:12px;font-weight:600;display:none"></div>
+
+                <div style="margin-top:20px;display:flex;gap:12px">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        📚 Add Book
+                    </button>
+                    <button type="button" class="btn" style="background:#e2e8f0;color:#334155"
+                            onclick="resetForm()">
+                        Clear
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- API Info box (helps understand what's happening) -->
+        <div class="card" style="max-width:640px;background:#1e1e2e;color:#cdd6f4">
+            <div style="font-size:0.85rem;font-family:monospace;line-height:1.8">
+                <div style="color:#89dceb;font-weight:700;margin-bottom:10px">// API Endpoint used by this form:</div>
+                <div><span style="color:#f38ba8">POST</span> <span style="color:#a6e3a1">http://localhost:3000/api/books</span></div>
+                <div style="color:#6c7086;margin-top:8px">// Request Body (JSON):</div>
+                <div style="color:#fab387">{ "title": "...", "author": "...", "year": 2024, "genre": "...", "copies": 1 }</div>
+                <div style="color:#6c7086;margin-top:8px">// Response (201 Created):</div>
+                <div style="color:#a6e3a1">{ "success": true, "message": "Book added!", "book": { ... } }</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 3: Dashboard / Stats
+         ══════════════════════════════════════════════ -->
+    <section class="section" id="section-stats">
+
+        <!-- Stats Cards (loaded by JS) -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Genre breakdown -->
+        <div class="card">
+            <div class="card-title">📊 Books by Genre</div>
+            <div id="genreChart"></div>
+        </div>
+
+        <!-- Recently Added -->
+        <div class="card">
+            <div class="card-title">🆕 Recently Added Books</div>
+            <div id="recentBooks"></div>
+        </div>
+
+        <!-- API Endpoints reference -->
+        <div class="card" style="background:#1e1e2e;color:#cdd6f4">
+            <div class="card-title" style="color:#89dceb">🔌 REST API Endpoints</div>
+            <div style="font-family:monospace;font-size:0.85rem;line-height:2.2">
+                <div><span style="color:#89b4fa">GET</span>    <span style="color:#a6e3a1">/api/books</span>         <span style="color:#6c7086">— Get all books</span></div>
+                <div><span style="color:#89b4fa">GET</span>    <span style="color:#a6e3a1">/api/books?search=orwell</span> <span style="color:#6c7086">— Search books</span></div>
+                <div><span style="color:#89b4fa">GET</span>    <span style="color:#a6e3a1">/api/books/:id</span>     <span style="color:#6c7086">— Get one book</span></div>
+                <div><span style="color:#f38ba8">POST</span>   <span style="color:#a6e3a1">/api/books</span>         <span style="color:#6c7086">— Add new book</span></div>
+                <div><span style="color:#fab387">DELETE</span> <span style="color:#a6e3a1">/api/books/:id</span>     <span style="color:#6c7086">— Delete a book</span></div>
+                <div><span style="color:#89b4fa">GET</span>    <span style="color:#a6e3a1">/api/stats</span>         <span style="color:#6c7086">— Dashboard stats</span></div>
+            </div>
+        </div>
+    </section>
+
+</div><!-- /.container -->
+
+<!-- ══════════════════════════════════════════════════
+     JavaScript — WT Unit II: DOM, Fetch API, Events
+     All logic for: calling API, rendering data, validation
+     ══════════════════════════════════════════════════ -->
+<script>
+// ── BASE URL of our Node.js API ──
+// All fetch() calls use this prefix
+const API = 'http://localhost:3000/api';
+
+// ── Debounce timer for search (avoids API call on every keystroke) ──
+let searchTimer = null;
+
+// ============================================================
+// SECTION NAVIGATION
+// Shows/hides sections by toggling CSS classes
+// ============================================================
+function showSection(name) {
+    // document.querySelectorAll() returns ALL matching elements as NodeList
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    // document.getElementById() gets a single element by its id attribute
+    document.getElementById('section-' + name).classList.add('active');
+
+    // event.target — the button that was clicked
+    // Instead, find the button by index (books=0, add=1, stats=2)
+    const idx = { books: 0, add: 1, stats: 2 }[name];
+    document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+
+    // Load data when section becomes visible
+    if (name === 'books') loadBooks();
+    if (name === 'stats') loadStats();
+}
+
+// ============================================================
+// FETCH API — calls the Node.js REST API
+// fetch() is built into modern browsers
+// It returns a Promise (async operation)
+// async/await syntax makes it look synchronous but it isn't
+// ============================================================
+
+// ── Load & Display All Books ──
+async function loadBooks() {
+    const search = document.getElementById('searchInput').value;
+    const genre  = document.getElementById('genreFilter').value;
+
+    // Build query string for filtering
+    // URLSearchParams automatically encodes special characters
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (genre)  params.append('genre', genre);
+
+    const url = `${API}/books${params.toString() ? '?' + params : ''}`;
+
+    // Show loading state in table body
+    document.getElementById('booksBody').innerHTML = `
+        <tr><td colspan="8">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top:12px;color:var(--muted)">Loading...</p>
+            </div>
+        </td></tr>`;
+
+    try {
+        // fetch(url) — sends HTTP GET request to the URL
+        const response = await fetch(url);
+        // response.json() — parses the JSON response body
+        const data = await response.json();
+
+        if (data.success) {
+            renderBooks(data.books);
+            document.getElementById('resultInfo').textContent =
+                `Showing ${data.count} book${data.count !== 1 ? 's' : ''}` +
+                (search ? ` for "${search}"` : '') +
+                (genre  ? ` in ${genre}`     : '');
+        }
+    } catch (err) {
+        // catch block: runs if fetch fails (server down, network error)
+        document.getElementById('booksBody').innerHTML = `
+            <tr><td colspan="8">
+                <div class="empty">
+                    <div class="empty-icon">⚠️</div>
+                    <p>Cannot connect to server. Make sure Node.js is running.</p>
+                    <p style="margin-top:8px;font-size:0.85rem;color:var(--muted)">Run: <code>node server.js</code></p>
+                </div>
+            </td></tr>`;
+    }
+}
+
+// ── Render Books into Table ──
+function renderBooks(books) {
+    const tbody = document.getElementById('booksBody');
+
+    if (books.length === 0) {
+        // Template literal: backtick strings allow embedded expressions ${...}
+        tbody.innerHTML = `
+            <tr><td colspan="8">
+                <div class="empty">
+                    <div class="empty-icon">📭</div>
+                    <p>No books found.</p>
+                </div>
+            </td></tr>`;
+        return;
+    }
+
+    // Array.map() transforms each book object into an HTML string
+    // Then join('') combines all strings into one big string
+    tbody.innerHTML = books.map(book => {
+        // Format date from ISO string to readable format
+        const date = new Date(book.added_at).toLocaleDateString('en-IN', {
+            day: '2-digit', month: 'short', year: 'numeric'
+        });
+
+        // Get badge class (fallback to 'General' if genre not in our list)
+        const badgeClass = `badge-${book.genre}` in document.styleSheets[0]
+            ? `badge-${book.genre}` : 'badge-General';
+
+        // Return one <tr> (table row) per book
+        return `
+        <tr>
+            <td style="color:var(--muted);font-family:monospace">#${book.book_id}</td>
+            <td><strong>${escHtml(book.title)}</strong></td>
+            <td>${escHtml(book.author)}</td>
+            <td>${book.year}</td>
+            <td><span class="badge badge-${escHtml(book.genre)}">${escHtml(book.genre)}</span></td>
+            <td style="text-align:center">${book.copies}</td>
+            <td style="color:var(--muted);font-size:0.85rem">${date}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="deleteBook(${book.book_id}, '${escHtml(book.title)}')">
+                    🗑️ Delete
+                </button>
+            </td>
+        </tr>`;
+    }).join(''); // join array of strings into one string
+}
+
+// ── Delete a Book ──
+async function deleteBook(id, title) {
+    // confirm() shows browser dialog — returns true if user clicks OK
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+
+    try {
+        // HTTP DELETE request — note method: 'DELETE'
+        const response = await fetch(`${API}/books/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('✅ ' + data.message, 'success');
+            loadBooks(); // reload table
+        } else {
+            showToast('❌ ' + data.message, 'error');
+        }
+    } catch (err) {
+        showToast('❌ Server error: ' + err.message, 'error');
+    }
+}
+
+// ── Submit Add Book Form ──
+async function submitBook(event) {
+    // preventDefault() stops browser's default form submit (which reloads page)
+    event.preventDefault();
+
+    // Clear previous errors
+    document.getElementById('formError').style.display = 'none';
+    document.querySelectorAll('input.error').forEach(el => el.classList.remove('error'));
+
+    // ── Client-side Validation ──
+    const title  = document.getElementById('title').value.trim();
+    const author = document.getElementById('author').value.trim();
+    const year   = parseInt(document.getElementById('year').value);
+    const genre  = document.getElementById('genre').value;
+    const copies = parseInt(document.getElementById('copies').value) || 1;
+
+    let errorMsg = '';
+    if (!title)                        errorMsg = 'Book title is required.';
+    else if (title.length < 2)         errorMsg = 'Title must be at least 2 characters.';
+    else if (!author)                  errorMsg = 'Author name is required.';
+    else if (isNaN(year))              errorMsg = 'Publication year is required.';
+    else if (year < 1000 || year > new Date().getFullYear())
+                                       errorMsg = `Year must be between 1000 and ${new Date().getFullYear()}.`;
+
+    if (errorMsg) {
+        const errEl = document.getElementById('formError');
+        errEl.textContent = '⚠️ ' + errorMsg;
+        errEl.style.display = 'block'; // show error div
+        return; // stop execution
+    }
+
+    // Disable button while sending (prevent double submit)
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Adding...';
+
+    try {
+        // POST request with JSON body
+        const response = await fetch(`${API}/books`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' }, // tell server we're sending JSON
+            body:    JSON.stringify({ title, author, year, genre, copies })
+            // JSON.stringify() converts JS object → JSON string
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('✅ ' + data.message, 'success');
+            resetForm();
+            showSection('books'); // switch to books tab to see new book
+        } else {
+            showToast('❌ ' + data.message, 'error');
+        }
+    } catch (err) {
+        showToast('❌ Cannot reach server. Is Node.js running?', 'error');
+    } finally {
+        // finally block: always runs (success or error)
+        btn.disabled = false;
+        btn.textContent = '📚 Add Book';
+    }
+}
+
+// ── Load Dashboard Stats ──
+async function loadStats() {
+    document.getElementById('statsGrid').innerHTML =
+        '<div class="stat-card"><div class="spinner"></div></div>'.repeat(3);
+
+    try {
+        const response = await fetch(`${API}/stats`);
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        // Render stat cards
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div><div class="stat-num">${data.totalTitles}</div><div class="stat-lbl">Total Titles</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div><div class="stat-num">${data.totalCopies}</div><div class="stat-lbl">Total Copies</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏷️</div>
+                <div><div class="stat-num">${data.byGenre.length}</div><div class="stat-lbl">Genres</div></div>
+            </div>
+        `;
+
+        // Render genre chart (simple CSS bar chart — no library needed!)
+        const maxCount = Math.max(...data.byGenre.map(g => g.count)); // spread operator
+        document.getElementById('genreChart').innerHTML = data.byGenre.map(g => {
+            const pct = Math.round((g.count / maxCount) * 100);
+            return `
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                <div style="width:110px;font-size:0.85rem;font-weight:600;color:var(--muted);text-align:right">${g.genre}</div>
+                <div style="flex:1;background:#e2e8f0;border-radius:99px;height:20px;overflow:hidden">
+                    <div style="width:${pct}%;background:var(--primary);height:100%;border-radius:99px;transition:width 0.8s ease;display:flex;align-items:center;padding-left:8px">
+                        <span style="color:#fff;font-size:0.72rem;font-weight:700">${g.count}</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Render recently added books
+        document.getElementById('recentBooks').innerHTML = data.recentlyAdded.map(book => `
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);align-items:center">
+                <div>
+                    <strong>${escHtml(book.title)}</strong>
+                    <div style="font-size:0.83rem;color:var(--muted)">${escHtml(book.author)} · ${book.year}</div>
+                </div>
+                <span class="badge badge-${escHtml(book.genre)}">${escHtml(book.genre)}</span>
+            </div>
+        `).join('');
+
+    } catch (err) {
+        document.getElementById('statsGrid').innerHTML =
+            '<div class="stat-card" style="color:var(--danger)">⚠️ Server not reachable</div>';
+    }
+}
+
+// ── Search handler with debounce ──
+// Debounce: wait 400ms after user stops typing before calling API
+// Prevents too many API calls while user is still typing
+function handleSearch() {
+    clearTimeout(searchTimer);                        // cancel previous timer
+    searchTimer = setTimeout(() => loadBooks(), 400); // set new 400ms timer
+}
+
+// ── Toast Notification ──
+// Shows a brief pop-up message in the corner
+function showToast(msg, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = `toast toast-${type} show`; // add 'show' class → CSS slides in
+
+    // After 3 seconds, remove 'show' class → CSS slides out
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ── Reset form fields ──
+function resetForm() {
+    document.getElementById('addBookForm').reset(); // HTML form reset method
+    document.getElementById('formError').style.display = 'none';
+}
+
+// ── Escape HTML to prevent XSS ──
+// If book title contains <script>, this converts it to safe text
+function escHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+// ── Load books when page first loads ──
+// This runs immediately when the script executes
+loadBooks();
+</script>
+</body>
+</html>

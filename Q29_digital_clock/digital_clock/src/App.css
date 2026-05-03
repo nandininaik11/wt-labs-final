@@ -1,0 +1,75 @@
+/* ============================================================
+   src/App.css — App Wrapper & Background Animation
+   WT Syllabus Unit I: CSS Animations, Keyframes, Variables
+   ============================================================ */
+
+/* CSS Custom Properties (Variables) */
+:root {
+  --neon-blue:   #00d4ff;
+  --neon-purple: #7c3aed;
+  --neon-green:  #10b981;
+  --neon-red:    #ef4444;
+  --dark-bg:     #0a0a1a;
+  --card-bg:     rgba(255, 255, 255, 0.03);
+  --border:      rgba(255, 255, 255, 0.08);
+  --text-dim:    rgba(255, 255, 255, 0.5);
+}
+
+/* Full-page wrapper — position:relative needed for absolute children */
+.app-wrapper {
+  width: 100vw;         /* 100% of viewport width */
+  min-height: 100vh;    /* 100% of viewport height */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0f0f2e 0%, #0a0a1a 100%);
+}
+
+/* ── Floating background dots (CSS animation) ── */
+.bg-animation {
+  position: absolute; /* take out of normal flow */
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; /* clicks pass through this element */
+  overflow: hidden;
+}
+
+/* Each dot: random sizes/positions set by nth-child */
+.dot {
+  position: absolute;
+  border-radius: 50%;   /* circle */
+  background: rgba(0, 212, 255, 0.06);
+  animation: floatDot linear infinite;
+}
+
+/* CSS :nth-child() — style every nth element differently */
+/* Creates 20 unique dots with different sizes, positions, speeds */
+.dot:nth-child(1)  { width:80px;  height:80px;  left:10%; animation-duration:25s; animation-delay:0s;    top:20%; }
+.dot:nth-child(2)  { width:30px;  height:30px;  left:20%; animation-duration:18s; animation-delay:-3s;   top:80%; background:rgba(124,58,237,0.08); }
+.dot:nth-child(3)  { width:60px;  height:60px;  left:70%; animation-duration:22s; animation-delay:-6s;   top:10%; }
+.dot:nth-child(4)  { width:20px;  height:20px;  left:80%; animation-duration:15s; animation-delay:-9s;   top:60%; background:rgba(16,185,129,0.08); }
+.dot:nth-child(5)  { width:100px; height:100px; left:50%; animation-duration:30s; animation-delay:-12s;  top:50%; background:rgba(124,58,237,0.05); }
+.dot:nth-child(6)  { width:45px;  height:45px;  left:30%; animation-duration:20s; animation-delay:-1s;   top:30%; }
+.dot:nth-child(7)  { width:25px;  height:25px;  left:90%; animation-duration:16s; animation-delay:-4s;   top:70%; background:rgba(239,68,68,0.06); }
+.dot:nth-child(8)  { width:70px;  height:70px;  left:5%;  animation-duration:28s; animation-delay:-7s;   top:55%; }
+.dot:nth-child(9)  { width:35px;  height:35px;  left:60%; animation-duration:19s; animation-delay:-10s;  top:85%; background:rgba(124,58,237,0.07); }
+.dot:nth-child(10) { width:50px;  height:50px;  left:40%; animation-duration:24s; animation-delay:-13s;  top:5%;  }
+.dot:nth-child(11) { width:15px;  height:15px;  left:15%; animation-duration:14s; animation-delay:-2s;   top:45%; background:rgba(16,185,129,0.09); }
+.dot:nth-child(12) { width:90px;  height:90px;  left:75%; animation-duration:32s; animation-delay:-5s;   top:35%; background:rgba(0,212,255,0.04); }
+.dot:nth-child(13) { width:22px;  height:22px;  left:55%; animation-duration:17s; animation-delay:-8s;   top:65%; }
+.dot:nth-child(14) { width:58px;  height:58px;  left:25%; animation-duration:21s; animation-delay:-11s;  top:90%; background:rgba(239,68,68,0.05); }
+.dot:nth-child(15) { width:38px;  height:38px;  left:85%; animation-duration:26s; animation-delay:-14s;  top:25%; }
+.dot:nth-child(16) { width:12px;  height:12px;  left:45%; animation-duration:13s; animation-delay:-3.5s; top:15%; background:rgba(124,58,237,0.1); }
+.dot:nth-child(17) { width:75px;  height:75px;  left:65%; animation-duration:29s; animation-delay:-6.5s; top:75%; }
+.dot:nth-child(18) { width:28px;  height:28px;  left:35%; animation-duration:16s; animation-delay:-9.5s; top:40%; background:rgba(16,185,129,0.07); }
+.dot:nth-child(19) { width:42px;  height:42px;  left:8%;  animation-duration:23s; animation-delay:-12.5s;top:60%; }
+.dot:nth-child(20) { width:18px;  height:18px;  left:92%; animation-duration:11s; animation-delay:-0.5s; top:10%; background:rgba(239,68,68,0.07); }
+
+/* @keyframes: defines animation from start (0%) to end (100%) */
+@keyframes floatDot {
+  0%   { transform: translateY(0px) rotate(0deg);    opacity: 0.3; }
+  50%  { transform: translateY(-60px) rotate(180deg); opacity: 0.7; }
+  100% { transform: translateY(0px) rotate(360deg);  opacity: 0.3; }
+}

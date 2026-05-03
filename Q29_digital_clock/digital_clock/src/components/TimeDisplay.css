@@ -1,0 +1,123 @@
+/* ============================================================
+   TimeDisplay.css — The big clock digits
+   WT Syllabus Unit I: CSS — Flexbox, text-shadow (neon glow),
+   CSS transitions, @keyframes animations
+   ============================================================ */
+
+/* ── Time Display Row ── */
+/* Flexbox: arranges HH : MM : SS in a horizontal row */
+.time-display {
+  display: flex;
+  align-items: center;       /* vertically center colons with digits */
+  justify-content: center;   /* horizontally center everything */
+  gap: 4px;
+  margin: 16px 0 12px;
+  flex-wrap: wrap;            /* wrap on very small screens */
+}
+
+/* ── Digit Group: block + label below ── */
+.digit-group {
+  display: flex;
+  flex-direction: column;  /* stack digit block and label vertically */
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Digit Block: the big number ── */
+.digit-block {
+  display: flex;
+  gap: 2px;
+  /* CSS transition: smooth property change over time */
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+/* Paused state: dimmed and slightly blurred */
+.digit-paused {
+  opacity: 0.45;
+  filter: blur(0.5px);
+}
+
+/* ── Individual digit character ── */
+.digit-char {
+  font-family: 'Orbitron', monospace; /* futuristic digital font */
+  font-size: clamp(3rem, 10vw, 5.5rem); /* clamp(min, preferred, max) — responsive */
+  font-weight: 900;
+  /* CSS custom property fallback: var(--accent, defaultValue) */
+  color: var(--accent, #00d4ff);
+  /* Multi-layer text-shadow for neon glow effect */
+  text-shadow:
+    0 0 10px var(--accent, #00d4ff),
+    0 0 20px var(--accent, #00d4ff),
+    0 0 40px var(--accent, #00d4ff),
+    0 0 80px var(--accent, #00d4ff);
+  line-height: 1;
+  display: block;
+  /* CSS animation on each digit */
+  animation: digitGlow 2s ease-in-out infinite alternate;
+  /* alternate: plays forward then backward */
+}
+
+/* Subtle pulsing glow on digits */
+@keyframes digitGlow {
+  0%   { text-shadow: 0 0 10px var(--accent, #00d4ff), 0 0 20px var(--accent, #00d4ff), 0 0 40px var(--accent, #00d4ff); }
+  100% { text-shadow: 0 0 20px var(--accent, #00d4ff), 0 0 40px var(--accent, #00d4ff), 0 0 80px var(--accent, #00d4ff), 0 0 120px var(--accent, #00d4ff); }
+}
+
+/* ── Digit label (HOURS, MINUTES, SECONDS) ── */
+.digit-label {
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: 'Orbitron', monospace;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+/* ── Colon separator ── */
+.colon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px; /* offset to visually align with digits */
+  margin: 0 4px;
+}
+.colon span {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 900;
+  color: var(--accent, #00d4ff);
+  line-height: 1;
+  text-shadow: 0 0 20px var(--accent, #00d4ff);
+}
+/* Blinking colon animation — blinks every second */
+.colon-blink span {
+  animation: colonBlink 1s step-end infinite;
+  /* step-end: jumps between states instantly (not smooth) */
+}
+.colon-dim span {
+  opacity: 0.2;
+}
+@keyframes colonBlink {
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.1; }
+}
+
+/* ── AM/PM Badge ── */
+.period-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent, #00d4ff);
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  align-self: center;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .digit-char { font-size: clamp(2.2rem, 14vw, 3.5rem); }
+  .colon span { font-size: clamp(2rem, 12vw, 3rem); }
+}

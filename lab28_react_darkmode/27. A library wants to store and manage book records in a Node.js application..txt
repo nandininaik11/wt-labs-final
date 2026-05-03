@@ -1,0 +1,16 @@
+27. A library wants to store and manage book records in a Node.js application. 
+Librarians should be able to add books and view all books available in the library.
+ Tasks:
+1. Create a Book table/collection with fields such as book_id, title, author, 
+and year.
+2. Insert book records into the database. 
+3. Retrieve book data using a Node.js API. 
+4. Display book details in the browser
+28. Design a React application that allows users to toggle between Light Mode and 
+Dark Mode using React Hooks.
+Tasks to be Performed:
+1. Create a toggle button. 
+2. Use useState() to store the current theme. 
+3. Change the background and text colors dynamically. 
+4. Display the current theme mode. 
+5. Persist theme selection during component re-render

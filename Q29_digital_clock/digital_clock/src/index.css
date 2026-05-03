@@ -1,0 +1,40 @@
+/* ============================================================
+   src/index.css — Global Styles
+   WT Syllabus Unit I: CSS — applied to the entire page
+   ============================================================ */
+
+/* CSS Reset — removes browser default margins/padding */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Body: dark background, full viewport height, flexbox center */
+body {
+  /* font-family: stack of fonts — uses first available one */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Dark space-like background */
+  background: #0a0a1a;
+
+  /* min-height: ensures body fills at least full screen height */
+  min-height: 100vh;
+
+  /* CSS Flexbox — center the React app vertically and horizontally */
+  display: flex;
+  justify-content: center; /* horizontal center */
+  align-items: center;     /* vertical center */
+
+  /* overflow-x: hidden prevents horizontal scroll */
+  overflow-x: hidden;
+}
+
+/* #root is the div React mounts into — make it fill the page */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

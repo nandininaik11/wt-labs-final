@@ -1,0 +1,123 @@
+/* ============================================================
+   Clock.css — Main clock card styles
+   WT Syllabus Unit I: CSS — box-shadow (neon glow), gradients,
+   border-radius, transitions, backdrop-filter
+   ============================================================ */
+
+/* Clock container card */
+.clock-container {
+  position: relative;
+  z-index: 10; /* above animated background */
+  background: rgba(10, 10, 30, 0.85);
+  /* backdrop-filter: blurs the background behind this element (glass effect) */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); /* Safari prefix */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  padding: 40px 48px;
+  width: 100%;
+  max-width: 700px;
+  margin: 20px;
+  /* box-shadow: creates the neon glow effect */
+  /* Multiple shadows: offset-x offset-y blur spread color */
+  box-shadow:
+    0 0 0 1px rgba(0, 212, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(0, 212, 255, 0.05);
+  /* transition: smooth color change when theme changes */
+  transition: box-shadow 0.5s ease;
+}
+
+/* ── Theme-specific glow colors ── */
+/* :root [class] selector targets when theme-* class is on container */
+.theme-blue   { --glow: rgba(0, 212, 255, 0.15);  --accent: #00d4ff; }
+.theme-green  { --glow: rgba(16, 185, 129, 0.15); --accent: #10b981; }
+.theme-purple { --glow: rgba(124, 58, 237, 0.2);  --accent: #7c3aed; }
+.theme-red    { --glow: rgba(239, 68, 68, 0.15);  --accent: #ef4444; }
+
+.theme-blue   { box-shadow: 0 0 0 1px rgba(0,212,255,0.15), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px var(--glow); }
+.theme-green  { box-shadow: 0 0 0 1px rgba(16,185,129,0.15), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px var(--glow); }
+.theme-purple { box-shadow: 0 0 0 1px rgba(124,58,237,0.2), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px var(--glow); }
+.theme-red    { box-shadow: 0 0 0 1px rgba(239,68,68,0.15), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px var(--glow); }
+
+/* ── Header ── */
+.clock-header { text-align: center; margin-bottom: 8px; }
+.clock-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: var(--accent, #00d4ff);
+  text-transform: uppercase;
+  /* text-shadow: creates neon glow on text */
+  text-shadow: 0 0 20px var(--accent, #00d4ff), 0 0 40px var(--accent, #00d4ff);
+}
+.clock-subtitle {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* ── Status Indicator ── */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  font-weight: 700;
+  transition: color 0.3s;
+}
+.status-running { color: #10b981; }
+.status-stopped { color: #ef4444; }
+
+/* Blinking dot for "live" indicator */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  background: currentColor;
+  /* CSS animation: name duration timing-function iteration-count */
+  animation: blink 1s ease-in-out infinite;
+}
+.status-stopped .status-dot { animation: none; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+/* ── Elapsed Section ── */
+.elapsed-section {
+  text-align: center;
+  margin: 12px 0 20px;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.elapsed-label {
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'Orbitron', monospace;
+  margin-bottom: 4px;
+}
+.elapsed-time {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.6);
+  font-weight: 700;
+  letter-spacing: 4px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .clock-container { padding: 24px 16px; margin: 12px; }
+  .clock-label { font-size: 0.75rem; letter-spacing: 3px; }
+}

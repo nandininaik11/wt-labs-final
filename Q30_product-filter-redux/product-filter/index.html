@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!--
+  FILE: index.html
+  THEORY: The ONLY HTML file in a React SPA (Single Page Application).
+  React takes over <div id="root"> and renders ALL UI via JavaScript.
+  No full page reloads — React updates only what changed (Virtual DOM).
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🛍️ Product Filter — React + Redux</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <!-- React MOUNT POINT — all components render inside here -->
+    <div id="root"></div>
+    <!-- type="module" enables ES Module syntax (import/export) -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

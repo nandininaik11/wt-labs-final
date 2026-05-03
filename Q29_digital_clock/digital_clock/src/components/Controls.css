@@ -1,0 +1,90 @@
+/* Controls.css — Button styles */
+
+.controls { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 20px; }
+
+.controls-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.controls-row-sm { gap: 8px; }
+
+/* Base button style */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+.btn:active { transform: scale(0.96); }
+
+/* Start/Resume button — green */
+.btn-start {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+  min-width: 150px;
+  justify-content: center;
+}
+.btn-start:hover { box-shadow: 0 6px 28px rgba(16, 185, 129, 0.6); transform: translateY(-1px); }
+
+/* Pause/Stop button — red */
+.btn-stop {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  min-width: 150px;
+  justify-content: center;
+}
+.btn-stop:hover { box-shadow: 0 6px 28px rgba(239, 68, 68, 0.6); transform: translateY(-1px); }
+
+/* Reset button */
+.btn-reset {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.btn-reset:hover { background: rgba(255,255,255,0.12); color: white; }
+
+/* Toggle buttons */
+.btn-toggle {
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 16px;
+  font-size: 0.72rem;
+}
+.btn-toggle-active {
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--accent, #00d4ff);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+.btn-toggle:hover { background: rgba(255,255,255,0.1); color: white; }
+
+.btn-icon { font-size: 1rem; }
+
+/* Theme picker */
+.theme-picker { display: flex; align-items: center; gap: 12px; }
+.theme-label { font-size: 0.62rem; letter-spacing: 3px; color: rgba(255,255,255,0.3); font-family: 'Orbitron', monospace; }
+.theme-dots { display: flex; gap: 8px; }
+.theme-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+}
+.theme-dot:hover { transform: scale(1.2); border-color: rgba(255,255,255,0.4); }
+.theme-dot-active { border-color: white; transform: scale(1.1); box-shadow: 0 0 12px currentColor; }
