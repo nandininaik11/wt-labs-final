@@ -1,0 +1,123 @@
+{
+  "info": {
+    "_postman_id": "lab34-blog-api",
+    "name": "Lab 34 — Blog REST API",
+    "description": "Complete CRUD test collection for Lab 34.\nImport this file into Postman, then run each request.\nMake sure server is running: npm start",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base", "value": "http://localhost:3000", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "ROOT — API Info",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/", "host": ["{{base}}"], "path": [""] }
+      }
+    },
+    {
+      "name": "1. GET All Posts",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/api/posts", "host": ["{{base}}"], "path": ["api","posts"] },
+        "description": "Returns all blog posts. Status 200."
+      }
+    },
+    {
+      "name": "2. GET All Posts — Filter author",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base}}/api/posts?author=Rahul",
+          "host": ["{{base}}"], "path": ["api","posts"],
+          "query": [{ "key": "author", "value": "Rahul" }]
+        }
+      }
+    },
+    {
+      "name": "3. GET Single Post (ID=1)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/api/posts/1", "host": ["{{base}}"], "path": ["api","posts","1"] },
+        "description": "Returns one post. Status 200."
+      }
+    },
+    {
+      "name": "4. GET Single Post — Not Found (ID=999)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/api/posts/999", "host": ["{{base}}"], "path": ["api","posts","999"] },
+        "description": "Tests 404 response."
+      }
+    },
+    {
+      "name": "5. POST — Create New Post",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"My Express Blog Post\",\n  \"content\": \"This post was created using the POST /api/posts endpoint. Express.js makes building REST APIs very easy with its routing and middleware system.\",\n  \"author\": \"Rahul Sharma\",\n  \"category\": \"Technology\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": { "raw": "{{base}}/api/posts", "host": ["{{base}}"], "path": ["api","posts"] },
+        "description": "Creates a post. Status 201 Created."
+      }
+    },
+    {
+      "name": "6. POST — Validation Error (400 test)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"\",\n  \"content\": \"\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": { "raw": "{{base}}/api/posts", "host": ["{{base}}"], "path": ["api","posts"] },
+        "description": "Tests 400 Bad Request response when fields are empty."
+      }
+    },
+    {
+      "name": "7. PUT — Update Post (ID=1)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Getting Started with Node.js — UPDATED\",\n  \"content\": \"This is the UPDATED content of the post. Node.js uses an event-driven, non-blocking I/O model that makes it efficient for data-intensive real-time applications.\",\n  \"author\": \"Rahul Sharma\",\n  \"category\": \"Technology\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": { "raw": "{{base}}/api/posts/1", "host": ["{{base}}"], "path": ["api","posts","1"] },
+        "description": "Updates post with ID 1. updatedAt timestamp changes."
+      }
+    },
+    {
+      "name": "8. DELETE — Delete Post (ID=3)",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{base}}/api/posts/3", "host": ["{{base}}"], "path": ["api","posts","3"] },
+        "description": "Deletes post with ID 3. Returns deleted post."
+      }
+    },
+    {
+      "name": "9. SEARCH — keyword=express",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base}}/api/posts/search?q=express",
+          "host": ["{{base}}"], "path": ["api","posts","search"],
+          "query": [{ "key": "q", "value": "express" }]
+        }
+      }
+    },
+    {
+      "name": "10. GET Stats",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base}}/api/stats", "host": ["{{base}}"], "path": ["api","stats"] }
+      }
+    }
+  ]
+}
