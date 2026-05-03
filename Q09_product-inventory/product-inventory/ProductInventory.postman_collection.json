@@ -1,0 +1,276 @@
+{
+	"info": {
+		"_postman_id": "product-inventory-collection",
+		"name": "Product Inventory API",
+		"description": "Complete CRUD operations for Product Inventory Management System\nSpring Boot + MongoDB + Basic Auth\n\nCredentials:\n- Admin: admin / admin123\n- User:  user / user123",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "username",
+				"value": "admin",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "admin123",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "1 - CREATE Product (Laptop)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Laptop\",\n  \"category\": \"Electronics\",\n  \"price\": 55000.00,\n  \"quantity\": 10,\n  \"description\": \"Dell Inspiron 15 - Intel i5\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/products",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products"]
+				},
+				"description": "Creates a new product.\nExpected: 201 Created\nReturns the saved product with auto-generated MongoDB ID.\n\nCOPY the 'id' from response to use in GET/PUT/DELETE requests below!"
+			}
+		},
+		{
+			"name": "2 - CREATE Product (Mouse)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Wireless Mouse\",\n  \"category\": \"Electronics\",\n  \"price\": 899.00,\n  \"quantity\": 50,\n  \"description\": \"Logitech MX Master 3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/products",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products"]
+				},
+				"description": "Creates a second product (Mouse).\nExpected: 201 Created"
+			}
+		},
+		{
+			"name": "3 - CREATE Product (Chair)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Office Chair\",\n  \"category\": \"Furniture\",\n  \"price\": 12000.00,\n  \"quantity\": 5,\n  \"description\": \"Ergonomic chair with lumbar support\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/products",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products"]
+				},
+				"description": "Creates a third product (Chair).\nExpected: 201 Created"
+			}
+		},
+		{
+			"name": "4 - GET All Products",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/products",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products"]
+				},
+				"description": "Returns all products from MongoDB.\nExpected: 200 OK\nReturns JSON array of all products."
+			}
+		},
+		{
+			"name": "5 - GET Product by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/products/PASTE_ID_HERE",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products", "PASTE_ID_HERE"]
+				},
+				"description": "Get a single product by its MongoDB ID.\n\nSTEP: Replace 'PASTE_ID_HERE' in the URL with the actual id from the CREATE response.\n\nExample: http://localhost:8080/api/products/6812ab3cd4e5f67890123456\n\nExpected: 200 OK (if ID exists) or 404 Not Found"
+			}
+		},
+		{
+			"name": "6 - UPDATE Product by ID",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Laptop Pro\",\n  \"category\": \"Electronics\",\n  \"price\": 75000.00,\n  \"quantity\": 7,\n  \"description\": \"Dell XPS 15 - Updated Model\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/products/PASTE_ID_HERE",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products", "PASTE_ID_HERE"]
+				},
+				"description": "Updates an existing product.\n\nSTEP: Replace 'PASTE_ID_HERE' with actual product ID.\n\nExpected: 200 OK with updated product\nor 404 Not Found if ID wrong"
+			}
+		},
+		{
+			"name": "7 - DELETE Product by ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/products/PASTE_ID_HERE",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products", "PASTE_ID_HERE"]
+				},
+				"description": "Deletes a product by ID.\n\nSTEP: Replace 'PASTE_ID_HERE' with actual product ID.\n\nExpected: 200 OK → 'Product deleted successfully!'\nor 404 Not Found if ID wrong"
+			}
+		},
+		{
+			"name": "8 - GET by Category (Electronics)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/products/category/Electronics",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products", "category", "Electronics"]
+				},
+				"description": "Find all products in 'Electronics' category.\nExpected: 200 OK with filtered list.\n\nTry also: /category/Furniture"
+			}
+		},
+		{
+			"name": "9 - SEARCH by Name (lap)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/products/search?name=lap",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products", "search"],
+					"query": [
+						{
+							"key": "name",
+							"value": "lap"
+						}
+					]
+				},
+				"description": "Search products by name keyword (case-insensitive).\nSearching 'lap' will match 'Laptop', 'Laptop Pro' etc.\nExpected: 200 OK with matching products."
+			}
+		},
+		{
+			"name": "10 - TEST No Auth (should fail 401)",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/products",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products"]
+				},
+				"description": "This request has NO authentication.\nExpected: 401 Unauthorized\n\nThis proves Spring Security is working correctly!\nShow this to examiner to demonstrate security."
+			}
+		},
+		{
+			"name": "11 - TEST Wrong Password (should fail 401)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "wrongpassword",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/products",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8080",
+					"path": ["api", "products"]
+				},
+				"description": "Uses wrong password intentionally.\nExpected: 401 Unauthorized\n\nShows BCrypt password verification is working!"
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		}
+	]
+}
