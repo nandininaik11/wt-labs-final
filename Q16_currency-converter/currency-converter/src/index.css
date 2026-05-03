@@ -1,0 +1,60 @@
+/* ============================================================
+   FILE: src/index.css
+   PURPOSE: Global styles — resets and base styles
+   THEORY: This file is imported in main.jsx and applies to
+           the ENTIRE application. Good for CSS resets and
+           font imports that should be everywhere.
+   ============================================================ */
+
+/* CSS Reset — removes browser default styles for consistency */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* box-sizing: border-box — padding and border included in width/height
+     This makes layout math MUCH easier:
+     box-sizing: content-box (default): width=content only
+     box-sizing: border-box: width=content+padding+border */
+}
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Inter is a clean, modern font designed for screens */
+
+/* Root element styles */
+html {
+  font-size: 16px; /* Base font size — rem units are relative to this */
+  scroll-behavior: smooth; /* Smooth scrolling when navigating */
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Font stack: tries Inter first, then system fonts as fallback */
+  line-height: 1.6;
+  /* line-height: space between lines of text (1.6 = 160% of font-size) */
+  min-height: 100vh;
+  /* vh = viewport height units. 100vh = full screen height */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* linear-gradient: smooth color transition from one to another
+     135deg: diagonal direction
+     This gives the purple-blue gradient background */
+}
+
+/* Remove default list styles */
+ul {
+  list-style: none;
+}
+
+/* Make images responsive by default */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Remove default button styles */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit; /* Buttons don't inherit font by default — fix this */
+}

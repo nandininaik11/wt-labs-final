@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Registration System – Lab Q10</title>
+
+    <!-- Bootstrap 5 CDN – provides responsive grid, components, utilities -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <style>
+        /* ── Custom CSS ────────────────────────────────────────────── */
+        :root {
+            --primary:   #4f46e5;
+            --primary-light: #e0e7ff;
+            --success:   #22c55e;
+            --danger:    #ef4444;
+            --bg:        #f8fafc;
+            --card-bg:   #ffffff;
+            --text:      #1e293b;
+            --muted:     #64748b;
+            --border:    #e2e8f0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 2px 12px rgba(79,70,229,.35);
+        }
+        .navbar-custom .navbar-brand { color: #fff; font-weight: 700; font-size: 1.3rem; }
+        .navbar-custom .nav-link { color: rgba(255,255,255,.85); }
+        .navbar-custom .nav-link:hover { color: #fff; }
+
+        /* Section cards */
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.06);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+        /* Form */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: #fff;
+            border: none;
+            padding: .65rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: opacity .2s;
+        }
+        .btn-register:hover { opacity: .88; color: #fff; }
+
+        /* Stats cards */
+        .stat-card {
+            background: var(--primary-light);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.4rem;
+        }
+        .stat-label { font-size: .8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--primary); line-height: 1; }
+
+        /* Table */
+        .table-custom { border-collapse: separate; border-spacing: 0; width: 100%; }
+        .table-custom thead th {
+            background: var(--primary);
+            color: #fff;
+            padding: .85rem 1rem;
+            font-weight: 600;
+            font-size: .85rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            border: none;
+        }
+        .table-custom thead th:first-child { border-radius: 10px 0 0 0; }
+        .table-custom thead th:last-child  { border-radius: 0 10px 0 0; }
+        .table-custom tbody tr { transition: background .15s; }
+        .table-custom tbody tr:hover { background: var(--primary-light); }
+        .table-custom tbody td {
+            padding: .8rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        /* Badge */
+        .course-badge {
+            background: #ede9fe;
+            color: #6d28d9;
+            border-radius: 20px;
+            padding: .25rem .75rem;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+
+        /* Alert toast */
+        #toast-container {
+            position: fixed; top: 1.2rem; right: 1.2rem; z-index: 9999;
+            display: flex; flex-direction: column; gap: .5rem;
+        }
+        .toast-msg {
+            background: #fff;
+            border-radius: 10px;
+            padding: .9rem 1.4rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,.14);
+            display: flex; align-items: center; gap: .7rem;
+            font-size: .92rem; font-weight: 500;
+            animation: slideIn .3s ease;
+            min-width: 280px;
+        }
+        .toast-msg.success { border-left: 4px solid var(--success); }
+        .toast-msg.error   { border-left: 4px solid var(--danger); }
+        @keyframes slideIn { from { transform: translateX(110%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+        /* Search bar */
+        .search-group { position: relative; }
+        .search-group .bi-search {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: var(--muted); pointer-events: none;
+        }
+        .search-group input { padding-left: 2.2rem; border-radius: 8px; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+        .empty-state i { font-size: 3rem; display: block; margin-bottom: .8rem; opacity: .4; }
+
+        /* Loading spinner */
+        .spinner { display: inline-block; width: 18px; height: 18px;
+            border: 2px solid #fff; border-top-color: transparent;
+            border-radius: 50%; animation: spin .7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg navbar-custom mb-0">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-mortarboard-fill me-2"></i>Student Registration System
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-white text-primary fw-semibold" id="nav-count">0 Students</span>
+        </div>
+    </div>
+</nav>
+
+<!-- ── Toast Container ─────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ── Main Content ───────────────────────────────────────────────────── -->
+<div class="container py-4">
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-3" id="stats-row">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                <div>
+                    <div class="stat-label">Total Students</div>
+                    <div class="stat-value" id="stat-total">–</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background:#dcfce7">
+                <div class="stat-icon" style="background:#16a34a"><i class="bi bi-book-fill"></i></div>
+                <div>
+                    <div class="stat-label">Courses Offered</div>
+                    <div class="stat-value" style="color:#16a34a" id="stat-courses">–</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background:#fef3c7">
+                <div class="stat-icon" style="background:#d97706"><i class="bi bi-calendar-check-fill"></i></div>
+                <div>
+                    <div class="stat-label">Latest Registration</div>
+                    <div class="stat-value" style="color:#d97706;font-size:1rem" id="stat-latest">–</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- ── Left: Registration Form (Tasks 3) ───────────────────── -->
+        <div class="col-lg-4">
+            <div class="section-card h-100">
+                <div class="section-title">
+                    <i class="bi bi-person-plus-fill"></i> Register New Student
+                </div>
+
+                <form id="reg-form" novalidate>
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="inp-name">
+                            <i class="bi bi-person me-1"></i>Full Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="inp-name"
+                               placeholder="e.g. Aarav Sharma" required minlength="2" />
+                        <div class="invalid-feedback">Name must be at least 2 characters.</div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="inp-email">
+                            <i class="bi bi-envelope me-1"></i>Email Address <span class="text-danger">*</span>
+                        </label>
+                        <input type="email" class="form-control" id="inp-email"
+                               placeholder="e.g. aarav@example.com" required />
+                        <div class="invalid-feedback">Enter a valid email address.</div>
+                    </div>
+
+                    <!-- Course -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" for="inp-course">
+                            <i class="bi bi-book me-1"></i>Course <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="inp-course" required>
+                            <option value="">-- Select Course --</option>
+                            <option>Computer Science</option>
+                            <option>Information Technology</option>
+                            <option>Data Science</option>
+                            <option>Artificial Intelligence</option>
+                            <option>Cybersecurity</option>
+                            <option>Electronics Engineering</option>
+                            <option>Mechanical Engineering</option>
+                            <option>Business Administration</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a course.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-register w-100" id="submit-btn">
+                        <i class="bi bi-send-fill me-2"></i>Register Student
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── Right: Student List (Tasks 4 & 5) ──────────────────── -->
+        <div class="col-lg-8">
+            <div class="section-card">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div class="section-title mb-0">
+                        <i class="bi bi-table"></i> Registered Students
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="loadStudents()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+
+                <!-- Search + Filter -->
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-7">
+                        <div class="search-group">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="form-control form-control-sm"
+                                   id="search-inp" placeholder="Search by name, email, course…"
+                                   oninput="filterTable()" />
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <select class="form-select form-select-sm" id="course-filter" onchange="filterTable()">
+                            <option value="">All Courses</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table-custom" id="students-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Registered</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <span class="spinner" style="border-color:#4f46e5;border-top-color:transparent"></span>
+                                    Loading…
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-2 text-muted small" id="record-count"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Delete Confirm Modal ────────────────────────────────────────────── -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; overflow:hidden">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-trash3-fill me-2"></i>Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong id="del-name"></strong>? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="confirm-del-btn">
+                    <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/**
+ * public/index.html – Client-side JavaScript
+ *
+ * Uses Fetch API (modern alternative to XMLHttpRequest) to call our Express REST APIs.
+ * DOM Manipulation: dynamically builds the student table from API response.
+ *
+ * Key JS Concepts used:
+ *   - fetch() → HTTP requests from browser
+ *   - async/await → handle asynchronous operations cleanly
+ *   - JSON.parse / JSON.stringify → convert between JS objects and JSON strings
+ *   - DOM manipulation: createElement, innerHTML, appendChild
+ *   - Event listeners: form submit, button click
+ *   - Template literals: `Hello ${name}`
+ */
+
+const API = '/api/students';   // base API URL
+let allStudents = [];          // local cache of all students
+let deleteModal, deleteId;
+
+// ─── DOM Ready ────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    loadStudents();
+    loadStats();
+
+    // Form submit – Task 3: Insert new student
+    document.getElementById('reg-form').addEventListener('submit', registerStudent);
+});
+
+// ─── TASK 3: Register / Insert Student ───────────────────────────────────
+async function registerStudent(e) {
+    e.preventDefault();   // prevent default form submission (page reload)
+
+    const form = e.target;
+    const name   = document.getElementById('inp-name').value.trim();
+    const email  = document.getElementById('inp-email').value.trim();
+    const course = document.getElementById('inp-course').value;
+
+    // Bootstrap validation
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.innerHTML = '<span class="spinner me-2"></span>Registering…';
+    btn.disabled  = true;
+
+    try {
+        // POST request to Express API
+        const res  = await fetch(API, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({ name, email, course })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            showToast(`✅ ${data.data.name} registered successfully!`, 'success');
+            form.reset();
+            form.classList.remove('was-validated');
+            loadStudents();   // refresh table
+            loadStats();
+        } else {
+            showToast(`❌ ${data.message}`, 'error');
+        }
+    } catch (err) {
+        showToast('❌ Network error. Is the server running?', 'error');
+    } finally {
+        btn.innerHTML = '<i class="bi bi-send-fill me-2"></i>Register Student';
+        btn.disabled  = false;
+    }
+}
+
+// ─── TASK 4 & 5: Retrieve & Display All Students ─────────────────────────
+async function loadStudents() {
+    try {
+        const res  = await fetch(API);
+        const data = await res.json();
+
+        allStudents = data.data || [];
+        document.getElementById('nav-count').textContent = `${allStudents.length} Students`;
+        buildCourseFilter(allStudents);
+        renderTable(allStudents);
+    } catch (err) {
+        document.getElementById('table-body').innerHTML =
+            `<tr><td colspan="6" class="text-center text-danger py-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to load students.
+            </td></tr>`;
+    }
+}
+
+// Render student rows into the table
+function renderTable(students) {
+    const tbody = document.getElementById('table-body');
+    document.getElementById('record-count').textContent =
+        `Showing ${students.length} record${students.length !== 1 ? 's' : ''}`;
+
+    if (students.length === 0) {
+        tbody.innerHTML = `
+            <tr><td colspan="6">
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    No students found. Register the first student!
+                </div>
+            </td></tr>`;
+        return;
+    }
+
+    // DOM manipulation: build table rows dynamically from data
+    tbody.innerHTML = students.map((s, idx) => `
+        <tr>
+            <td><span class="badge bg-secondary">${s.id}</span></td>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width:32px;height:32px;border-radius:50%;background:#4f46e5;
+                         display:flex;align-items:center;justify-content:center;
+                         color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0">
+                        ${s.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span class="fw-semibold">${escHtml(s.name)}</span>
+                </div>
+            </td>
+            <td><a href="mailto:${escHtml(s.email)}" class="text-decoration-none">${escHtml(s.email)}</a></td>
+            <td><span class="course-badge">${escHtml(s.course)}</span></td>
+            <td class="text-muted small">${formatDate(s.created_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${s.id}, '${escHtml(s.name)}')">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ─── Load Stats ───────────────────────────────────────────────────────────
+async function loadStats() {
+    try {
+        const res  = await fetch(`${API}/stats`);
+        const data = await res.json();
+        const { totalStudents, byCourse } = data.data;
+        document.getElementById('stat-total').textContent   = totalStudents;
+        document.getElementById('stat-courses').textContent = byCourse.length;
+        document.getElementById('stat-latest').textContent  =
+            allStudents.length ? allStudents[allStudents.length - 1].name.split(' ')[0] : '–';
+    } catch (_) {}
+}
+
+// ─── Client-side Filter ───────────────────────────────────────────────────
+function filterTable() {
+    const query  = document.getElementById('search-inp').value.toLowerCase();
+    const course = document.getElementById('course-filter').value;
+
+    const filtered = allStudents.filter(s =>
+        (!query || s.name.toLowerCase().includes(query) ||
+                   s.email.toLowerCase().includes(query) ||
+                   s.course.toLowerCase().includes(query)) &&
+        (!course || s.course === course)
+    );
+    renderTable(filtered);
+}
+
+function buildCourseFilter(students) {
+    const courses = [...new Set(students.map(s => s.course))].sort();
+    const sel = document.getElementById('course-filter');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All Courses</option>' +
+        courses.map(c => `<option ${c===cur?'selected':''} value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+}
+
+// ─── Delete ───────────────────────────────────────────────────────────────
+function confirmDelete(id, name) {
+    deleteId = id;
+    document.getElementById('del-name').textContent = name;
+    document.getElementById('confirm-del-btn').onclick = deleteStudent;
+    deleteModal.show();
+}
+
+async function deleteStudent() {
+    try {
+        const res  = await fetch(`${API}/${deleteId}`, { method: 'DELETE' });
+        const data = await res.json();
+        deleteModal.hide();
+        if (res.ok) {
+            showToast(`🗑️ ${data.message}`, 'success');
+            loadStudents();
+            loadStats();
+        } else {
+            showToast(`❌ ${data.message}`, 'error');
+        }
+    } catch (err) {
+        showToast('❌ Network error.', 'error');
+    }
+}
+
+// ─── Toast Notification ───────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast-msg ${type}`;
+    toast.innerHTML = `<i class="bi ${type==='success'?'bi-check-circle-fill text-success':'bi-x-circle-fill text-danger'}"></i>${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+// ─── Utility Helpers ──────────────────────────────────────────────────────
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+}
+function formatDate(dt) {
+    if (!dt) return '–';
+    return new Date(dt).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "Lab Q10 – Student Registration API",
+    "_postman_id": "lab-q10-student-registration",
+    "description": "Node.js + Express + SQLite Student Registration System\nBase URL: http://localhost:3000\nNo authentication required.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. INSERT Student (POST)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/api/students", "host": ["localhost"], "port": "3000", "path": ["api","students"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Arjun Patel\",\n  \"email\": \"arjun.patel@example.com\",\n  \"course\": \"Computer Science\"\n}"
+        }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+        "var json = pm.response.json();",
+        "pm.test('Success true', () => pm.expect(json.success).to.be.true);",
+        "pm.test('Has id', () => pm.expect(json.data.id).to.exist);",
+        "pm.environment.set('studentId', json.data.id);"
+      ]}}]
+    },
+    {
+      "name": "2. INSERT Another Student",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/api/students", "host": ["localhost"], "port": "3000", "path": ["api","students"] },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Sneha Kulkarni\",\n  \"email\": \"sneha.k@example.com\",\n  \"course\": \"Data Science\"\n}" }
+      }
+    },
+    {
+      "name": "3. INSERT Student – Validation Error (Empty name)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/api/students", "host": ["localhost"], "port": "3000", "path": ["api","students"] },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"\",\n  \"email\": \"bad-email\",\n  \"course\": \"\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));",
+        "pm.test('Has errors array', () => pm.expect(pm.response.json().errors).to.be.an('array'));"
+      ]}}]
+    },
+    {
+      "name": "4. GET All Students",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:3000/api/students", "host": ["localhost"], "port": "3000", "path": ["api","students"] }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('Data is array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+        "pm.test('Has count', () => pm.expect(pm.response.json().count).to.be.a('number'));"
+      ]}}]
+    },
+    {
+      "name": "5. GET Student by ID",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:3000/api/students/{{studentId}}", "host": ["localhost"], "port": "3000", "path": ["api","students","{{studentId}}"] }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('Name exists', () => pm.expect(pm.response.json().data.name).to.exist);"
+      ]}}]
+    },
+    {
+      "name": "6. GET – Search Students by Name",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/students?search=arjun",
+          "host": ["localhost"], "port": "3000", "path": ["api","students"],
+          "query": [{ "key": "search", "value": "arjun" }]
+        }
+      }
+    },
+    {
+      "name": "7. GET – Filter by Course",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/students?course=Computer Science",
+          "host": ["localhost"], "port": "3000", "path": ["api","students"],
+          "query": [{ "key": "course", "value": "Computer Science" }]
+        }
+      }
+    },
+    {
+      "name": "8. GET – Sort by Name Ascending",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/students?sort=name&order=asc",
+          "host": ["localhost"], "port": "3000", "path": ["api","students"],
+          "query": [{ "key": "sort", "value": "name" },{ "key": "order", "value": "asc" }]
+        }
+      }
+    },
+    {
+      "name": "9. GET Stats",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:3000/api/students/stats", "host": ["localhost"], "port": "3000", "path": ["api","students","stats"] }
+      }
+    },
+    {
+      "name": "10. GET – Student Not Found (404)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:3000/api/students/99999", "host": ["localhost"], "port": "3000", "path": ["api","students","99999"] }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"
+      ]}}]
+    },
+    {
+      "name": "11. UPDATE Student (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/api/students/{{studentId}}", "host": ["localhost"], "port": "3000", "path": ["api","students","{{studentId}}"] },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Arjun Patel (Updated)\",\n  \"email\": \"arjun.updated@example.com\",\n  \"course\": \"Artificial Intelligence\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('Name updated', () => pm.expect(pm.response.json().data.name).to.include('Updated'));"
+      ]}}]
+    },
+    {
+      "name": "12. DELETE Student",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "http://localhost:3000/api/students/{{studentId}}", "host": ["localhost"], "port": "3000", "path": ["api","students","{{studentId}}"] }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+        "pm.test('Message says deleted', () => pm.expect(pm.response.json().message).to.include('deleted'));"
+      ]}}]
+    },
+    {
+      "name": "13. Duplicate Email Error (409)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:3000/api/students", "host": ["localhost"], "port": "3000", "path": ["api","students"] },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Duplicate\",\n  \"email\": \"aarav@example.com\",\n  \"course\": \"Computer Science\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"
+      ]}}]
+    }
+  ]
+}

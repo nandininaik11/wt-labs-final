@@ -1,0 +1,131 @@
+/* ============================================================
+   FILE: css/style.css
+   PURPOSE: Custom styles on top of Bootstrap
+   THEORY: CSS (Cascading Style Sheets) controls the visual
+           presentation of HTML elements.
+           "Cascading" means styles inherit and override from
+           top to bottom. More specific selectors win.
+   ============================================================ */
+
+/* ---- Global / Body ---- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* font-family: specifies which font to use (fallbacks listed) */
+    min-height: 100vh;
+    /* vh = viewport height. 100vh = full screen height */
+}
+
+/* ---- Card enhancements ---- */
+.card {
+    border-radius: 12px;
+    /* border-radius rounds the corners of the card */
+    overflow: hidden;
+    /* overflow:hidden clips child elements to rounded corners */
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+/* ---- Navbar brand ---- */
+.navbar-brand {
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+    /* letter-spacing adds space between characters */
+}
+
+/* ---- Buttons ---- */
+.btn {
+    border-radius: 8px;
+    /* Rounded buttons look more modern */
+    font-weight: 500;
+}
+
+.btn:hover {
+    /* :hover is a CSS pseudo-class — styles applied when mouse is over element */
+    transform: translateY(-1px);
+    /* transform moves element — translateY(-1px) = lift up 1px on hover */
+    transition: transform 0.2s;
+    /* transition animates the change smoothly over 0.2 seconds */
+}
+
+/* ---- Form controls ---- */
+.form-control:focus,
+.form-select:focus {
+    /* :focus applies when element is clicked/tabbed into */
+    border-color: #0d6efd;
+    /* Blue border when focused — matches Bootstrap primary */
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    /* box-shadow creates a glowing effect around focused input */
+}
+
+/* ---- Complaint card in list ---- */
+.complaint-card {
+    transition: background-color 0.2s;
+    /* Smooth background color change */
+}
+
+.complaint-card:hover {
+    background-color: #f8f9fa;
+    /* Light grey on hover to indicate interactivity */
+}
+
+/* ---- Status badges (custom) ---- */
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.status-inprogress {
+    background-color: #cff4fc;
+    color: #055160;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.status-resolved {
+    background-color: #d1e7dd;
+    color: #0a3622;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* ---- Stat card left border ---- */
+.stat-card {
+    border-left-width: 5px !important;
+    /* !important overrides any conflicting Bootstrap style */
+}
+
+/* ---- Responsive adjustments ---- */
+/* @media queries apply styles only on certain screen sizes */
+@media (max-width: 768px) {
+    /* This block only runs if screen width is 768px or less (tablet/mobile) */
+    .container {
+        padding: 10px;
+    }
+    h2 {
+        font-size: 1.4rem;
+    }
+}
+
+/* ---- Alert styling ---- */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* ---- Table ---- */
+.table thead th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    /* Makes table headers all capital letters */
+    letter-spacing: 0.5px;
+}

@@ -1,0 +1,360 @@
+/* ============================================================
+   FILE: css/style.css
+   PURPOSE: Custom CSS on top of Bootstrap
+   
+   THEORY (Unit I — CSS):
+   CSS = Cascading Style Sheets
+   "Cascading" = styles apply from top to bottom, more specific wins
+   
+   Three ways to add CSS:
+   1. Inline:    <p style="color:red">      ← lowest priority
+   2. Internal:  <style> in <head>          ← medium priority
+   3. External:  <link rel="stylesheet">    ← best practice (what we use)
+   
+   CSS Box Model:
+   margin → border → padding → content
+   ============================================================ */
+
+/* ===== GOOGLE FONTS IMPORT ===== */
+/* @import loads external stylesheet (Google Fonts CDN) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ===== CSS RESET / BASE ===== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* box-sizing: border-box — padding/border included in element width
+       Default (content-box): width = content only (harder to calculate)
+       border-box: width = content + padding + border (easier!) */
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Font stack: tries Inter first, then system fonts as fallback */
+    background-color: #f0f4f8;
+    /* Light grey-blue background for public pages */
+    color: #2d3748;
+    line-height: 1.6; /* Space between lines = 160% of font-size */
+}
+
+/* Admin pages get darker background */
+.admin-body {
+    background-color: #edf2f7;
+}
+
+/* ===== NAVBAR ===== */
+#topNav {
+    background: linear-gradient(135deg, #1a7a4a, #27ae60) !important;
+    /* linear-gradient: smooth color transition diagonally
+       !important: overrides any Bootstrap conflicting style */
+    box-shadow: 0 2px 15px rgba(0,0,0,0.15);
+    /* box-shadow: horizontal vertical blur spread color
+       rgba(0,0,0,0.15) = black at 15% opacity */
+    padding: 0.75rem 0;
+    transition: box-shadow 0.3s;
+    /* transition: smoothly animates changes to box-shadow over 0.3s */
+}
+
+.navbar-brand {
+    font-size: 1.3rem;
+    letter-spacing: -0.3px;
+}
+
+/* ===== HERO BANNER ===== */
+.hero-banner {
+    background: linear-gradient(135deg, #1a7a4a 0%, #27ae60 50%, #2ecc71 100%);
+    /* Multiple color stops in gradient */
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+    /* clip-path: creates a diagonal bottom edge (CSS shape)
+       polygon(top-left, top-right, bottom-right, bottom-left)
+       85% height at right, 100% at left = slanted bottom */
+    padding: 3rem 0 5rem;
+}
+
+.hero-emoji {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    /* filter: CSS visual effects
+       drop-shadow: shadow that follows element shape (unlike box-shadow) */
+    animation: bounce 2s infinite;
+    /* animation: name duration repeat */
+}
+
+/* CSS Keyframe Animation — defines animation sequence */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    /* transform: translateY() moves element up/down */
+    50%       { transform: translateY(-10px); }
+    /* At 50% of animation, element is 10px higher */
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    /* text-shadow: adds shadow behind text */
+    margin-bottom: 1rem;
+}
+
+.step-pill {
+    background: rgba(255,255,255,0.2);
+    /* rgba: red green blue alpha — 20% opacity white */
+    color: white;
+    border-radius: 50px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+    /* backdrop-filter: applies blur to what's BEHIND the element */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-num {
+    background: white;
+    color: #27ae60;
+    border-radius: 50%;
+    /* border-radius: 50% makes element circular */
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Flexbox centering: centers content both horizontally and vertically */
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* ===== FORM CARD ===== */
+.card-header-custom {
+    background: linear-gradient(135deg, #1a7a4a, #27ae60);
+    color: white;
+    padding: 1.5rem 2rem;
+}
+
+.section-block {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #e2e8f0;
+    /* border: shorthand — width style color */
+}
+
+.section-header {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #4a5568;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* gap: space between flex children */
+}
+
+/* ===== FORM CONTROLS FOCUS ===== */
+.form-control:focus,
+.form-select:focus {
+    /* :focus pseudo-class: applies when element is selected/clicked */
+    border-color: #27ae60;
+    box-shadow: 0 0 0 0.2rem rgba(39,174,96,0.2);
+    /* Glowing green border when focused */
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.btn-submit {
+    background: linear-gradient(135deg, #1a7a4a, #27ae60);
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 0.9rem 2rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.3px;
+    transition: all 0.25s;
+    /* transition: smoothly animates the listed properties */
+    box-shadow: 0 4px 15px rgba(39,174,96,0.4);
+}
+
+.btn-submit:hover {
+    /* :hover pseudo-class: applies when mouse is over element */
+    background: linear-gradient(135deg, #156638, #219a52);
+    transform: translateY(-2px);
+    /* translateY(-2px): move 2px upward — "lift" on hover */
+    box-shadow: 0 8px 25px rgba(39,174,96,0.5);
+    color: white;
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    /* opacity: 0=invisible, 1=fully visible, 0.6=60% visible */
+    transform: none;
+    cursor: not-allowed;
+    /* cursor: changes mouse cursor style */
+}
+
+/* ===== INFO CHIPS ===== */
+.info-chip {
+    background: white;
+    border-radius: 50px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2d7a4a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 2px solid #c6f6d5;
+    /* Decorative border using light green */
+}
+
+/* ===== STATUS TIMELINE ===== */
+.status-timeline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+}
+
+.timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 70px;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #aaa;
+}
+
+.timeline-dot {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.timeline-step.done    { color: #27ae60; }
+.timeline-step.current { color: #2980b9; }
+
+.timeline-line {
+    flex: 1;
+    height: 2px;
+    background: #ddd;
+    min-width: 15px;
+    margin-bottom: 18px;
+}
+
+.timeline-line.done { background: #27ae60; }
+
+/* ===== ADMIN STATS CARDS ===== */
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    transition: transform 0.2s;
+    border-top: 4px solid #ccc; /* Overridden inline per card */
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    /* Lift effect on hover */
+}
+
+.stat-num {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    /* text-transform: converts text to uppercase visually */
+    letter-spacing: 0.5px;
+}
+
+/* ===== TABLE ===== */
+.table th {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    /* white-space: nowrap — prevents text from wrapping to next line */
+}
+
+.table td {
+    font-size: 0.85rem;
+    vertical-align: middle;
+    /* vertical-align: middle — centers content vertically in table cell */
+}
+
+/* ===== ADMIN LOGIN PAGE ===== */
+.admin-body .card {
+    border-radius: 16px;
+}
+
+/* ===== FOOTER ===== */
+.site-footer {
+    background: linear-gradient(135deg, #1a3a2a, #1a7a4a);
+    color: rgba(255,255,255,0.9);
+    padding: 2rem 0;
+    margin-top: 4rem;
+}
+
+.site-footer a {
+    color: #a8f0c4;
+    text-decoration: none;
+}
+
+.site-footer a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* ===== UTILITIES ===== */
+/* Rounded card corners */
+.rounded-4 {
+    border-radius: 1rem !important;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+/* @media query: applies styles only for specific screen sizes */
+@media (max-width: 768px) {
+    /* Applies when screen width ≤ 768px (tablet/mobile) */
+    
+    .hero-title {
+        font-size: 1.7rem;
+    }
+
+    .hero-banner {
+        clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
+        /* Less dramatic angle on mobile */
+        padding: 2rem 0 4rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem;
+    }
+
+    .stat-num {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Very small screens — phones */
+    .status-timeline {
+        gap: 2px;
+    }
+    .timeline-step {
+        min-width: 50px;
+        font-size: 0.6rem;
+    }
+}

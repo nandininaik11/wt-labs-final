@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!--
+  FILE: index.html
+  THEORY: This is the ONLY HTML file in a React app.
+  React is a Single Page Application (SPA) framework.
+  Everything renders inside <div id="root"></div>.
+  React takes control of the DOM and injects all components there.
+  The browser only downloads this one HTML page.
+  Navigation between "pages" is handled by JavaScript, not the server.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- charset=UTF-8 supports all characters including ₹ symbol -->
+    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- favicon: the small icon shown in browser tab -->
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport meta: makes the app responsive on mobile devices -->
+
+    <title>💵 Currency Converter | USD to INR</title>
+  </head>
+  <body>
+    <!--
+      div#root is the MOUNT POINT for our entire React application.
+      React will replace the contents of this div with our components.
+      Without this div, React has nowhere to render.
+    -->
+    <div id="root"></div>
+
+    <!--
+      type="module": loads the JS file as an ES Module
+      This allows import/export syntax in JavaScript
+      Vite uses this to enable Fast Refresh during development
+    -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,617 @@
+/* ============================================================
+   FILE: src/App.css
+   PURPOSE: Component-level styles for the entire app
+   THEORY: CSS in React can be done in multiple ways:
+   1. Regular .css files (what we're using here)
+   2. CSS Modules (.module.css) - scoped styles
+   3. Styled-components - CSS in JS
+   4. Tailwind CSS - utility classes
+   We use regular CSS for simplicity and clarity.
+   ============================================================ */
+
+/* ==================== APP WRAPPER ==================== */
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;                  /* Flexbox layout */
+  flex-direction: column;         /* Stack children vertically */
+  /* flex-direction: column = top to bottom (like a vertical stack) */
+}
+
+/* ==================== HEADER ==================== */
+.app-header {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+  /* padding: top right bottom left — shorthand */
+}
+
+.header-content {
+  max-width: 600px;
+  margin: 0 auto; /* Centers the block horizontally */
+}
+
+.app-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  /* text-shadow: horizontal-offset vertical-offset blur-radius color */
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.flag {
+  font-size: 1.8rem;
+}
+
+.app-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+  /* rgba(r, g, b, alpha) — alpha 0=transparent, 1=opaque */
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+.app-main {
+  flex: 1;
+  /* flex: 1 — takes up all remaining space in the flex container */
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: flex-start;  /* Align to top */
+  padding: 0 1rem 2rem;
+}
+
+/* ==================== CONVERTER CONTAINER ==================== */
+.converter-container {
+  width: 100%;
+  max-width: 580px;
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  /* position: relative — needed for positioning child elements absolutely */
+  transition: all 0.3s ease;
+  /* transition: animates changes smoothly over 0.3 seconds */
+}
+
+/* LIGHT THEME */
+.converter-container.light {
+  background: #ffffff;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25),
+              0 10px 30px rgba(0, 0, 0, 0.15);
+  /* Multiple shadows: first=far shadow, second=close shadow (layered depth) */
+  color: #1a1a2e;
+}
+
+/* DARK THEME */
+.converter-container.dark {
+  background: #1e1e2e;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  color: #e0e0ff;
+}
+
+/* ==================== THEME TOGGLE ==================== */
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  /* position: absolute — positions relative to .converter-container (position: relative) */
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid #764ba2;
+  background: transparent;
+  color: #764ba2;
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+  background: #764ba2;
+  color: white;
+  transform: scale(1.05);
+  /* transform: scale(1.05) — grows element to 105% of its size on hover */
+}
+
+.dark .theme-toggle {
+  border-color: #a78bfa;
+  color: #a78bfa;
+}
+
+.dark .theme-toggle:hover {
+  background: #a78bfa;
+  color: #1e1e2e;
+}
+
+/* ==================== RATE INFO ==================== */
+.rate-info {
+  text-align: center;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #667eea20, #764ba220);
+  /* 20 at end of hex color = alpha in hex (12.5% opacity) */
+  border-radius: 10px;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border: 1px solid #764ba230;
+}
+
+.dark .rate-info {
+  background: linear-gradient(135deg, #667eea30, #764ba230);
+  color: #c0c0e0;
+}
+
+/* ==================== CURRENCY TABS ==================== */
+.currency-tabs {
+  display: flex;          /* Flexbox: children side by side */
+  gap: 0.5rem;            /* gap: space between flex children */
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;        /* flex-wrap: wrap to next line if no space */
+}
+
+.tab-btn {
+  flex: 1;               /* flex: 1 — each tab takes equal width */
+  padding: 0.6rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 2px solid #e0e0e0;
+  background: transparent;
+  color: #666;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  border-color: #764ba2;
+  color: #764ba2;
+}
+
+/* Active tab — selected currency */
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+}
+
+.dark .tab-btn {
+  border-color: #444;
+  color: #aaa;
+}
+
+.dark .tab-btn.active {
+  color: white;
+}
+
+/* ==================== INPUT SECTION ==================== */
+.input-section {
+  margin-bottom: 1.5rem;
+}
+
+.input-label {
+  display: block;
+  /* display: block — takes full width, puts on its own line */
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  color: #555;
+}
+
+.dark .input-label {
+  color: #bbb;
+}
+
+.input-group {
+  display: flex;
+  align-items: center; /* Vertically center children */
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  background: white;
+}
+
+.input-group:focus-within {
+  /* :focus-within — applies when ANY child is focused */
+  border-color: #764ba2;
+  box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
+}
+
+.dark .input-group {
+  border-color: #444;
+  background: #2a2a3e;
+}
+
+.dark .input-group:focus-within {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.15);
+}
+
+.currency-prefix {
+  padding: 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #764ba2;
+  background: rgba(118, 75, 162, 0.08);
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.amount-input {
+  flex: 1;              /* Takes remaining width after the $ prefix */
+  padding: 1rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  /* outline: none — removes browser's default blue outline */
+  background: transparent;
+  color: inherit;       /* inherit: takes color from parent element */
+}
+
+/* Remove default number input arrows in WebKit browsers */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove arrows in Firefox */
+.amount-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.input-error {
+  border-color: #ef4444 !important;
+  /* !important overrides any other border-color rules */
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
+/* ==================== BUTTONS ==================== */
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-convert {
+  flex: 3;              /* Takes 3x more space than btn-reset */
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+}
+
+.btn-convert:hover:not(:disabled) {
+  /* :not(:disabled) — only apply hover if button is NOT disabled */
+  transform: translateY(-2px);
+  /* translateY(-2px): move 2px upward — gives "lift" effect */
+  box-shadow: 0 8px 25px rgba(118, 75, 162, 0.5);
+}
+
+.btn-convert:disabled {
+  opacity: 0.5;         /* 50% transparent when disabled */
+  cursor: not-allowed;  /* Shows ⊘ cursor when hovering disabled button */
+  transform: none;
+}
+
+.btn-reset {
+  flex: 1;
+  padding: 1rem;
+  background: #f3f4f6;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s;
+  border: 2px solid #e0e0e0;
+}
+
+.btn-reset:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.dark .btn-reset {
+  background: #2a2a3e;
+  color: #888;
+  border-color: #444;
+}
+
+.dark .btn-reset:hover {
+  background: #3d1515;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* ==================== RESULT SECTION ==================== */
+.result-section {
+  margin-bottom: 1.5rem;
+  animation: slideDown 0.4s ease;
+  /* animation: name duration easing — CSS animation */
+}
+
+/* Keyframe animation — defines how element animates */
+@keyframes slideDown {
+  from {
+    opacity: 0;              /* Start: invisible */
+    transform: translateY(-10px);  /* Start: 10px above final position */
+  }
+  to {
+    opacity: 1;              /* End: fully visible */
+    transform: translateY(0);      /* End: at normal position */
+  }
+}
+
+.result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* justify-content: space-between — space distributed between children */
+  background: linear-gradient(135deg, #667eea15, #764ba215);
+  border: 2px solid #764ba230;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;          /* Wrap on small screens */
+  gap: 1rem;
+}
+
+.dark .result-card {
+  background: linear-gradient(135deg, #667eea20, #764ba220);
+  border-color: #764ba240;
+}
+
+.result-from, .result-to {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.flag-large {
+  font-size: 2.5rem;
+}
+
+.result-label {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 500;
+  text-transform: uppercase;
+  /* text-transform: uppercase — converts text to ALL CAPS */
+  letter-spacing: 0.5px;
+}
+
+.result-value-usd {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.result-value-converted {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #764ba2;
+}
+
+.dark .result-value-usd { color: #a5b4fc; }
+.dark .result-value-converted { color: #c4b5fd; }
+
+.result-currency {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.result-arrow {
+  font-size: 1.8rem;
+  color: #764ba2;
+  opacity: 0.6;
+}
+
+.rate-note {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.rate-note-small {
+  font-size: 0.72rem;
+  color: #aaa;
+}
+
+/* ==================== HISTORY SECTION ==================== */
+.history-section {
+  border-top: 2px dashed #e0e0e0;
+  /* dashed: border style — shows as dashes */
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.dark .history-section {
+  border-top-color: #444;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.history-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #555;
+}
+
+.dark .history-title {
+  color: #bbb;
+}
+
+.btn-clear-history {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-clear-history:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.history-empty {
+  text-align: center;
+  padding: 1.5rem;
+  color: #aaa;
+  font-size: 0.9rem;
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+
+.dark .history-empty {
+  background: #2a2a3e;
+  color: #666;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.history-item:hover {
+  background: #f0f0ff;
+}
+
+.dark .history-item {
+  background: #2a2a3e;
+}
+
+.dark .history-item:hover {
+  background: #33334a;
+}
+
+.history-number {
+  font-weight: 700;
+  color: #764ba2;
+  font-size: 0.75rem;
+  min-width: 25px;
+}
+
+.history-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.history-conversion {
+  font-weight: 600;
+  color: #333;
+}
+
+.dark .history-conversion { color: #ddd; }
+
+.history-time {
+  font-size: 0.72rem;
+  color: #999;
+}
+
+.history-rate {
+  font-size: 0.72rem;
+  color: #888;
+  text-align: right;
+}
+
+.history-note {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #bbb;
+  margin-top: 0.75rem;
+}
+
+/* ==================== FOOTER ==================== */
+.app-footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+}
+
+.footer-note {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.3rem;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+/* Media queries — apply styles for specific screen sizes */
+@media (max-width: 600px) {
+  /* This block applies when screen width is ≤ 600px (mobile) */
+  
+  .app-title {
+    font-size: 1.6rem;
+  }
+
+  .converter-container {
+    padding: 1.5rem 1.2rem;
+    border-radius: 16px;
+  }
+
+  .currency-tabs {
+    gap: 0.4rem;
+  }
+
+  .tab-btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.3rem;
+  }
+
+  .result-card {
+    flex-direction: column;
+    /* Stack items vertically on mobile */
+    text-align: center;
+  }
+
+  .result-arrow {
+    transform: rotate(90deg);
+    /* Rotate arrow to point down when card is stacked vertically */
+  }
+
+  .result-from, .result-to {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .amount-input {
+    font-size: 1.1rem;
+  }
+}
