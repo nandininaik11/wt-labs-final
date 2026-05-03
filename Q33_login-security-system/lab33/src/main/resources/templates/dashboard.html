@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Lab 33</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="nav-brand">🔐 LoginTracker</div>
+    <div class="nav-links">
+        <!-- sec:authorize shows/hides elements based on Spring Security role -->
+        <a sec:authorize="hasRole('ADMIN')" href="/admin/users" class="btn btn-secondary btn-sm">
+            👥 Manage Users
+        </a>
+        <!-- logout form: must be POST to prevent CSRF -->
+        <form action="/logout" method="post" style="display:inline;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card dashboard-card">
+        <h2>✅ Welcome, <span th:text="${username}">User</span>!</h2>
+        <p>You have successfully logged in.</p>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">📧 Email</span>
+                <span class="info-value" th:text="${email}">email@example.com</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🎭 Role</span>
+                <span class="info-value" th:text="${role}">ROLE_USER</span>
+            </div>
+        </div>
+
+        <!-- Security info box -->
+        <div class="security-info">
+            <h3>🛡️ Security Features Active</h3>
+            <ul>
+                <li>✅ Passwords stored as BCrypt hash</li>
+                <li>✅ Account locks after 3 failed attempts</li>
+                <li>✅ Auto-unlock after 15 minutes</li>
+                <li>✅ CSRF protection enabled</li>
+                <li>✅ Session management active</li>
+            </ul>
+        </div>
+
+        <!-- Show admin link only for admin role -->
+        <div sec:authorize="hasRole('ADMIN')" class="admin-panel">
+            <h3>⚙️ Admin Panel</h3>
+            <a href="/admin/users" class="btn btn-primary">View All Users & Lock Status</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

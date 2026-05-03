@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    pom.xml — Maven Project Object Model
+    =====================================
+    Maven is a BUILD TOOL for Java projects.
+    This file defines:
+      1. Project metadata (groupId, artifactId, version)
+      2. Dependencies (libraries we need)
+      3. Build plugins
+
+    THEORY (Unit IV – Spring Boot):
+    Spring Boot uses "starter" dependencies that bundle
+    everything needed for a feature (e.g. spring-boot-starter-web
+    includes Tomcat server + Spring MVC + Jackson JSON).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Spring Boot Parent POM:
+        Inherits default dependency versions so we don't
+        need to specify versions for most Spring libraries.
+        This is "opinionated configuration" — a key Spring Boot feature.
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.3</version>
+        <relativePath/>
+    </parent>
+
+    <!-- ── Project Identity ─────────────────────────────── -->
+    <groupId>com.lab32</groupId>         <!-- Company/group identifier -->
+    <artifactId>security</artifactId>    <!-- Project name (also the JAR name) -->
+    <version>0.0.1-SNAPSHOT</version>    <!-- SNAPSHOT = development version -->
+    <name>lab32-bcrypt-security</name>
+    <description>Lab Q32: Spring Boot BCrypt Password Encryption</description>
+
+    <!-- Java version -->
+    <properties>
+        <java.version>17</java.version>  <!-- Java 17 LTS — required for Spring Boot 3 -->
+    </properties>
+
+    <!-- ── Dependencies (Libraries) ─────────────────────── -->
+    <dependencies>
+
+        <!--
+            1. Spring Boot Web Starter
+            Includes: Spring MVC, embedded Tomcat server, Jackson JSON
+            Lets us create REST endpoints and serve HTML pages
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!--
+            2. Spring Security Starter
+            Includes: BCryptPasswordEncoder, authentication,
+                      authorization, CSRF protection
+            This is the KEY dependency for Lab Q32
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!--
+            3. Spring Data JPA Starter
+            Includes: Hibernate ORM, JPA (Java Persistence API)
+            Lets us interact with the database using Java objects
+            instead of writing SQL manually
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!--
+            4. Thymeleaf Template Engine
+            Server-side HTML rendering (like JSP but modern)
+            Thymeleaf + Spring Security: automatic CSRF tokens in forms
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+        <!--
+            5. Thymeleaf Spring Security Extras
+            Adds security-aware Thymeleaf tags:
+            th:if="${#authorization.expression('isAuthenticated()')}"
+        -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
+        <!--
+            6. H2 In-Memory Database
+            A Java-based database that runs IN MEMORY — no installation needed!
+            Perfect for labs and demos.
+            scope=runtime: only needed when the app is running (not compiling)
+            NOTE: Data is lost when app stops. For production use MySQL/PostgreSQL.
+        -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!--
+            7. Validation Starter
+            Provides @Valid, @NotBlank, @Size, @Email annotations
+            for validating request data
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!--
+            8. Lombok
+            Auto-generates boilerplate Java code:
+            @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor
+            Keeps code clean and readable
+            scope=provided: only needed during compilation
+        -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!--
+            9. Spring Boot Test
+            Includes JUnit 5, Mockito for unit testing
+            scope=test: only used during mvn test
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Spring Security Test utilities -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <!-- ── Build Configuration ───────────────────────────── -->
+    <build>
+        <plugins>
+            <!--
+                Spring Boot Maven Plugin
+                - mvn spring-boot:run → starts the application
+                - mvn package → creates executable JAR
+                Excludes Lombok from the final JAR (not needed at runtime)
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

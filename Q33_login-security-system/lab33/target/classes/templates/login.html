@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!-- Thymeleaf uses xmlns:th to add dynamic expressions like th:text, th:if -->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Lab 33</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="container">
+    <div class="card login-card">
+        <div class="card-header">
+            <h2>🔐 Login</h2>
+            <p>Lab 33 — Failed Login Tracker</p>
+        </div>
+
+        <!-- ERROR MESSAGE: shown only if errorMsg attribute is set -->
+        <!-- th:if checks if the variable exists; th:text renders its value -->
+        <div class="alert alert-danger" th:if="${errorMsg}" th:text="${errorMsg}"></div>
+
+        <!-- SUCCESS MESSAGE: after logout or registration -->
+        <div class="alert alert-success" th:if="${logoutMsg}" th:text="${logoutMsg}"></div>
+
+        <!-- LOGIN FORM -->
+        <!-- action="/login" matches Spring Security's default login processing URL -->
+        <!-- method="post" sends credentials in request body (not URL bar) -->
+        <form action="/login" method="post">
+
+            <!-- CSRF Token: Spring Security adds this hidden field automatically -->
+            <!-- It prevents Cross-Site Request Forgery attacks -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div class="form-group">
+                <label for="username">👤 Username</label>
+                <input type="text"
+                       id="username"
+                       name="username"
+                       placeholder="Enter username"
+                       required
+                       autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">🔑 Password</label>
+                <input type="password"
+                       id="password"
+                       name="password"
+                       placeholder="Enter password"
+                       required
+                       autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+
+        <div class="card-footer">
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+        </div>
+
+        <!-- Demo credentials box for testing -->
+        <div class="demo-box">
+            <h4>🧪 Demo Credentials</h4>
+            <p><strong>admin</strong> / admin123 (Admin)</p>
+            <p><strong>john</strong> / john123 (User)</p>
+            <p><strong>alice</strong> / alice123 (User)</p>
+            <p style="color:#e74c3c; font-size:0.85em;">⚠️ Account locks after 3 failed attempts (15 min)</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

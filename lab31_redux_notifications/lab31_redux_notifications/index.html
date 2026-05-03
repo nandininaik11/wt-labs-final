@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<!-- HTML5 DOCTYPE — modern browser rendering mode -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- RESPONSIVE: scales page correctly on mobile/tablet/desktop -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 31 – Redux Notifications</title>
+
+  <!-- Google Fonts: Space Grotesk (heading) + IBM Plex Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!--
+    ================================================================
+    CDN IMPORTS — In a real Vite/CRA project these are npm packages:
+      npm install react react-dom redux react-redux
+
+    react.development.js      → React core (hooks, JSX runtime)
+    react-dom.development.js  → Renders Virtual DOM to real DOM
+    redux.js                  → Redux library (createStore, combineReducers)
+    react-redux.js            → Connects React ↔ Redux (Provider, useSelector, useDispatch)
+    babel.min.js              → Transpiles JSX to plain JS in browser
+
+    SYLLABUS → Unit V: React, Redux, Flux
+    ================================================================
+  -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/redux@4/dist/redux.js"></script>
+  <script src="https://unpkg.com/react-redux@8/dist/react-redux.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* ============================================================
+       CSS — all visual styling. Theme: dark professional dashboard.
+       SYLLABUS → Unit I: CSS, Responsive Design
+    ============================================================ */
+    :root {
+      --bg:       #0e0e16;
+      --surface:  #16162a;
+      --surface2: #1e1e36;
+      --border:   #2a2a48;
+      --text:     #e8e8f8;
+      --muted:    #8888aa;
+      --radius:   10px;
+      /* Notification type colors */
+      --success:  #22c55e;
+      --error:    #ef4444;
+      --warning:  #f59e0b;
+      --info:     #3b82f6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body, #root { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    /* ---- LAYOUT SHELL ---- */
+    .shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- HEADER ---- */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header h1 span { color: #6c63ff; }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1.5px solid #6c63ff;
+      color: #a89cff;
+      background: rgba(108,99,255,0.1);
+    }
+
+    /* ---- MAIN TWO-COLUMN LAYOUT ---- */
+    /* CSS Grid for side-by-side panels, stacks on mobile */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 380px 1fr; /* fixed left, flexible right */
+      grid-template-rows: auto;
+      gap: 0;
+    }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; } /* single column on mobile */
+    }
+
+    /* ---- LEFT PANEL: CONTROLS ---- */
+    .panel-left {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    /* ---- RIGHT PANEL: NOTIFICATION FEED ---- */
+    .panel-right {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    /* ---- SECTION TITLES ---- */
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ---- FORM CARD ---- */
+    .form-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    /* Form field: label + input */
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    /* input[type="text"] and select — HTML5 form elements */
+    .field input[type="text"],
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: #6c63ff;
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+    }
+
+    .field textarea { resize: vertical; min-height: 60px; }
+
+    /* TYPE SELECTOR — 4 buttons for notification types */
+    .type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .type-btn {
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: 1.5px solid;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      background: transparent;
+    }
+
+    .type-btn.success { border-color: var(--success); color: var(--success); }
+    .type-btn.error   { border-color: var(--error);   color: var(--error);   }
+    .type-btn.warning { border-color: var(--warning);  color: var(--warning); }
+    .type-btn.info    { border-color: var(--info);     color: var(--info);    }
+
+    .type-btn.success.selected { background: rgba(34,197,94,0.15);  }
+    .type-btn.error.selected   { background: rgba(239,68,68,0.15);  }
+    .type-btn.warning.selected { background: rgba(245,158,11,0.15); }
+    .type-btn.info.selected    { background: rgba(59,130,246,0.15); }
+
+    /* ADD button */
+    .btn-add {
+      width: 100%;
+      padding: 11px;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 4px;
+    }
+
+    .btn-add:hover  { background: #5a52e0; }
+    .btn-add:active { transform: scale(0.98); }
+
+    /* QUICK FIRE BUTTONS — preset notifications */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .quick-btn {
+      padding: 9px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+
+    .quick-btn:hover {
+      background: var(--border);
+      border-color: #6c63ff;
+    }
+
+    /* CLEAR ALL BUTTON */
+    .btn-clear {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: var(--error);
+      border: 1.5px solid rgba(239,68,68,0.4);
+      border-radius: 7px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-clear:hover { background: rgba(239,68,68,0.08); }
+
+    /* REDUX STATE DISPLAY */
+    .redux-display {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      color: #a89cff;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 180px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+
+    /* ====================================================
+       NOTIFICATION CARDS — right panel
+       TASK 4: Display notifications in the UI
+       TASK 5: Allow users to dismiss (× button)
+    ==================================================== */
+    .notif-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Base notification card */
+    .notif-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      /* Animation: card slides in from right when added */
+      animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Left colored border accent by type */
+    .notif-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .notif-card.success { border-color: rgba(34,197,94,0.3);  }
+    .notif-card.error   { border-color: rgba(239,68,68,0.3);  }
+    .notif-card.warning { border-color: rgba(245,158,11,0.3); }
+    .notif-card.info    { border-color: rgba(59,130,246,0.3); }
+
+    .notif-card.success::before { background: var(--success); }
+    .notif-card.error::before   { background: var(--error);   }
+    .notif-card.warning::before { background: var(--warning); }
+    .notif-card.info::before    { background: var(--info);    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(24px) scale(0.96); }
+      to   { opacity: 1; transform: translateX(0)    scale(1);    }
+    }
+
+    /* Notification icon circle */
+    .notif-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .notif-body { flex: 1; min-width: 0; }
+
+    /* Header row: title + time */
+    .notif-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .notif-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .notif-time {
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .notif-msg {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ID + type badges */
+    .notif-meta {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .meta-tag.success { background: rgba(34,197,94,0.12);  color: var(--success); }
+    .meta-tag.error   { background: rgba(239,68,68,0.12);  color: var(--error);   }
+    .meta-tag.warning { background: rgba(245,158,11,0.12); color: var(--warning); }
+    .meta-tag.info    { background: rgba(59,130,246,0.12); color: var(--info);    }
+    .meta-tag.id      { background: rgba(108,99,255,0.12); color: #a89cff;        }
+
+    /* DISMISS BUTTON (Task 5) — the × button */
+    .dismiss-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 5px;
+      line-height: 1;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .dismiss-btn:hover {
+      color: var(--error);
+      background: rgba(239,68,68,0.1);
+    }
+
+    /* EMPTY STATE — shown when no notifications */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-icon { font-size: 3.5rem; display: block; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state h3 { font-family: 'Space Grotesk', sans-serif; margin-bottom: 6px; opacity: 0.7; }
+    .empty-state p  { font-size: 0.83rem; line-height: 1.6; opacity: 0.5; }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-top: 2px;
+      display: block;
+    }
+
+    .stat-box.success .stat-val { color: var(--success); }
+    .stat-box.error   .stat-val { color: var(--error);   }
+    .stat-box.warning .stat-val { color: var(--warning); }
+    .stat-box.info    .stat-val { color: var(--info);    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 14px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- React mounts inside #root -->
+  <div id="root"></div>
+
+  <!--
+    type="text/babel" — Babel transpiles JSX to plain JS.
+    In Vite project: .jsx files are transpiled at build time.
+  -->
+  <script type="text/babel">
+
+    /*
+    ================================================================
+    LAB Q31 — Redux Notification System
+
+    FIVE TASKS COVERED:
+    Task 1: Redux Store for notifications (createStore)
+    Task 2: Actions — ADD_NOTIFICATION, REMOVE_NOTIFICATION, CLEAR_ALL
+    Task 3: Reducer — pure function updating notification state
+    Task 4: Display notifications in the UI (useSelector)
+    Task 5: Dismiss notifications (× button → dispatch REMOVE)
+
+    CONCEPTS (Unit V Syllabus):
+    - Redux: store, actions, reducers, dispatch, subscribe
+    - react-redux: Provider, useSelector, useDispatch
+    - React: useState, functional components, JSX, props, events
+    ================================================================
+    */
+
+    // Destructure from CDN globals
+    const { useState, useEffect, useCallback } = React;
+    const { createStore }                       = Redux;
+    const { Provider, useSelector, useDispatch } = ReactRedux;
+
+
+    /* ============================================================
+       TASK 2: ACTION TYPES
+       Constants for action type strings.
+       Using constants prevents typos (typo in string = silent bug).
+       SYLLABUS → Unit V: Redux, Flux
+    ============================================================ */
+    const ADD_NOTIFICATION    = 'ADD_NOTIFICATION';
+    const REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION';
+    const CLEAR_ALL           = 'CLEAR_ALL';
+
+
+    /* ============================================================
+       TASK 2: ACTION CREATORS
+       Functions that return action objects.
+       
+       An Action = a plain JS object with:
+         { type: 'ACTION_TYPE', payload: data }
+       
+       Actions are the ONLY way to change Redux state.
+       You dispatch an action → reducer processes it → state updates.
+       SYLLABUS → Unit V: Redux, Flux
+    ============================================================ */
+
+    // Counter for unique IDs — increments with each notification
+    let notifIdCounter = 1;
+
+    // ADD_NOTIFICATION action creator
+    // Returns an action object with type and notification payload
+    function addNotification(title, message, type = 'info') {
+      return {
+        type: ADD_NOTIFICATION,   // required 'type' field
+        payload: {                // data the reducer needs
+          id:        notifIdCounter++,             // unique ID
+          title:     title,
+          message:   message,
+          notifType: type,                         // 'success'|'error'|'warning'|'info'
+          timestamp: new Date().toLocaleTimeString(), // time when added
+        }
+      };
+    }
+
+    // REMOVE_NOTIFICATION action creator
+    // Only needs the ID to know which notification to remove
+    function removeNotification(id) {
+      return {
+        type: REMOVE_NOTIFICATION,
+        payload: { id }           // shorthand for { id: id }
+      };
+    }
+
+    // CLEAR_ALL action creator — removes every notification
+    function clearAll() {
+      return { type: CLEAR_ALL };
+    }
+
+
+    /* ============================================================
+       TASK 3: REDUCER
+       A PURE FUNCTION that takes (currentState, action) and returns
+       the NEW state. It NEVER mutates the old state.
+       
+       Pure function rules:
+         1. Same input → always same output
+         2. No side effects (no API calls, no mutating arguments)
+         3. Returns a NEW array/object (never modifies existing one)
+       
+       Signature: reducer(state = initialState, action) => newState
+       SYLLABUS → Unit V: Redux
+    ============================================================ */
+
+    // Initial state — the default value before any actions are dispatched
+    const initialState = {
+      notifications: [],   // Array of notification objects
+      totalAdded: 0,       // Running count (even after clearing)
+    };
+
+    function notificationReducer(state = initialState, action) {
+      // switch/case on action.type — standard Redux pattern
+      switch (action.type) {
+
+        case ADD_NOTIFICATION:
+          // Return a NEW state object — never mutate `state` directly!
+          // Spread operator (...) copies all existing properties
+          return {
+            ...state,
+            // Add new notification at the BEGINNING of the array (newest first)
+            notifications: [action.payload, ...state.notifications],
+            totalAdded: state.totalAdded + 1,
+          };
+
+        case REMOVE_NOTIFICATION:
+          return {
+            ...state,
+            // filter() returns a NEW array excluding the removed item
+            // TASK 5: Dismiss notification by ID
+            notifications: state.notifications.filter(
+              function(n) { return n.id !== action.payload.id; }
+            ),
+          };
+
+        case CLEAR_ALL:
+          return {
+            ...state,
+            notifications: [],   // Empty array = all dismissed
+          };
+
+        default:
+          // IMPORTANT: always return state for unknown actions
+          return state;
+      }
+    }
+
+
+    /* ============================================================
+       TASK 1: CREATE REDUX STORE
+       createStore(reducer) creates the central state store.
+       
+       The store has three key methods:
+         store.getState()       → returns current state
+         store.dispatch(action) → sends action to reducer
+         store.subscribe(fn)    → runs fn after every state change
+       
+       In this app, react-redux's Provider + hooks handle subscribe
+       and getState automatically.
+       SYLLABUS → Unit V: Redux
+    ============================================================ */
+    const store = createStore(notificationReducer);
+
+
+    /* ============================================================
+       HELPER — icon and label for each notification type
+    ============================================================ */
+    function getTypeInfo(type) {
+      const map = {
+        success: { icon: '✅', label: 'Success' },
+        error:   { icon: '❌', label: 'Error'   },
+        warning: { icon: '⚠️', label: 'Warning' },
+        info:    { icon: 'ℹ️', label: 'Info'    },
+      };
+      return map[type] || map.info;
+    }
+
+
+    /* ============================================================
+       COMPONENT: NotificationCard
+       Renders a single notification.
+       
+       TASK 4: Displays title, message, type, timestamp
+       TASK 5: Has a dismiss button that dispatches REMOVE action
+       
+       Props from parent:
+         notification → the notification object
+       SYLLABUS → Unit V: React component, Props, Events
+    ============================================================ */
+    function NotificationCard({ notification }) {
+      // useDispatch() hook returns the Redux store's dispatch function.
+      // Calling dispatch(action) sends the action to the reducer.
+      // SYLLABUS → Unit V: Redux, react-redux
+      const dispatch = useDispatch();
+
+      const { id, title, message, notifType, timestamp } = notification;
+      const { icon, label } = getTypeInfo(notifType);
+
+      // TASK 5: Dismiss handler — dispatches REMOVE_NOTIFICATION action
+      function handleDismiss() {
+        dispatch(removeNotification(id));
+        // Flow: dispatch → reducer(REMOVE_NOTIFICATION) → new state
+        //       → useSelector detects change → React re-renders list
+      }
+
+      return (
+        /* className includes type for CSS color coding */
+        <div className={`notif-card ${notifType}`}>
+          <span className="notif-icon">{icon}</span>
+
+          <div className="notif-body">
+            <div className="notif-header">
+              <span className="notif-title">{title}</span>
+              <span className="notif-time">{timestamp}</span>
+            </div>
+            <p className="notif-msg">{message}</p>
+            <div className="notif-meta">
+              {/* Type tag */}
+              <span className={`meta-tag ${notifType}`}>{label}</span>
+              {/* ID tag — shows Redux state ID */}
+              <span className="meta-tag id">ID: {id}</span>
+            </div>
+          </div>
+
+          {/* TASK 5: Dismiss button — × — calls handleDismiss */}
+          <button
+            className="dismiss-btn"
+            onClick={handleDismiss}
+            title="Dismiss notification"
+            aria-label="Dismiss"
+          >
+            ×
+          </button>
+        </div>
+      );
+    }
+
+
+    /* ============================================================
+       COMPONENT: NotificationFeed
+       Right panel — reads notifications from Redux store and
+       renders the list.
+       
+       TASK 4: useSelector reads state from store.
+       useSelector(selectorFn) subscribes to the store.
+       When state changes, this component automatically re-renders.
+       SYLLABUS → Unit V: Redux, react-redux
+    ============================================================ */
+    function NotificationFeed() {
+      // useSelector hook reads state from the Redux store.
+      // The selector function receives the entire state object and
+      // returns the slice we need.
+      // SYLLABUS → Unit V: Redux
+      const notifications = useSelector(
+        function(state) { return state.notifications; }
+      );
+
+      const totalAdded = useSelector(
+        function(state) { return state.totalAdded; }
+      );
+
+      const dispatch = useDispatch();
+
+      // Count by type for stats
+      const counts = notifications.reduce(function(acc, n) {
+        acc[n.notifType] = (acc[n.notifType] || 0) + 1;
+        return acc;
+      }, { success: 0, error: 0, warning: 0, info: 0 });
+
+      return (
+        <div className="panel-right">
+
+          {/* STATS ROW */}
+          <div className="stats-row">
+            <div className="stat-box success">
+              <span className="stat-val">{counts.success}</span>
+              <span className="stat-label">Success</span>
+            </div>
+            <div className="stat-box error">
+              <span className="stat-val">{counts.error}</span>
+              <span className="stat-label">Error</span>
+            </div>
+            <div className="stat-box warning">
+              <span className="stat-val">{counts.warning}</span>
+              <span className="stat-label">Warning</span>
+            </div>
+            <div className="stat-box info">
+              <span className="stat-val">{counts.info}</span>
+              <span className="stat-label">Info</span>
+            </div>
+          </div>
+
+          <div className="section-title">
+            Notification Feed ({notifications.length} active · {totalAdded} total)
+          </div>
+
+          {/* Conditional render: empty state OR list of cards */}
+          {notifications.length === 0 ? (
+            <div className="empty-state">
+              <span className="empty-icon">🔔</span>
+              <h3>No Notifications</h3>
+              <p>
+                Use the panel on the left to add notifications.<br />
+                They will appear here, managed by Redux state.
+              </p>
+            </div>
+          ) : (
+            <div className="notif-list">
+              {/*
+                .map() iterates the notifications array and renders
+                a NotificationCard for each one.
+                'key' prop: React needs a unique key for each list item
+                to efficiently update the DOM.
+                SYLLABUS → Unit V: Keys in React
+              */}
+              {notifications.map(function(n) {
+                return (
+                  <NotificationCard
+                    key={n.id}           /* unique key for React reconciliation */
+                    notification={n}     /* pass the full notification as prop */
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+
+    /* ============================================================
+       COMPONENT: ControlPanel
+       Left panel — form to create notifications and quick presets.
+       SYLLABUS → Unit V: React, Forms, Events, useState
+    ============================================================ */
+    function ControlPanel() {
+      // LOCAL STATE — for the form fields only.
+      // These are React useState hooks, NOT Redux state.
+      // (Form input values don't need to be in global Redux store.)
+      const [title,   setTitle]   = useState('');
+      const [message, setMessage] = useState('');
+      const [type,    setType]    = useState('info'); // default type
+
+      const dispatch = useDispatch();
+
+      // Read total count from Redux store for display
+      const total = useSelector(s => s.totalAdded);
+      const count = useSelector(s => s.notifications.length);
+
+      // Raw Redux state as JSON — for examiner demo
+      const rawState = useSelector(s => JSON.stringify(s, null, 2));
+
+      // TASK 2: Dispatch ADD_NOTIFICATION action on form submit
+      function handleAdd() {
+        if (!title.trim() || !message.trim()) {
+          // Basic validation: both fields required
+          dispatch(addNotification('Validation Error', 'Title and message are required.', 'error'));
+          return;
+        }
+        // Dispatch the action — goes to reducer → state updates → UI re-renders
+        dispatch(addNotification(title.trim(), message.trim(), type));
+        // Reset form fields
+        setTitle('');
+        setMessage('');
+      }
+
+      // Enter key to submit
+      function handleKeyDown(e) {
+        if (e.key === 'Enter' && !e.shiftKey) handleAdd();
+      }
+
+      // Quick preset notifications
+      const PRESETS = [
+        { label: '✅ Login Success',   title: 'Login Successful',   msg: 'Welcome back! You have logged in successfully.',              type: 'success' },
+        { label: '❌ Network Error',   title: 'Network Error',       msg: 'Could not connect to server. Please check your connection.', type: 'error'   },
+        { label: '⚠️ Low Storage',     title: 'Low Storage Warning', msg: 'Only 2GB remaining. Please free up disk space.',             type: 'warning' },
+        { label: 'ℹ️ Update Ready',    title: 'Update Available',    msg: 'Version 3.1.0 is ready. Click to install the update.',       type: 'info'    },
+        { label: '✅ File Saved',      title: 'File Saved',          msg: 'Your changes have been saved automatically.',                type: 'success' },
+        { label: '❌ Upload Failed',   title: 'Upload Failed',       msg: 'The file upload failed. Maximum size is 5MB.',               type: 'error'   },
+      ];
+
+      return (
+        <div className="panel-left">
+
+          {/* SECTION: ADD NOTIFICATION FORM */}
+          <div>
+            <div className="section-title">Add Notification</div>
+            <div className="form-card">
+
+              {/* Title input */}
+              <div className="field">
+                <label>Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Login Successful"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+
+              {/* Message textarea */}
+              <div className="field">
+                <label>Message</label>
+                <textarea
+                  placeholder="Notification message..."
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                />
+              </div>
+
+              {/* Type selector — 4 color-coded buttons */}
+              <div className="field">
+                <label>Type</label>
+                <div className="type-selector">
+                  {['success', 'error', 'warning', 'info'].map(t => (
+                    <button
+                      key={t}
+                      className={`type-btn ${t} ${type === t ? 'selected' : ''}`}
+                      onClick={() => setType(t)}
+                    >
+                      {getTypeInfo(t).icon} {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* TASK 2: Dispatch ADD_NOTIFICATION */}
+              <button className="btn-add" onClick={handleAdd}>
+                + Add Notification to Store
+              </button>
+            </div>
+          </div>
+
+          {/* SECTION: QUICK PRESETS */}
+          <div>
+            <div className="section-title">Quick Fire Presets</div>
+            <div className="quick-grid">
+              {PRESETS.map(function(p, i) {
+                return (
+                  <button
+                    key={i}
+                    className="quick-btn"
+                    onClick={() => dispatch(addNotification(p.title, p.msg, p.type))}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* TASK 5: Clear all (bulk dismiss) */}
+          <button
+            className="btn-clear"
+            onClick={() => dispatch(clearAll())}
+            disabled={count === 0}
+          >
+            🗑 Clear All ({count}) Notifications
+          </button>
+
+          {/* REDUX STATE LIVE VIEW — for examiner demo */}
+          <div>
+            <div className="section-title">Redux Store State (Live)</div>
+            <div className="redux-display">{rawState}</div>
+          </div>
+
+        </div>
+      );
+    }
+
+
+    /* ============================================================
+       ROOT COMPONENT: App
+       Wraps everything in the layout shell.
+    ============================================================ */
+    function App() {
+      return (
+        <div className="shell">
+
+          <header className="header">
+            <h1>🔔 <span>Redux</span> Notification System</h1>
+            <span className="badge">Lab 31 · Redux + React</span>
+          </header>
+
+          <div className="main">
+            <ControlPanel />
+            <NotificationFeed />
+          </div>
+
+          <footer className="footer">
+            Lab 31 · Redux Notification System · Web Technology
+          </footer>
+
+        </div>
+      );
+    }
+
+
+    /* ============================================================
+       PROVIDER + RENDER
+       
+       <Provider store={store}> wraps the entire app.
+       It makes the Redux store available to ALL child components
+       via useSelector and useDispatch hooks — without prop drilling.
+       
+       This is how react-redux connects React ↔ Redux.
+       SYLLABUS → Unit V: Redux, react-redux
+    ============================================================ */
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+Now let me create all the Spring Boot project files:Now the HTML templates:Now create the ZIP:---
+
+## 📖 Complete Theory — Spring Boot Security (WT Unit IV Viva Ready)
+
+---
+
+### 🏗️ What is Spring Boot?
+Spring Boot is a **framework on top of Spring Framework** that eliminates manual configuration. Instead of writing 200 lines of XML config, Spring Boot **auto-configures** everything based on what libraries are in your project (this is called *opinionated defaults*).
+
+**Key idea:** You just add a dependency like `spring-boot-starter-security` and Spring Boot sets up the entire security pipeline automatically.
+
+---
+
+### 🔐 Spring Security — How Login Works (Flow)
+
+```
+Browser POSTs /login (username + password)
+        ↓
+Spring Security's UsernamePasswordAuthenticationFilter intercepts
+        ↓
+Calls CustomUserDetailsService.loadUserByUsername(username)
+        ↓
+We load User from DB, check if accountNonLocked = true
+        ↓
+Spring compares submitted password with BCrypt hash
+        ↓
+SUCCESS → AuthenticationSuccessHandler → /dashboard
+FAILURE → AuthenticationFailureHandler → /login?error=...
+```
+
+---
+
+### 🔑 BCrypt Password Hashing
+- BCrypt is a **one-way hashing algorithm** — you can never reverse it
+- It automatically adds a **salt** (random bytes) to prevent rainbow table attacks
+- Each hash looks different even for the same password: `$2a$10$abc...xyz`
+- Spring's `PasswordEncoder.matches("plain", hash)` verifies without decoding
+
+---
+
+### 🔒 Account Locking Logic
+| Event | Action |
+|---|---|
+| Wrong password | `failedAttempts++` in DB |
+| `failedAttempts >= 3` | `accountNonLocked = false`, `lockTime = now()` |
+| Login while locked | `LockedException` thrown, redirect to `/login?error=locked` |
+| 15 minutes pass | Auto-unlock: reset `failedAttempts=0`, `accountNonLocked=true` |
+| Admin clicks Unlock | Same reset, manual override |
+
+---
+
+### 🛡️ CSRF Protection
+**Cross-Site Request Forgery** — attacker tricks user's browser into making a request. Spring Security defends by generating a unique token for every form. The server rejects requests without the matching token. That's why all POST forms have:
+```html
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+```
+
+---
+
+### 🗂️ Project File Structure
+```
+lab33/
+├── pom.xml                          ← Maven dependencies
+└── src/main/
+    ├── java/com/security/logintracker/
+    │   ├── LoginTrackerApplication.java     ← Main class (@SpringBootApplication)
+    │   ├── model/
+    │   │   └── User.java                    ← @Entity (maps to DB table)
+    │   ├── repository/
+    │   │   └── UserRepository.java          ← JPA DB access
+    │   ├── service/
+    │   │   ├── LoginAttemptService.java     ← Increment/reset counter, lock logic
+    │   │   └── CustomUserDetailsService.java← Spring Security loads user from DB
+    │   ├── config/
+    │   │   ├── SecurityConfig.java          ← HEART: URL rules, login/logout config
+    │   │   └── DataInitializer.java         ← Seeds demo users on startup
+    │   └── controller/
+    │       └── MainController.java          ← Handles /login, /dashboard, /register
+    └── resources/
+        ├── application.properties           ← Config (DB, ports, custom settings)
+        ├── templates/                        ← Thymeleaf HTML pages
+        │   ├── login.html
+        │   ├── dashboard.html
+        │   ├── register.html
+        │   └── admin-users.html
+        └── static/css/style.css             ← CSS
+```
+
+---
+
+## ⚙️ Setup & Run Commands
+
+### Prerequisites
+- **Java 17+** → `java -version`
+- **Maven 3.6+** → `mvn -version`
+- VS Code with **Extension Pack for Java** installed
+
+### Steps
+```bash
+# 1. Extract the ZIP → folder called lab33/
+
+# 2. Open in VS Code
+File → Open Folder → select lab33/
+
+# 3. Open terminal in VS Code (Ctrl+`)
+
+# 4. Run the application
+mvn spring-boot:run
+
+# Wait for: "Started LoginTrackerApplication in X seconds"
+# You'll also see the demo credentials printed in console
+```
+
+### Access the app
+| URL | Purpose |
+|---|---|
+| `http://localhost:8080/login` | Login page |
+| `http://localhost:8080/register` | Register new user |
+| `http://localhost:8080/dashboard` | After login |
+| `http://localhost:8080/admin/users` | Admin panel (login as `admin`) |
+| `http://localhost:8080/h2-console` | View database (JDBC URL: `jdbc:h2:mem:logindb`) |
+
+---
+
+## 🖥️ Expected Output — What to Show Examiner
+
+**Step 1 — Successful login:**
+Login as `john` / `john123` → Dashboard shows ✅ Welcome john!
+
+**Step 2 — Failed attempt (show error):**
+Login as `john` with wrong password → "Invalid username or password. 2 attempt(s) remaining before lock."
+
+**Step 3 — Account locked:**
+Enter wrong password 3 times → "Your account is locked due to multiple failed attempts."
+
+**Step 4 — Admin panel:**
+Login as `admin` / `admin123` → Click "Manage Users" → See john's row highlighted red with 🔒 Locked badge
+
+**Step 5 — Manual unlock:**
+Click Unlock button next to john → John can now login again
+
+**Step 6 — H2 Console:**
+Go to `http://localhost:8080/h2-console` → JDBC URL: `jdbc:h2:mem:logindb` → Run: `SELECT * FROM APP_USER;` — shows `failed_attempts` and `account_non_locked` columns live
+
+---
+
+## ❓ Likely Viva Questions + Answers
+
+**Q: What is Spring Security?**
+A: Spring Security is a framework that handles authentication (who are you?) and authorization (what can you do?) in Spring applications. It intercepts HTTP requests and checks credentials before allowing access.
+
+**Q: What is BCrypt and why use it?**
+A: BCrypt is a one-way hashing algorithm for passwords. We use it because passwords must never be stored in plain text. BCrypt adds a random salt automatically, so even identical passwords produce different hashes.
+
+**Q: What is the difference between Authentication and Authorization?**
+A: Authentication = verifying identity (login). Authorization = checking permissions (can this user access `/admin`?).
+
+**Q: What is UserDetailsService?**
+A: It's a Spring Security interface with one method: `loadUserByUsername()`. Spring calls this during login. We implement it to load our User from the database.
+
+**Q: What is CSRF and how does Spring prevent it?**
+A: CSRF (Cross-Site Request Forgery) is an attack where a malicious site tricks your browser into making unwanted requests. Spring Security generates a unique token for each session; every form must include it, so forged requests from other sites are rejected.
+
+**Q: How does account locking work in your app?**
+A: We maintain a `failedAttempts` counter in the database. On each failed login, we increment it. When it reaches 3, we set `accountNonLocked = false` and record the `lockTime`. On the next login attempt, `loadUserByUsername()` checks if the lock duration (15 min) has passed, and auto-unlocks if it has.
+
+**Q: What is @SpringBootApplication?**
+A: It combines `@Configuration` (config class), `@EnableAutoConfiguration` (auto-setup based on classpath), and `@ComponentScan` (scan for Spring beans in the package).
+
+**Q: What is JPA and H2?**
+A: JPA (Java Persistence API) is a standard for storing Java objects in databases using annotations like `@Entity`. H2 is an in-memory database — great for development since it requires no installation; data resets on restart.
+
+**Q: What is Thymeleaf?**
+A: Thymeleaf is a Java template engine. It lets you write HTML with dynamic expressions like `th:text`, `th:if`, `th:each` which are replaced with real data on the server before sending to the browser.
+
+**Q: What is the role of `@Value` annotation?**
+A: `@Value("${property.key}")` injects values from `application.properties` directly into Java fields. Used here to make `maxFailedAttempts` and `lockDurationMinutes` configurable without changing code.
