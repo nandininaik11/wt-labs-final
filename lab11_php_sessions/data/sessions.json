@@ -1,0 +1,18 @@
+{
+    "Nandini Naik": [
+        {
+            "session_id": "e2b3d4eb6616723202c48165a7d6eaad",
+            "created_at": 1777641393,
+            "last_active": 1777641394,
+            "ip": "::1",
+            "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/147.0.0.0 Safari\/537.36 Edg\/147.0.0.0"
+        },
+        {
+            "session_id": "237059d1b7906ca7b98cb2c5b0255bf7",
+            "created_at": 1777641467,
+            "last_active": 1777641468,
+            "ip": "::1",
+            "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/147.0.0.0 Safari\/537.36 Edg\/147.0.0.0"
+        }
+    ]
+}
