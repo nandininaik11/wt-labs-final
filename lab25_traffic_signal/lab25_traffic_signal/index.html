@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<!-- HTML5 DOCTYPE: modern browser rendering mode -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- UTF-8: supports all international characters -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- RESPONSIVE: scales page to fit any screen size (mobile, tablet, desktop) -->
+
+  <title>Lab 25 – Traffic Signal Lights</title>
+
+  <!-- Google Fonts: Bebas Neue (bold display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==============================================================
+       CSS SECTION
+       All visual styling — colors, layout, animations, glowing LEDs
+    ============================================================== */
+
+    /* CSS Custom Properties — define once, reuse with var() */
+    :root {
+      /* Colors */
+      --bg-sky:    #0d1b2a;    /* deep night sky */
+      --bg-road:   #1a1a1a;    /* dark asphalt */
+      --pole:      #2c2c2c;    /* traffic pole color */
+      --housing:   #111;       /* signal box color */
+      --rim:       #333;       /* LED rim ring */
+      --text:      #e8e8e8;
+      --muted:     #778899;
+
+      /* Active LED colors */
+      --red-on:    #ff2020;
+      --red-glow:  rgba(255, 32, 32, 0.75);
+      --yellow-on: #ffd700;
+      --yellow-glow: rgba(255, 215, 0, 0.7);
+      --green-on:  #00e676;
+      --green-glow: rgba(0, 230, 118, 0.7);
+
+      /* Dim (off) LED colors */
+      --red-off:    #3a0a0a;
+      --yellow-off: #3a3000;
+      --green-off:  #003a18;
+
+      --radius: 12px;
+    }
+
+    /* Universal box-sizing reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+
+    /* BODY — full-page night scene background */
+    body {
+      background: linear-gradient(
+        to bottom,
+        #0d1b2a 0%,    /* deep night sky at top */
+        #1a2a3a 60%,
+        #111 100%      /* dark asphalt at bottom */
+      );
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    header h1 {
+      font-family: 'Bebas Neue', sans-serif; /* bold display font */
+      font-size: clamp(1.3rem, 4vw, 2rem);  /* clamp = responsive font */
+      letter-spacing: 3px;
+      color: var(--text);
+    }
+
+    header h1 span { color: var(--yellow-on); }
+
+    .badge {
+      background: rgba(255,215,0,0.12);
+      border: 1px solid rgba(255,215,0,0.3);
+      color: var(--yellow-on);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+    }
+
+    /* ---- SCENE AREA ---- */
+    /* The "road scene" holding the signal poles */
+    .scene {
+      width: 100%;
+      max-width: 1100px;
+      padding: 40px 20px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;  /* align poles to bottom like standing on ground */
+      gap: clamp(20px, 5vw, 80px);
+      flex-wrap: wrap;        /* wrap on small screens */
+    }
+
+    /* ---- SIGNAL POLE UNIT ---- */
+    /* Each pole unit = vertical pole + housing box at top */
+    .signal-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Label below each signal */
+    .signal-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* ---- TRAFFIC SIGNAL HOUSING BOX ---- */
+    /* The rectangular black box containing the 3 LED lights */
+    .signal-box {
+      background: var(--housing);
+      border: 3px solid #222;
+      /* border-radius creates the slightly rounded housing corners */
+      border-radius: 18px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      /* Box shadow = subtle 3D depth effect */
+      box-shadow:
+        0 0 0 5px #1a1a1a,
+        0 0 0 7px #333,
+        0 8px 30px rgba(0,0,0,0.6);
+      position: relative;
+      /* Width scales with viewport */
+      width: clamp(80px, 12vw, 120px);
+    }
+
+    /* Small visor "hood" above each LED (like real traffic lights) */
+    .signal-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -8px; right: -8px;
+      height: 100%;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    /* ---- THE LED LIGHT ---- */
+    /* A circle representing one LED bulb */
+    .led {
+      /* width/height make it a circle (when border-radius = 50%) */
+      width: clamp(48px, 8vw, 76px);
+      height: clamp(48px, 8vw, 76px);
+      border-radius: 50%;       /* 50% = perfect circle */
+
+      /* Default = OFF state — dark dim color */
+      background: var(--red-off);
+      border: 3px solid var(--rim);
+
+      /* CSS transition: animates background and box-shadow changes smoothly */
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+
+      /* Flexbox centers the icon inside */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      /* Slight inner shadow to give LED a 3D concave look */
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.5),
+        inset 0 -1px 3px rgba(255,255,255,0.05);
+
+      /* ID for the inner icon emoji */
+      font-size: clamp(1.2rem, 2.5vw, 2rem);
+      position: relative;
+    }
+
+    /* ---- LED "VISOR" — the hood shade above each LED ---- */
+    /* ::before pseudo-element creates the shade without extra HTML */
+    .led::before {
+      content: '';
+      position: absolute;
+      top: -14px;
+      left: -2px; right: -2px;
+      height: 12px;
+      background: #222;
+      border-radius: 4px 4px 0 0;
+    }
+
+    /* ===== LED ACTIVE (ON) STATES =====
+       These classes are ADDED by JavaScript when a light is active.
+       CSS box-shadow spread creates the glowing halo effect.
+    ===== */
+
+    /* RED LED ON */
+    .led.red-active {
+      background: radial-gradient(circle at 35% 35%, #ff6060, var(--red-on));
+      /* box-shadow: horizontal vertical blur spread color */
+      box-shadow:
+        0 0 20px 8px var(--red-glow),    /* outer glow */
+        0 0 50px 15px rgba(255,0,0,0.3), /* wide soft glow */
+        inset 0 2px 8px rgba(255,200,200,0.4); /* inner highlight */
+      border-color: rgba(255,80,80,0.6);
+    }
+
+    /* CSS @keyframes — define animation steps from/to or % */
+    /* Pulse animation: glow expands and contracts */
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 20px 8px var(--red-glow), 0 0 50px 15px rgba(255,0,0,0.3), inset 0 2px 8px rgba(255,200,200,0.4); }
+      50%       { box-shadow: 0 0 30px 14px var(--red-glow), 0 0 70px 25px rgba(255,0,0,0.4), inset 0 2px 8px rgba(255,200,200,0.4); }
+    }
+
+    .led.red-active {
+      animation: pulse-red 1.2s ease-in-out infinite;
+    }
+
+    /* YELLOW LED ON */
+    .led.yellow-active {
+      background: radial-gradient(circle at 35% 35%, #ffe066, var(--yellow-on));
+      box-shadow:
+        0 0 20px 8px var(--yellow-glow),
+        0 0 50px 15px rgba(255,215,0,0.3),
+        inset 0 2px 8px rgba(255,255,200,0.4);
+      border-color: rgba(255,220,60,0.7);
+    }
+
+    @keyframes pulse-yellow {
+      0%, 100% { box-shadow: 0 0 20px 8px var(--yellow-glow), 0 0 50px 15px rgba(255,215,0,0.3), inset 0 2px 8px rgba(255,255,200,0.4); }
+      50%       { box-shadow: 0 0 30px 14px var(--yellow-glow), 0 0 70px 25px rgba(255,215,0,0.4), inset 0 2px 8px rgba(255,255,200,0.4); }
+    }
+
+    .led.yellow-active {
+      animation: pulse-yellow 0.8s ease-in-out infinite;
+    }
+
+    /* GREEN LED ON */
+    .led.green-active {
+      background: radial-gradient(circle at 35% 35%, #80ffb0, var(--green-on));
+      box-shadow:
+        0 0 20px 8px var(--green-glow),
+        0 0 50px 15px rgba(0,230,118,0.3),
+        inset 0 2px 8px rgba(180,255,220,0.4);
+      border-color: rgba(0,230,118,0.7);
+    }
+
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 20px 8px var(--green-glow), 0 0 50px 15px rgba(0,230,118,0.3), inset 0 2px 8px rgba(180,255,220,0.4); }
+      50%       { box-shadow: 0 0 30px 14px var(--green-glow), 0 0 70px 25px rgba(0,230,118,0.4), inset 0 2px 8px rgba(180,255,220,0.4); }
+    }
+
+    .led.green-active {
+      animation: pulse-green 1s ease-in-out infinite;
+    }
+
+    /* ---- LED OFF (dim) base colors for each type ---- */
+    .led-red    { background: var(--red-off);    }
+    .led-yellow { background: var(--yellow-off); }
+    .led-green  { background: var(--green-off);  }
+
+    /* ---- POLE ---- */
+    /* The vertical metal pole */
+    .pole {
+      width: clamp(10px, 1.5vw, 16px);
+      height: clamp(80px, 14vw, 160px);
+      background: linear-gradient(to right, #2a2a2a, #444, #2a2a2a);
+      border-radius: 4px;
+    }
+
+    /* ---- GROUND BASE ---- */
+    .base {
+      width: clamp(50px, 8vw, 80px);
+      height: clamp(12px, 2vw, 18px);
+      background: linear-gradient(to bottom, #444, #222);
+      border-radius: 4px 4px 0 0;
+      margin-top: -2px;
+    }
+
+    /* ---- ROAD GROUND STRIP ---- */
+    .road-strip {
+      width: 100%;
+      max-width: 1100px;
+      height: 60px;
+      background: linear-gradient(to bottom, #222, #111);
+      border-top: 3px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      padding: 0 20px;
+      overflow: hidden;
+    }
+
+    /* Dashed white road markings */
+    .road-dash {
+      width: 60px;
+      height: 8px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+    }
+
+    /* ---- CONTROL PANEL ---- */
+    .control-panel {
+      width: 100%;
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 0 20px 40px;
+    }
+
+    .panel-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .panel-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* STATUS INDICATOR ROW */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .status-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .status-dot.red    { background: var(--red-on);    box-shadow: 0 0 10px 3px var(--red-glow); }
+    .status-dot.yellow { background: var(--yellow-on); box-shadow: 0 0 10px 3px var(--yellow-glow); }
+    .status-dot.green  { background: var(--green-on);  box-shadow: 0 0 10px 3px var(--green-glow); }
+    .status-dot.off    { background: #444; box-shadow: none; }
+
+    .status-text {
+      font-size: 0.9rem;
+    }
+
+    .status-text strong { color: var(--yellow-on); }
+
+    /* TIMER BAR */
+    .timer-wrap {
+      margin-bottom: 20px;
+    }
+
+    .timer-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .timer-bar-bg {
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* Progress bar fill — width changed by JS */
+    .timer-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.1s linear, background 0.3s;
+      width: 100%;
+    }
+
+    /* BUTTONS ROW */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Base button style */
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .btn:active { transform: scale(0.97); }
+
+    /* Colored variant buttons */
+    .btn-red    { border-color: rgba(255,32,32,0.4);   color: var(--red-on); }
+    .btn-yellow { border-color: rgba(255,215,0,0.4);   color: var(--yellow-on); }
+    .btn-green  { border-color: rgba(0,230,118,0.4);   color: var(--green-on); }
+    .btn-start  { border-color: rgba(0,230,118,0.5);   background: rgba(0,230,118,0.1); color: var(--green-on); }
+    .btn-stop   { border-color: rgba(255,32,32,0.5);   background: rgba(255,32,32,0.1); color: var(--red-on); }
+
+    /* SPEED CONTROL */
+    .speed-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .speed-row label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      min-width: 100px;
+      accent-color: var(--yellow-on);
+    }
+
+    #speedVal {
+      font-size: 0.82rem;
+      color: var(--yellow-on);
+      min-width: 60px;
+    }
+
+    /* INFO TABLE */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 20px;
+    }
+
+    .info-table th {
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      text-align: left;
+      padding: 9px 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .info-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+
+    .info-table tr:last-child td { border-bottom: none; }
+
+    .dot-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mini-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    /* @media: CSS applied only when screen matches the condition */
+    @media (max-width: 600px) {
+      .scene { gap: 16px; padding: 24px 12px 12px; }
+      .btn-row { gap: 8px; }
+      .btn { padding: 8px 14px; font-size: 0.8rem; }
+    }
+
+    @media (max-width: 400px) {
+      .signal-box { width: 70px; padding: 10px 8px; gap: 8px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <h1>🚦 Traffic <span>Signal</span> Lights</h1>
+    <span class="badge">Lab Question 25 · HTML5 + CSS + JS</span>
+  </header>
+
+  <!-- ===== ROAD SCENE ===== -->
+  <!-- The visual scene: two signal poles on a night road -->
+  <div class="scene">
+
+    <!-- SIGNAL 1: Left-side signal -->
+    <div class="signal-unit">
+      <!-- SIGNAL BOX contains 3 LED circles stacked vertically -->
+      <div class="signal-box" id="signal1">
+        <!-- RED LED — top position -->
+        <!-- id="r1" lets JavaScript target this element to add/remove .red-active -->
+        <div class="led led-red"    id="r1" title="Red - Stop">🛑</div>
+        <!-- YELLOW LED — middle position -->
+        <div class="led led-yellow" id="y1" title="Yellow - Ready / Caution">⚠️</div>
+        <!-- GREEN LED — bottom position -->
+        <div class="led led-green"  id="g1" title="Green - Go">✅</div>
+      </div>
+      <!-- POLE: vertical metal pole below box -->
+      <div class="pole"></div>
+      <!-- BASE: wide base at ground level -->
+      <div class="base"></div>
+      <div class="signal-label">SIGNAL A</div>
+    </div>
+
+    <!-- SIGNAL 2: Right-side signal (opposite phase) -->
+    <div class="signal-unit">
+      <div class="signal-box" id="signal2">
+        <div class="led led-red"    id="r2" title="Red - Stop">🛑</div>
+        <div class="led led-yellow" id="y2" title="Yellow - Ready / Caution">⚠️</div>
+        <div class="led led-green"  id="g2" title="Green - Go">✅</div>
+      </div>
+      <div class="pole"></div>
+      <div class="base"></div>
+      <div class="signal-label">SIGNAL B</div>
+    </div>
+
+  </div><!-- end .scene -->
+
+  <!-- ROAD GROUND STRIP with dashed markings -->
+  <div class="road-strip">
+    <!-- Multiple dashes represent the white road markings -->
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+    <div class="road-dash"></div>
+  </div>
+
+  <!-- ===== CONTROL PANEL ===== -->
+  <div class="control-panel">
+    <div class="panel-card">
+
+      <div class="panel-title">⚙ Control Panel</div>
+
+      <!-- CURRENT STATUS ROW -->
+      <div class="status-row">
+        <div class="status-dot" id="statusDot"></div>
+        <div class="status-text">
+          Current Phase: <strong id="statusText">RED — STOP</strong>
+        </div>
+        <div style="margin-left:auto; font-size:0.82rem; color:var(--muted);">
+          Timer: <span id="countdown" style="color:var(--yellow-on); font-weight:700;">—</span>s
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR: shows how much time remains in current phase -->
+      <div class="timer-wrap">
+        <div class="timer-label">
+          <span>Phase Duration</span>
+          <span id="phaseName">—</span>
+        </div>
+        <!-- Timer bar fill — width% updated by JS every 100ms -->
+        <div class="timer-bar-bg">
+          <div class="timer-bar-fill" id="timerBar"></div>
+        </div>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="btn-row">
+        <!-- Auto-cycle button: JS starts setInterval loop -->
+        <button class="btn btn-start" onclick="startAuto()">▶ Auto Cycle</button>
+        <!-- Stop button: JS calls clearInterval -->
+        <button class="btn btn-stop"  onclick="stopAuto()">⏹ Stop</button>
+
+        <!-- Manual override buttons — directly set a phase -->
+        <button class="btn btn-red"    onclick="setPhase('red')">🔴 Force Red</button>
+        <button class="btn btn-yellow" onclick="setPhase('yellow')">🟡 Force Yellow</button>
+        <button class="btn btn-green"  onclick="setPhase('green')">🟢 Force Green</button>
+      </div>
+
+      <!-- SPEED SLIDER -->
+      <div class="speed-row">
+        <label>Cycle Speed</label>
+        <!-- input type="range" — slider from 0.5x to 3x speed -->
+        <input type="range" id="speedSlider" min="0.5" max="3" step="0.5" value="1"
+               oninput="updateSpeed(this.value)" />
+        <span id="speedVal">1× speed</span>
+      </div>
+
+      <!-- TRAFFIC SIGNAL INFORMATION TABLE -->
+      <!-- <table> shows phase details — required HTML5 element per syllabus -->
+      <table class="info-table">
+        <thead>
+          <tr>
+            <!-- <th> = table header cell -->
+            <th>Signal</th>
+            <th>Color</th>
+            <th>Duration</th>
+            <th>Meaning</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- <tr> = table row, <td> = table data cell -->
+          <tr>
+            <td>1st — TOP</td>
+            <td>
+              <div class="dot-cell">
+                <span class="mini-dot" style="background:var(--red-on); box-shadow:0 0 6px var(--red-glow)"></span>
+                RED
+              </div>
+            </td>
+            <td id="tdRed">10s</td>
+            <td>Danger / Halt</td>
+            <td>STOP — Do not proceed</td>
+          </tr>
+          <tr>
+            <td>2nd — MIDDLE</td>
+            <td>
+              <div class="dot-cell">
+                <span class="mini-dot" style="background:var(--yellow-on); box-shadow:0 0 6px var(--yellow-glow)"></span>
+                YELLOW
+              </div>
+            </td>
+            <td id="tdYellow">3s</td>
+            <td>Caution / Ready</td>
+            <td>PREPARE — Signal about to change</td>
+          </tr>
+          <tr>
+            <td>3rd — BOTTOM</td>
+            <td>
+              <div class="dot-cell">
+                <span class="mini-dot" style="background:var(--green-on); box-shadow:0 0 6px var(--green-glow)"></span>
+                GREEN
+              </div>
+            </td>
+            <td id="tdGreen">10s</td>
+            <td>Safe / Clear</td>
+            <td>GO — Proceed with caution</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div><!-- end .panel-card -->
+  </div><!-- end .control-panel -->
+
+  <!-- ================================================================
+       JAVASCRIPT SECTION
+       Controls signal cycling, LED glow, timer bar, and DOM updates.
+       
+       SYLLABUS LINK → Unit II:
+         - JavaScript: Functions, Control Structures, Objects
+         - DOM: Manipulating DOM (.classList, .textContent, .style)
+         - setInterval / setTimeout (timing functions)
+  ================================================================ -->
+  <script>
+
+    // ================================================================
+    // CONFIGURATION OBJECT
+    // Stores the duration (in ms) for each phase and styling info.
+    // Object literal = { key: value } pairs
+    // ================================================================
+    const CONFIG = {
+      red:    { duration: 10000, label: 'RED — STOP',       barColor: '#ff2020', dotClass: 'red'    },
+      yellow: { duration: 3000,  label: 'YELLOW — CAUTION', barColor: '#ffd700', dotClass: 'yellow' },
+      green:  { duration: 10000, label: 'GREEN — GO',       barColor: '#00e676', dotClass: 'green'  }
+    };
+
+    // ================================================================
+    // PHASE SEQUENCE
+    // Traffic light cycle: RED → GREEN → YELLOW → RED → ...
+    // Stored as an array. currentPhaseIdx tracks where we are.
+    // ================================================================
+    const SEQUENCE = ['red', 'green', 'yellow'];  // standard traffic order
+    let currentPhaseIdx = 0;   // index into SEQUENCE array
+
+    // TIMER VARIABLES
+    let autoInterval  = null;  // holds the setInterval reference
+    let timerInterval = null;  // holds the countdown timer reference
+    let timeLeft      = 0;     // seconds remaining in current phase
+    let totalTime     = 0;     // total seconds for current phase
+    let speedMult     = 1;     // speed multiplier (1 = normal)
+
+    // ================================================================
+    // setPhase(phase)
+    // Core function — turns ON the correct LEDs, turns all others OFF.
+    // Called both manually and by the auto-cycle timer.
+    //
+    // PARAMETERS: phase = 'red' | 'yellow' | 'green'
+    // ================================================================
+    function setPhase(phase) {
+
+      // ---- CLEAR ALL ACTIVE CLASSES FROM ALL LEDs ----
+      // querySelectorAll returns a NodeList (all matching elements)
+      // forEach loops through each one
+      document.querySelectorAll('.led').forEach(function(led) {
+        // classList.remove() removes one or more CSS classes
+        led.classList.remove('red-active', 'yellow-active', 'green-active');
+      });
+
+      // ---- ACTIVATE THE CORRECT LEDs ----
+      // Signal A and Signal B are opposite phases:
+      //   When A is RED, B is GREEN (and vice versa)
+      //   When either is YELLOW, both show YELLOW (transition)
+
+      if (phase === 'red') {
+        // Signal A: RED on
+        document.getElementById('r1').classList.add('red-active');
+        // Signal B: GREEN on (opposite direction can go)
+        document.getElementById('g2').classList.add('green-active');
+      }
+      else if (phase === 'green') {
+        // Signal A: GREEN on
+        document.getElementById('g1').classList.add('green-active');
+        // Signal B: RED on
+        document.getElementById('r2').classList.add('red-active');
+      }
+      else if (phase === 'yellow') {
+        // Both signals: YELLOW (caution for everyone)
+        document.getElementById('y1').classList.add('yellow-active');
+        document.getElementById('y2').classList.add('yellow-active');
+      }
+
+      // ---- UPDATE STATUS PANEL ----
+      const cfg = CONFIG[phase];   // get config for this phase
+
+      // Update the status dot color class
+      const dot = document.getElementById('statusDot');
+      dot.className = 'status-dot ' + cfg.dotClass;  // replaces all classes
+
+      // Update the text label
+      // .textContent = sets plain text content of the element
+      document.getElementById('statusText').textContent = cfg.label;
+      document.getElementById('phaseName').textContent  = cfg.label;
+
+      // Update timer bar color
+      // .style.property = sets inline CSS on the element
+      document.getElementById('timerBar').style.background = cfg.barColor;
+
+      // ---- START COUNTDOWN TIMER ----
+      startCountdown(cfg.duration / 1000);  // convert ms to seconds
+    }
+
+
+    // ================================================================
+    // startCountdown(seconds)
+    // Shows a live countdown and updates the progress bar every 100ms.
+    // Uses setInterval — runs a function repeatedly at set intervals.
+    // ================================================================
+    function startCountdown(seconds) {
+      // Clear any existing countdown timer to avoid overlap
+      if (timerInterval) clearInterval(timerInterval);
+
+      totalTime = seconds;       // save total for progress bar calculation
+      timeLeft  = seconds;       // live countdown value
+
+      // Update immediately (before first interval fires)
+      updateTimerDisplay();
+
+      // setInterval(callback, ms): calls callback every `ms` milliseconds
+      // Returns an interval ID — save it so we can clearInterval later
+      timerInterval = setInterval(function() {
+        timeLeft -= 0.1;          // reduce by 0.1 seconds every 100ms
+
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          clearInterval(timerInterval);
+        }
+
+        updateTimerDisplay();
+      }, 100);  // 100ms interval = smooth bar animation
+    }
+
+
+    // ================================================================
+    // updateTimerDisplay()
+    // Refreshes the countdown text and progress bar width.
+    // ================================================================
+    function updateTimerDisplay() {
+      // Show rounded seconds
+      document.getElementById('countdown').textContent = Math.ceil(timeLeft);
+
+      // Progress bar width = (timeLeft / totalTime) * 100%
+      // As timeLeft decreases, the bar shrinks from left
+      const pct = (timeLeft / totalTime) * 100;
+
+      // .style.width sets the CSS width property as an inline style
+      document.getElementById('timerBar').style.width = pct + '%';
+    }
+
+
+    // ================================================================
+    // nextPhase()
+    // Advances to the next phase in the SEQUENCE array.
+    // Called repeatedly by setInterval in startAuto().
+    // ================================================================
+    function nextPhase() {
+      // Increment index, wrap around using modulo (%)
+      // % = modulo operator: 3 % 3 = 0 (wraps back to 0)
+      currentPhaseIdx = (currentPhaseIdx + 1) % SEQUENCE.length;
+      setPhase(SEQUENCE[currentPhaseIdx]);
+    }
+
+
+    // ================================================================
+    // startAuto()
+    // Starts the automatic traffic light cycle using setInterval.
+    // Each call to nextPhase happens after the current phase's duration.
+    // ================================================================
+    function startAuto() {
+      // Stop any existing auto-cycle first (prevents double-running)
+      stopAuto();
+
+      // Set the first phase immediately
+      setPhase(SEQUENCE[currentPhaseIdx]);
+
+      // Use a self-scheduling approach: each phase schedules the next
+      // This handles variable phase durations correctly
+      scheduleNext();
+    }
+
+
+    // ================================================================
+    // scheduleNext()
+    // Schedules the next phase after current phase duration expires.
+    // Uses setTimeout (runs ONCE after delay) instead of setInterval.
+    // This is better because each phase can have a different duration.
+    // ================================================================
+    function scheduleNext() {
+      const currentPhase = SEQUENCE[currentPhaseIdx];
+      const duration     = CONFIG[currentPhase].duration / speedMult;
+      // speedMult > 1 = shorter duration = faster cycle
+
+      autoInterval = setTimeout(function() {
+        nextPhase();       // advance to next phase
+        scheduleNext();    // schedule the one after that
+      }, duration);
+    }
+
+
+    // ================================================================
+    // stopAuto()
+    // Stops the automatic cycle by clearing the timeout.
+    // clearTimeout(id) cancels a pending setTimeout.
+    // clearInterval(id) cancels a running setInterval.
+    // ================================================================
+    function stopAuto() {
+      if (autoInterval)  clearTimeout(autoInterval);
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+
+    // ================================================================
+    // updateSpeed(val)
+    // Called when the speed slider changes.
+    // Restarts the cycle at the new speed.
+    // ================================================================
+    function updateSpeed(val) {
+      speedMult = parseFloat(val);   // parseFloat converts string "1.5" to number 1.5
+      document.getElementById('speedVal').textContent = val + '× speed';
+
+      // Update duration table cells with scaled values
+      document.getElementById('tdRed').textContent    = Math.round(10 / speedMult) + 's';
+      document.getElementById('tdYellow').textContent = Math.round(3  / speedMult) + 's';
+      document.getElementById('tdGreen').textContent  = Math.round(10 / speedMult) + 's';
+
+      // Restart auto cycle with new speed
+      stopAuto();
+      scheduleNext();
+    }
+
+
+    // ================================================================
+    // INITIALIZATION
+    // Runs when the page loads. Sets up the initial state.
+    // ================================================================
+    (function init() {
+      setPhase('red');    // start with RED phase
+      scheduleNext();     // begin auto-cycling
+
+      // Console output for examiner demo (F12 → Console tab)
+      console.log('Lab 25: Traffic Signal initialized');
+      console.log('Phases:', SEQUENCE);
+      console.log('Durations:', CONFIG.red.duration + 'ms RED, '
+                              + CONFIG.yellow.duration + 'ms YELLOW, '
+                              + CONFIG.green.duration + 'ms GREEN');
+    })();  // IIFE — runs immediately
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,263 @@
+{
+	"info": {
+		"_postman_id": "order-management-collection",
+		"name": "Order Management System - Lab 26",
+		"description": "Complete collection of REST API endpoints for Order Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Create Order",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerEmail\": \"john@example.com\",\n  \"productName\": \"Laptop\",\n  \"quantity\": 2,\n  \"price\": 50000.00\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders"
+					]
+				},
+				"description": "Create a new order. Returns 201 CREATED with the created order."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Get All Orders",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders"
+					]
+				},
+				"description": "Retrieve all orders from the database."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Get Order By ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"1"
+					]
+				},
+				"description": "Get a specific order by its ID. Returns 404 if not found."
+			},
+			"response": []
+		},
+		{
+			"name": "4. Update Order (PUT)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerName\": \"John Doe Updated\",\n  \"customerEmail\": \"john@example.com\",\n  \"productName\": \"Gaming Laptop\",\n  \"quantity\": 3,\n  \"price\": 75000.00,\n  \"orderStatus\": \"CONFIRMED\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/orders/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"1"
+					]
+				},
+				"description": "Update an entire order. All fields must be provided."
+			},
+			"response": []
+		},
+		{
+			"name": "5. Update Order Status (PATCH)",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders/1/status?status=SHIPPED",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"1",
+						"status"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "SHIPPED",
+							"description": "Valid values: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED"
+						}
+					]
+				},
+				"description": "Partially update order - just change the status."
+			},
+			"response": []
+		},
+		{
+			"name": "6. Delete Order",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"1"
+					]
+				},
+				"description": "Delete an order by ID. Returns 200 with success message."
+			},
+			"response": []
+		},
+		{
+			"name": "7. Get Orders By Customer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders/customer/John Doe",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"customer",
+						"John Doe"
+					]
+				},
+				"description": "Filter orders by customer name."
+			},
+			"response": []
+		},
+		{
+			"name": "8. Get Orders By Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders/status/PENDING",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"status",
+						"PENDING"
+					]
+				},
+				"description": "Filter orders by status. Valid: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED"
+			},
+			"response": []
+		},
+		{
+			"name": "9. Search Orders By Product",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders/search?product=Laptop",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"search"
+					],
+					"query": [
+						{
+							"key": "product",
+							"value": "Laptop"
+						}
+					]
+				},
+				"description": "Search orders by product name (case-insensitive)."
+			},
+			"response": []
+		},
+		{
+			"name": "10. Count Orders By Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/orders/count/PENDING",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"count",
+						"PENDING"
+					]
+				},
+				"description": "Get count of orders with a specific status."
+			},
+			"response": []
+		}
+	]
+}

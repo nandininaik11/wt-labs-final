@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<!-- DOCTYPE declaration: tells the browser this is an HTML5 document -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- UTF-8 supports all international characters -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Makes the page RESPONSIVE on mobile devices -->
+
+  <title>Lab 23 – jQuery Style Switcher</title>
+
+  <!-- ============================================================
+       LOADING jQuery FROM CDN (Content Delivery Network)
+       jQuery is a JavaScript LIBRARY — a pre-written collection of
+       functions that make DOM manipulation and event handling easier.
+       
+       CDN = external server hosting the library file.
+       When browser hits this <script src="...">, it downloads jQuery.
+       
+       SYLLABUS LINK → Unit II: "Loading jQuery"
+  ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <style>
+    /* ============================================================
+       BASE / RESET CSS
+       Applied before any theme. Ensures consistent defaults.
+    ============================================================ */
+
+    /* CSS Custom Properties (CSS Variables) — defined in :root (global scope)
+       Allows one-place color/font changes that cascade everywhere */
+    :root {
+      --transition-speed: 0.45s; /* smooth theme-switch animation duration */
+    }
+
+    /* Universal box model reset */
+    *, *::before, *::after {
+      box-sizing: border-box; /* padding/border included in width/height */
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Base body — transition makes color/font changes animate smoothly */
+    body {
+      transition:
+        background var(--transition-speed) ease,
+        color      var(--transition-speed) ease,
+        font-family var(--transition-speed) ease;
+      min-height: 100vh;        /* fills full viewport height */
+    }
+
+    /* ============================================================
+       THEME CLASSES
+       jQuery will ADD one of these classes to <body>.
+       All child elements inherit the styles automatically.
+       
+       SYLLABUS LINK → Unit II: "Changing styles with jQuery"
+    ============================================================ */
+
+    /* ---- THEME 1: DARK CYBER ---- */
+    body.theme-dark {
+      background: #0a0a0f;
+      color: #e2e2f0;
+      font-family: 'Courier New', Courier, monospace; /* terminal / code look */
+    }
+
+    body.theme-dark .page-wrapper {
+      background: linear-gradient(135deg, #0a0a0f 0%, #12121e 100%);
+    }
+
+    body.theme-dark header {
+      background: #111120;
+      border-bottom: 2px solid #6c63ff;
+      box-shadow: 0 2px 30px rgba(108, 99, 255, 0.25);
+    }
+
+    body.theme-dark h1 { color: #6c63ff; text-shadow: 0 0 20px rgba(108,99,255,0.5); }
+    body.theme-dark h2 { color: #a89cff; }
+    body.theme-dark h3 { color: #7c74e8; }
+
+    body.theme-dark .card {
+      background: #14141f;
+      border: 1px solid #2a2a3e;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    body.theme-dark input,
+    body.theme-dark select,
+    body.theme-dark textarea {
+      background: #0e0e1a;
+      border: 1.5px solid #3a3a5c;
+      color: #e2e2f0;
+    }
+
+    body.theme-dark input:focus,
+    body.theme-dark select:focus,
+    body.theme-dark textarea:focus {
+      border-color: #6c63ff;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.2);
+    }
+
+    body.theme-dark .btn-primary {
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+    }
+
+    body.theme-dark .btn-primary:hover { background: #5a52e0; }
+
+    body.theme-dark table thead {
+      background: #1e1e32;
+      color: #a89cff;
+    }
+
+    body.theme-dark table tbody tr:nth-child(even) { background: #111120; }
+    body.theme-dark table tbody tr:hover { background: #1c1c2e; }
+    body.theme-dark table td, body.theme-dark table th { border-color: #2a2a3e; }
+
+    body.theme-dark .active-badge {
+      background: #6c63ff;
+      color: #fff;
+    }
+
+    /* ---- THEME 2: WARM PAPER ---- */
+    body.theme-warm {
+      background: #fdf6ec;
+      color: #3b2f2f;
+      font-family: 'Georgia', 'Times New Roman', serif; /* classic editorial */
+    }
+
+    body.theme-warm .page-wrapper {
+      background: linear-gradient(160deg, #fdf6ec 0%, #f5e8d0 100%);
+    }
+
+    body.theme-warm header {
+      background: #fff8ef;
+      border-bottom: 3px solid #c0833a;
+      box-shadow: 0 2px 12px rgba(192,131,58,0.15);
+    }
+
+    body.theme-warm h1 { color: #8b4513; letter-spacing: 1px; }
+    body.theme-warm h2 { color: #a0522d; }
+    body.theme-warm h3 { color: #b8622e; }
+
+    body.theme-warm .card {
+      background: #fffaf3;
+      border: 1px solid #e8d5b5;
+      box-shadow: 0 2px 12px rgba(139,69,19,0.08);
+    }
+
+    body.theme-warm input,
+    body.theme-warm select,
+    body.theme-warm textarea {
+      background: #fffdf7;
+      border: 1.5px solid #d4b896;
+      color: #3b2f2f;
+    }
+
+    body.theme-warm input:focus,
+    body.theme-warm select:focus,
+    body.theme-warm textarea:focus {
+      border-color: #c0833a;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(192,131,58,0.18);
+    }
+
+    body.theme-warm .btn-primary {
+      background: #c0833a;
+      color: #fff;
+      border: none;
+    }
+
+    body.theme-warm .btn-primary:hover { background: #a0682e; }
+
+    body.theme-warm table thead { background: #f0dfc4; color: #5a3010; }
+    body.theme-warm table tbody tr:nth-child(even) { background: #fdf3e4; }
+    body.theme-warm table tbody tr:hover { background: #f8e8cc; }
+    body.theme-warm table td, body.theme-warm table th { border-color: #e8d5b5; }
+
+    body.theme-warm .active-badge { background: #c0833a; color: #fff; }
+
+    /* ---- THEME 3: MINT FRESH ---- */
+    body.theme-mint {
+      background: #f0faf5;
+      color: #1a3d30;
+      font-family: 'Trebuchet MS', 'Lucida Sans', sans-serif; /* clean, modern */
+    }
+
+    body.theme-mint .page-wrapper {
+      background: linear-gradient(140deg, #f0faf5 0%, #d4f5e4 100%);
+    }
+
+    body.theme-mint header {
+      background: #e8f8f0;
+      border-bottom: 3px solid #2ecc71;
+      box-shadow: 0 2px 14px rgba(46,204,113,0.15);
+    }
+
+    body.theme-mint h1 { color: #1a8a52; }
+    body.theme-mint h2 { color: #27ae60; }
+    body.theme-mint h3 { color: #2ecc71; }
+
+    body.theme-mint .card {
+      background: #ffffff;
+      border: 1px solid #b2e8cc;
+      box-shadow: 0 2px 14px rgba(46,204,113,0.1);
+    }
+
+    body.theme-mint input,
+    body.theme-mint select,
+    body.theme-mint textarea {
+      background: #f4fdf8;
+      border: 1.5px solid #90d8ae;
+      color: #1a3d30;
+    }
+
+    body.theme-mint input:focus,
+    body.theme-mint select:focus,
+    body.theme-mint textarea:focus {
+      border-color: #2ecc71;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(46,204,113,0.18);
+    }
+
+    body.theme-mint .btn-primary {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+    }
+
+    body.theme-mint .btn-primary:hover { background: #27ae60; }
+
+    body.theme-mint table thead { background: #d0f0df; color: #145f38; }
+    body.theme-mint table tbody tr:nth-child(even) { background: #f0fdf6; }
+    body.theme-mint table tbody tr:hover { background: #e0f8ec; }
+    body.theme-mint table td, body.theme-mint table th { border-color: #b2e8cc; }
+
+    body.theme-mint .active-badge { background: #2ecc71; color: #fff; }
+
+    /* ============================================================
+       LAYOUT — works for ALL themes (structural, not cosmetic)
+    ============================================================ */
+
+    .page-wrapper {
+      min-height: 100vh;
+      transition: background var(--transition-speed) ease;
+    }
+
+    /* HEADER */
+    header {
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      transition: background var(--transition-speed) ease,
+                  border-color var(--transition-speed) ease,
+                  box-shadow var(--transition-speed) ease;
+    }
+
+    .header-left h1 {
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      transition: color var(--transition-speed) ease;
+    }
+
+    .header-left p {
+      font-size: 0.78rem;
+      opacity: 0.6;
+      margin-top: 3px;
+    }
+
+    /* THEME SWITCHER BUTTONS */
+    .theme-switcher {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Base style for all three theme buttons */
+    .theme-btn {
+      padding: 9px 20px;
+      border-radius: 30px;        /* pill shape */
+      border: 2px solid transparent;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;            /* hand cursor on hover */
+      letter-spacing: 0.5px;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s;
+      position: relative;
+    }
+
+    /* Scale up slightly on hover — micro-interaction */
+    .theme-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+    .theme-btn:active { transform: scale(0.97); }
+
+    /* Individual button colors — visible regardless of active theme */
+    #btn-dark   { background: #1a1a2e; color: #a89cff; border-color: #6c63ff; }
+    #btn-warm   { background: #fff0dc; color: #8b4513; border-color: #c0833a; }
+    #btn-mint   { background: #d4f5e4; color: #1a5c38; border-color: #2ecc71; }
+
+    /* Active state ring — jQuery adds class "btn-active" */
+    .theme-btn.btn-active {
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 4px 14px rgba(0,0,0,0.25);
+      transform: translateY(-2px);
+    }
+
+    /* MAIN CONTENT */
+    .content {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 20px;
+      display: grid;
+      gap: 20px;
+    }
+
+    /* Cards — white/dark containers for each section */
+    .card {
+      border-radius: 12px;
+      padding: 22px 26px;
+      transition:
+        background var(--transition-speed) ease,
+        border-color var(--transition-speed) ease,
+        box-shadow var(--transition-speed) ease;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid currentColor;
+      opacity: 0.8;
+      transition: color var(--transition-speed) ease;
+    }
+
+    /* FORM CONTROLS */
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    label.field-label {
+      font-size: 0.78rem;
+      opacity: 0.7;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Input, select, textarea — base layout (theme provides colors) */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    select,
+    textarea {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;       /* inherit from body (changes with theme) */
+      width: 100%;
+      transition:
+        background var(--transition-speed) ease,
+        border-color var(--transition-speed) ease,
+        color var(--transition-speed) ease;
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Primary action button */
+    .btn-primary {
+      padding: 10px 26px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 600;
+      transition:
+        background var(--transition-speed) ease,
+        transform 0.15s ease;
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    /* TABLE */
+    .table-wrapper { overflow-x: auto; }  /* horizontal scroll on mobile */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;   /* remove space between table cells */
+      font-size: 0.88rem;
+    }
+
+    table th, table td {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid;           /* color comes from theme */
+      transition:
+        background var(--transition-speed) ease,
+        border-color var(--transition-speed) ease,
+        color var(--transition-speed) ease;
+    }
+
+    table th { font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px; }
+
+    /* STATUS BADGE */
+    .active-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      transition: background var(--transition-speed) ease;
+    }
+
+    /* THEME INFO BOX — shows which theme is active */
+    .theme-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      opacity: 0.7;
+      margin-top: 14px;
+    }
+
+    .theme-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+
+    /* LIST */
+    .styled-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .styled-list li {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      border-left: 4px solid currentColor;
+      opacity: 0.85;
+      transition: background var(--transition-speed) ease;
+    }
+
+    body.theme-dark .styled-list li  { background: rgba(255,255,255,0.04); }
+    body.theme-warm .styled-list li  { background: rgba(192,131,58,0.07);  }
+    body.theme-mint .styled-list li  { background: rgba(46,204,113,0.07);  }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .content { padding: 16px 12px; }
+    }
+  </style>
+</head>
+
+<body class="theme-dark">
+<!-- Default theme: dark. jQuery will swap this class when buttons clicked. -->
+
+<div class="page-wrapper">
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="header-left">
+      <h1>🎨 jQuery Style Switcher — Lab Q23</h1>
+      <p>Click a theme button to apply one style throughout ALL controls</p>
+    </div>
+
+    <!-- THREE THEME BUTTONS
+         id attributes used by jQuery selectors to attach click handlers
+         data-theme attribute stores which theme class to apply to <body>
+         This is a clean pattern: HTML holds the "what", JS holds the "how"
+    -->
+    <div class="theme-switcher">
+      <button class="theme-btn btn-active" id="btn-dark"  data-theme="theme-dark">
+        🌑 Dark Cyber
+      </button>
+      <button class="theme-btn" id="btn-warm" data-theme="theme-warm">
+        🌿 Warm Paper
+      </button>
+      <button class="theme-btn" id="btn-mint" data-theme="theme-mint">
+        🌱 Mint Fresh
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="content">
+
+    <!-- CARD 1: INPUT FORM — demonstrates form controls changing style -->
+    <div class="card">
+      <h2>📋 Student Registration Form</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Full Name</label>
+          <!-- input type="text" — single-line text input -->
+          <input type="text" placeholder="e.g. Rahul Sharma" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Email Address</label>
+          <!-- input type="email" — validates email format in HTML5 -->
+          <input type="email" placeholder="e.g. rahul@college.edu" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Roll Number</label>
+          <!-- input type="number" — numeric input with up/down arrows -->
+          <input type="number" placeholder="e.g. 101" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Department</label>
+          <!-- <select> — dropdown list -->
+          <select>
+            <option value="">-- Select --</option>
+            <option>Computer Science</option>
+            <option>Information Technology</option>
+            <option>Electronics</option>
+            <option>Mechanical</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Address</label>
+          <!-- <textarea> — multi-line text input -->
+          <textarea placeholder="Enter your full address..."></textarea>
+        </div>
+      </div>
+      <!-- Submit button — also changes style with theme -->
+      <button class="btn-primary">Submit Registration</button>
+    </div>
+
+    <!-- CARD 2: TABLE — demonstrates table rows/headers changing style -->
+    <div class="card">
+      <h2>📊 Subject Marks Table</h2>
+      <div class="table-wrapper">
+        <!-- <table> — tabular data structure
+             <thead> = table header row group
+             <tbody> = table body row group
+             <tr> = table row
+             <th> = table header cell (bold)
+             <td> = table data cell -->
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Code</th>
+              <th>Marks / 100</th>
+              <th>Grade</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Web Technology</td>
+              <td>CS401</td>
+              <td>88</td>
+              <td>A</td>
+              <td><span class="active-badge">Pass</span></td>
+            </tr>
+            <tr>
+              <td>Database Systems</td>
+              <td>CS402</td>
+              <td>74</td>
+              <td>B+</td>
+              <td><span class="active-badge">Pass</span></td>
+            </tr>
+            <tr>
+              <td>Operating Systems</td>
+              <td>CS403</td>
+              <td>91</td>
+              <td>A+</td>
+              <td><span class="active-badge">Pass</span></td>
+            </tr>
+            <tr>
+              <td>Computer Networks</td>
+              <td>CS404</td>
+              <td>65</td>
+              <td>B</td>
+              <td><span class="active-badge">Pass</span></td>
+            </tr>
+            <tr>
+              <td>Software Engineering</td>
+              <td>CS405</td>
+              <td>55</td>
+              <td>C</td>
+              <td><span class="active-badge">Pass</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CARD 3: LIST — demonstrates list items changing style -->
+    <div class="card">
+      <h2>📌 Course Highlights</h2>
+      <ul class="styled-list">
+        <li>HTML5, CSS3 and Responsive Design with Bootstrap</li>
+        <li>JavaScript — DOM manipulation and event handling</li>
+        <li>jQuery — selectors, styling, AJAX and events</li>
+        <li>PHP with MySQL — server-side programming</li>
+        <li>React.js — component-based frontend development</li>
+        <li>Node.js + Express — backend with JavaScript</li>
+        <li>Spring Boot — Java-based enterprise applications</li>
+      </ul>
+    </div>
+
+    <!-- CARD 4: headings and paragraphs — shows typography/color change -->
+    <div class="card">
+      <h2>📖 About This Page</h2>
+      <h3 style="margin-bottom:10px;">jQuery Dynamic Styling</h3>
+      <p style="line-height:1.75; font-size:0.9rem; opacity:0.8; margin-bottom:12px;">
+        This page demonstrates how <strong>jQuery</strong> can apply a single
+        consistent style across ALL page controls — headings, paragraphs, inputs,
+        select dropdowns, textareas, tables, buttons, and lists — using just three
+        buttons. Each button applies a completely different theme to the entire page.
+      </p>
+      <p style="line-height:1.75; font-size:0.9rem; opacity:0.8;">
+        jQuery's <code style="padding:2px 6px;border-radius:4px;font-size:0.85rem;">
+        $('body').removeClass().addClass()</code> removes the old theme class and
+        adds the new one. Since all elements inherit from <code>body</code>, the
+        entire page instantly re-styles.
+      </p>
+      <!-- Live display of current theme -->
+      <div class="theme-info">
+        <div class="theme-dot" id="themeDot"></div>
+        <span>Active Theme: <strong id="themeLabel">Dark Cyber</strong></span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ================================================================
+     JQUERY JAVASCRIPT SECTION
+     All interaction logic. Uses jQuery's $ shorthand.
+     
+     IMPORTANT: This <script> tag is BELOW all HTML elements.
+     This ensures the DOM is fully loaded before jQuery tries to
+     select elements. Alternatively, use $(document).ready().
+     
+     SYLLABUS LINK → Unit II: jQuery — selecting elements, changing
+     styles, handling events
+================================================================ -->
+<script>
+  // ============================================================
+  // $(document).ready(function() { ... })
+  // Waits for the ENTIRE HTML document (DOM) to load before
+  // running the code inside. This is jQuery's equivalent of
+  // window.onload in plain JavaScript.
+  // Shorthand: $(function() { ... })
+  // ============================================================
+  $(document).ready(function () {
+
+    // ---- THEME CONFIGURATION OBJECT ----
+    // Stores metadata for each theme.
+    // Object literal: { key: value } pairs.
+    // Used to update the dot color and label when theme changes.
+    const themes = {
+      'theme-dark': {
+        label: 'Dark Cyber',     // text shown in "Active Theme:"
+        dotColor: '#6c63ff'      // dot color matching the theme accent
+      },
+      'theme-warm': {
+        label: 'Warm Paper',
+        dotColor: '#c0833a'
+      },
+      'theme-mint': {
+        label: 'Mint Fresh',
+        dotColor: '#2ecc71'
+      }
+    };
+
+    // ---- ATTACH CLICK HANDLERS TO ALL THEME BUTTONS ----
+    // $('.theme-btn') — jQuery CLASS SELECTOR
+    // Selects ALL elements that have class "theme-btn"
+    // .on('click', callback) — jQuery event binding
+    // This is how jQuery handles events (Unit II: "handling events")
+    $('.theme-btn').on('click', function () {
+
+      // $(this) — jQuery wraps the clicked element.
+      // 'this' = the specific button that was clicked.
+      // .data('theme') — reads the HTML data-theme="..." attribute.
+      // Equivalent to: this.dataset.theme in plain JS.
+      const selectedTheme = $(this).data('theme');
+
+      // ---- STEP 1: SWAP THE THEME CLASS ON <body> ----
+      // $('body') selects the <body> element
+      // .removeClass() with no argument REMOVES ALL classes from body
+      // .addClass(selectedTheme) ADDS the new theme class
+      //
+      // Because all elements inherit CSS from body,
+      // swapping ONE class on body reskins the ENTIRE page.
+      //
+      // jQuery chaining: methods called one after another on same element.
+      // SYLLABUS LINK → Unit II: "Selecting elements", "Changing styles"
+      $('body').removeClass('theme-dark theme-warm theme-mint')
+               .addClass(selectedTheme);
+
+      // ---- STEP 2: UPDATE THE ACTIVE BUTTON INDICATOR ----
+      // Remove 'btn-active' from ALL theme buttons first
+      $('.theme-btn').removeClass('btn-active');
+
+      // Add 'btn-active' only to the clicked button
+      $(this).addClass('btn-active');
+
+      // ---- STEP 3: UPDATE THE THEME INFO BOX ----
+      // Get this theme's metadata from our config object
+      const info = themes[selectedTheme];
+
+      // $('#themeLabel') — jQuery ID SELECTOR (like CSS #id)
+      // .text(value) — sets the text content of the element
+      // SYLLABUS LINK → Unit II: jQuery DOM manipulation
+      $('#themeLabel').text(info.label);
+
+      // .css(property, value) — jQuery method to set inline CSS
+      // Used here to change the colored dot indicator
+      // SYLLABUS LINK → Unit II: "Changing styles" with jQuery
+      $('#themeDot').css('background-color', info.dotColor);
+
+      // ---- STEP 4: ANIMATE THE PAGE (brief flash effect) ----
+      // .fadeOut(ms).fadeIn(ms) — jQuery animation methods
+      // Creates a smooth flash that signals the theme changed
+      // SYLLABUS LINK → Unit II: jQuery effects
+      $('.page-wrapper').fadeOut(120).fadeIn(300);
+    });
+
+    // ---- INITIALIZE THE DOT ON PAGE LOAD ----
+    // Set the initial dot color when page first loads (theme-dark is default)
+    $('#themeDot').css('background-color', themes['theme-dark'].dotColor);
+
+    // ---- BONUS: HOVER EFFECT ON TABLE ROWS ----
+    // $('table tbody tr') selects all <tr> inside <tbody> of any table
+    // .on('mouseenter') and .on('mouseleave') — jQuery mouse events
+    // .css() changes inline style dynamically
+    // Note: most hover is handled by CSS :hover but this shows jQuery usage
+    $('table tbody tr').on('mouseenter', function () {
+      // $(this).css('opacity', '0.85');  // example jQuery hover
+    }).on('mouseleave', function () {
+      // $(this).css('opacity', '1');
+    });
+
+    // ---- CONSOLE LOG (for examiner demo) ----
+    // console.log prints to browser Developer Tools → Console tab
+    // Shows jQuery is loaded and working
+    console.log('jQuery version loaded:', $.fn.jquery);
+    console.log('Lab 23: jQuery Style Switcher initialized');
+    console.log('Total theme buttons found:', $('.theme-btn').length);
+
+  }); // end $(document).ready
+</script>
+
+</body>
+</html>

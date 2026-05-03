@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<!-- HTML5 DOCTYPE: tells browser to use modern HTML5 parsing rules -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- UTF-8: supports all characters including ₹ ° © etc. -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Responsive: makes page scale correctly on mobile devices -->
+
+  <title>Lab 24 – Age Calculator</title>
+
+  <!-- Google Font: Syne (bold, geometric display) + Karla (clean body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Karla:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ================================================================
+       CSS SECTION
+       Controls ALL visual styling of the page.
+       CSS Cascades = later rules override earlier ones (same specificity)
+    ================================================================ */
+
+    /* CSS Custom Properties (Variables) — defined once, reused everywhere */
+    :root {
+      --bg:        #f7f3ee;          /* warm cream background */
+      --card:      #ffffff;          /* white card surface */
+      --ink:       #1a1208;          /* near-black text */
+      --muted:     #8a7968;          /* secondary/hint text */
+      --accent:    #d4622a;          /* burnt orange accent */
+      --accent2:   #4e8c6e;          /* sage green secondary */
+      --border:    #e8dfd2;          /* soft border */
+      --shadow:    rgba(26,18,8,0.09);
+      --radius:    16px;
+      --transition: 0.3s ease;
+    }
+
+    /* Universal reset — removes browser default margin/padding */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* BODY — base typography and layout */
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Karla', sans-serif;   /* body text font */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;               /* center horizontally */
+      padding: 40px 16px 60px;
+    }
+
+    /* ---- PAGE HEADER ---- */
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .page-header .label {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;   /* display font for headings */
+      font-size: clamp(2rem, 6vw, 3.2rem); /* responsive font scaling:
+                                              clamp(min, preferred, max) */
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .page-header h1 span { color: var(--accent); }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 10px;
+    }
+
+    /* ---- MAIN CARD ---- */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px var(--shadow);
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 520px;         /* limit width on wide screens */
+    }
+
+    /* ---- FORM SECTION ---- */
+    .form-section { margin-bottom: 28px; }
+
+    .form-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* FORM GROUP: label + input pair */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    /* label element: text shown above the input */
+    label {
+      display: block;           /* block = takes full width, goes to new line */
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    /* input[type="date"]: HTML5 date picker
+       Renders a native calendar popup in the browser.
+       value format: YYYY-MM-DD (ISO 8601) */
+    input[type="date"] {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Karla', sans-serif;
+      font-size: 1rem;
+      color: var(--ink);
+      background: var(--bg);
+      /* CSS transition: animates changes to listed properties */
+      transition: border-color var(--transition), box-shadow var(--transition);
+      cursor: pointer;
+    }
+
+    /* :focus pseudo-class — styles when element has keyboard/mouse focus */
+    input[type="date"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(212, 98, 42, 0.12);
+    }
+
+    /* Hint text below input */
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* ERROR MESSAGE — shown by JS when validation fails */
+    .error-msg {
+      display: none;            /* hidden by default; JS shows it with .style.display */
+      background: #fff0eb;
+      border: 1.5px solid #f4a07a;
+      color: #b03010;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.84rem;
+      margin-top: 10px;
+    }
+
+    /* ---- CALCULATE BUTTON ---- */
+    .btn-calc {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;          /* hand cursor on hover */
+      transition: background var(--transition), transform 0.15s;
+      margin-top: 4px;
+    }
+
+    .btn-calc:hover { background: #b8501f; }
+    .btn-calc:active { transform: scale(0.98); }
+
+    /* ---- RESULT SECTION ----
+       Hidden until JS has a result to show */
+    .result-section {
+      display: none;            /* hidden by default */
+      margin-top: 30px;
+      padding-top: 28px;
+      border-top: 2px dashed var(--border);
+    }
+
+    .result-section.visible {
+      display: block;           /* JS adds/removes this class to show/hide */
+    }
+
+    .result-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    /* Three big number boxes: Years / Months / Days */
+    .age-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);  /* 3 equal columns */
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .age-box {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      /* CSS animation: box "pops in" when result appears */
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    /* Each box gets a different animation delay for staggered reveal */
+    .age-box:nth-child(1) { animation-delay: 0.05s; border-color: var(--accent); }
+    .age-box:nth-child(2) { animation-delay: 0.12s; border-color: var(--accent2); }
+    .age-box:nth-child(3) { animation-delay: 0.19s; border-color: #6b7fd4; }
+
+    /* Big number inside each box */
+    .age-box .number {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1;
+      display: block;
+    }
+
+    .age-box:nth-child(1) .number { color: var(--accent);  }
+    .age-box:nth-child(2) .number { color: var(--accent2); }
+    .age-box:nth-child(3) .number { color: #6b7fd4;        }
+
+    /* Label below each number: "Years" / "Months" / "Days" */
+    .age-box .unit {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* Full-sentence summary e.g. "You are 22 years, 4 months and 7 days old." */
+    .age-summary {
+      background: linear-gradient(135deg, #fff8f4, #f0f8f4);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--ink);
+      animation: popIn 0.4s 0.25s both;
+    }
+
+    .age-summary strong { color: var(--accent); }
+
+    /* Extra stats row */
+    .extra-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stat-pill {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      animation: popIn 0.4s both;
+    }
+
+    .stat-pill:nth-child(1) { animation-delay: 0.3s; }
+    .stat-pill:nth-child(2) { animation-delay: 0.35s; }
+    .stat-pill:nth-child(3) { animation-delay: 0.4s; }
+    .stat-pill:nth-child(4) { animation-delay: 0.45s; }
+
+    .stat-pill .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--ink);
+      display: block;
+    }
+
+    /* NEXT BIRTHDAY section */
+    .bday-banner {
+      margin-top: 14px;
+      background: linear-gradient(135deg, #fff3ee, #eef8f3);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      animation: popIn 0.4s 0.5s both;
+    }
+
+    .bday-banner .bday-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    /* ---- KEYFRAME ANIMATION ---- */
+    /* @keyframes defines animation steps.
+       'popIn': element starts invisible and small, then bounces to full size */
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.85) translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* ---- FOOTER ---- */
+    footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ---- RESPONSIVE ---- */
+    /* @media queries: CSS rules applied only when screen matches condition */
+    @media (max-width: 480px) {
+      .card { padding: 24px 18px; }
+      .age-box .number { font-size: 1.8rem; }
+      .extra-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <span class="label">Lab Question 24</span>
+    <h1>Age <span>Calculator</span></h1>
+    <p>Enter your birth date — get your exact age in Years, Months &amp; Days</p>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card">
+
+    <!-- INPUT FORM SECTION -->
+    <div class="form-section">
+      <h2>📅 Enter Birth Date</h2>
+
+      <div class="form-group">
+        <!-- <label> associated to input via 'for' = input 'id' -->
+        <label for="birthDate">Date of Birth</label>
+
+        <!-- input type="date":
+             - Renders a native browser date picker (calendar popup)
+             - Returns value as string "YYYY-MM-DD"
+             - max attribute prevents selecting future dates
+             - id used by JS to read the value -->
+        <input
+          type="date"
+          id="birthDate"
+          max=""
+          placeholder="Select your birth date"
+        />
+        <p class="hint">Click the field to open the date picker calendar</p>
+
+        <!-- Error message div — hidden until validation fails -->
+        <div class="error-msg" id="errorMsg">
+          ⚠️ Please enter a valid birth date (not in the future, not empty).
+        </div>
+      </div>
+
+      <!-- Calculate button — onclick calls JS function calculateAge() -->
+      <button class="btn-calc" onclick="calculateAge()">
+        Calculate My Age →
+      </button>
+    </div>
+
+    <!-- RESULT SECTION — hidden until JS populates it -->
+    <div class="result-section" id="resultSection">
+      <h2>🎂 Your Age</h2>
+
+      <!-- THREE BIG BOXES: Years / Months / Days -->
+      <div class="age-grid">
+        <div class="age-box">
+          <!-- id="ageYears" lets JS write the number here with .textContent -->
+          <span class="number" id="ageYears">0</span>
+          <span class="unit">Years</span>
+        </div>
+        <div class="age-box">
+          <span class="number" id="ageMonths">0</span>
+          <span class="unit">Months</span>
+        </div>
+        <div class="age-box">
+          <span class="number" id="ageDays">0</span>
+          <span class="unit">Days</span>
+        </div>
+      </div>
+
+      <!-- Sentence summary -->
+      <div class="age-summary" id="ageSummary"></div>
+
+      <!-- Extra stats grid -->
+      <div class="extra-stats">
+        <div class="stat-pill">
+          <span class="stat-val" id="totalMonths">—</span>
+          Total Months Lived
+        </div>
+        <div class="stat-pill">
+          <span class="stat-val" id="totalWeeks">—</span>
+          Total Weeks Lived
+        </div>
+        <div class="stat-pill">
+          <span class="stat-val" id="totalDays">—</span>
+          Total Days Lived
+        </div>
+        <div class="stat-pill">
+          <span class="stat-val" id="totalHours">—</span>
+          Total Hours Lived
+        </div>
+      </div>
+
+      <!-- Next birthday countdown -->
+      <div class="bday-banner" id="bdayBanner"></div>
+    </div>
+
+  </div><!-- end .card -->
+
+  <footer>Lab 24 · Web Technology · JavaScript Date Object</footer>
+
+  <!-- ================================================================
+       JAVASCRIPT SECTION
+       All logic for reading input, calculating age, and updating DOM.
+       
+       SYLLABUS LINK → Unit II:
+         - JavaScript: Data types, Control Structures, Functions
+         - Objects in JS (Date object)
+         - DOM: Manipulating DOM (.textContent, .style, .classList)
+         - HTML5 Forms Validation
+  ================================================================ -->
+  <script>
+
+    // ================================================================
+    // STEP 1: SET MAX DATE ON PAGE LOAD
+    // Prevents user from selecting a future date in the date picker.
+    // new Date() → creates a Date object for RIGHT NOW (current date+time)
+    // .toISOString() → converts to "2025-04-15T10:30:00.000Z"
+    // .split('T')[0] → takes only "2025-04-15" (the date part before T)
+    // ================================================================
+    (function setMaxDate() {
+      const today = new Date();
+      // toISOString() returns ISO 8601 format: "YYYY-MM-DDTHH:mm:ss.sssZ"
+      // split('T')[0] extracts just "YYYY-MM-DD" which is the max attr format
+      document.getElementById('birthDate').max = today.toISOString().split('T')[0];
+    })(); // IIFE: Immediately Invoked Function Expression — runs right away
+
+
+    // ================================================================
+    // MAIN FUNCTION: calculateAge()
+    // Called when the Calculate button is clicked (onclick="calculateAge()")
+    //
+    // ALGORITHM:
+    // 1. Read birthdate from input
+    // 2. Validate: not empty, not in future
+    // 3. Get today's date
+    // 4. Subtract birth year from current year → candidate years
+    // 5. Check if birthday has passed this year:
+    //    - If current month < birth month → subtract 1 year, calculate months
+    //    - If current month = birth month and current day < birth day → same
+    //    - Otherwise → use as-is
+    // 6. Calculate remaining months and days similarly
+    // 7. Update DOM with results
+    // ================================================================
+    function calculateAge() {
+
+      // ---- READ INPUT VALUE ----
+      // document.getElementById() returns the DOM element with that id
+      // .value returns the string value of the input: "YYYY-MM-DD" or ""
+      const inputVal = document.getElementById('birthDate').value;
+
+      // Get references to UI elements we'll update
+      const errorMsg     = document.getElementById('errorMsg');
+      const resultSection = document.getElementById('resultSection');
+
+      // ---- VALIDATION ----
+      // if(!inputVal): empty string is "falsy" in JavaScript
+      if (!inputVal) {
+        // Show error, hide result
+        errorMsg.style.display = 'block';      // CSS display: block = visible
+        resultSection.classList.remove('visible');
+        return;  // exit function early — no point continuing
+      }
+
+      // new Date("YYYY-MM-DD") creates a Date object from the string
+      // Date object stores date as milliseconds since Jan 1, 1970 (Unix epoch)
+      const birthDate = new Date(inputVal);
+      const today     = new Date();             // current date and time
+
+      // Check if birth date is in the future
+      // Comparing two Date objects with > compares their timestamps
+      if (birthDate > today) {
+        errorMsg.style.display = 'block';
+        resultSection.classList.remove('visible');
+        return;
+      }
+
+      // Input is valid — hide error message
+      errorMsg.style.display = 'none';
+
+      // ---- EXTRACT DATE COMPONENTS ----
+      // .getFullYear() → 4-digit year  e.g. 2002
+      // .getMonth()    → 0-based month e.g. 0=Jan, 11=Dec
+      // .getDate()     → day of month  e.g. 1–31
+      const bYear  = birthDate.getFullYear();
+      const bMonth = birthDate.getMonth();     // 0-indexed
+      const bDay   = birthDate.getDate();
+
+      const tYear  = today.getFullYear();
+      const tMonth = today.getMonth();         // 0-indexed
+      const tDay   = today.getDate();
+
+      // ---- CALCULATE YEARS ----
+      let years  = tYear - bYear;    // difference in years (may be 1 too many)
+      let months = tMonth - bMonth;  // difference in months (may be negative)
+      let days   = tDay - bDay;      // difference in days (may be negative)
+
+      // ---- ADJUST DAYS ----
+      // If days is negative, birthday day hasn't arrived in current month yet.
+      // We need to borrow days from the previous month.
+      if (days < 0) {
+        months--;  // reduce months by 1
+
+        // Get number of days in the PREVIOUS month
+        // new Date(year, month, 0): day=0 is the LAST day of previous month
+        // e.g. new Date(2025, 3, 0) = last day of March = March 31
+        const prevMonthDate = new Date(tYear, tMonth, 0);
+        days += prevMonthDate.getDate();   // add days of previous month
+      }
+
+      // ---- ADJUST MONTHS ----
+      // If months is negative, birthday month hasn't arrived this year yet.
+      if (months < 0) {
+        years--;          // reduce years by 1
+        months += 12;     // add 12 months (borrow a year)
+      }
+
+      // ---- CALCULATE TOTAL STATS ----
+      // Math.floor() rounds DOWN to nearest integer
+      const msPerDay = 1000 * 60 * 60 * 24;   // milliseconds in one day
+                                               // 1000ms * 60s * 60min * 24hr
+
+      // Total days lived = difference between today and birthdate in milliseconds
+      // divided by milliseconds per day
+      const totalDaysLived = Math.floor((today - birthDate) / msPerDay);
+
+      // Total weeks = total days ÷ 7
+      const totalWeeksLived = Math.floor(totalDaysLived / 7);
+
+      // Total months = years * 12 + remaining months
+      const totalMonthsLived = (years * 12) + months;
+
+      // Total hours = total days * 24
+      const totalHoursLived = totalDaysLived * 24;
+
+      // ---- NEXT BIRTHDAY CALCULATION ----
+      // Create a Date for this year's birthday
+      let nextBday = new Date(tYear, bMonth, bDay);
+
+      // If birthday already passed this year, set to next year
+      if (nextBday <= today) {
+        nextBday = new Date(tYear + 1, bMonth, bDay);
+      }
+
+      // Days until next birthday
+      const daysUntilBday = Math.ceil((nextBday - today) / msPerDay);
+      // Math.ceil() rounds UP — even 0.5 days = 1 day to be safe
+
+      // ---- UPDATE DOM ----
+      // .textContent sets the text inside an element (safe, no HTML injection)
+
+      // Big number boxes
+      document.getElementById('ageYears').textContent  = years;
+      document.getElementById('ageMonths').textContent = months;
+      document.getElementById('ageDays').textContent   = days;
+
+      // Sentence summary
+      // Template literals: backtick strings ` ` with ${expression} interpolation
+      document.getElementById('ageSummary').innerHTML =
+        `You are <strong>${years} year${years !== 1 ? 's' : ''}</strong>, 
+         <strong>${months} month${months !== 1 ? 's' : ''}</strong> and 
+         <strong>${days} day${days !== 1 ? 's' : ''}</strong> old.`;
+      // Ternary operator: condition ? valueIfTrue : valueIfFalse
+      // years !== 1 ? 's' : '' → adds 's' for plural (2 years vs 1 year)
+
+      // Extra stats
+      // toLocaleString() adds comma formatting: 10000 → "10,000"
+      document.getElementById('totalMonths').textContent = totalMonthsLived.toLocaleString();
+      document.getElementById('totalWeeks').textContent  = totalWeeksLived.toLocaleString();
+      document.getElementById('totalDays').textContent   = totalDaysLived.toLocaleString();
+      document.getElementById('totalHours').textContent  = totalHoursLived.toLocaleString();
+
+      // Birthday banner
+      // Array of month names — JS months are 0-indexed so array index matches
+      const monthNames = ['January','February','March','April','May','June',
+                          'July','August','September','October','November','December'];
+
+      if (daysUntilBday === 0) {
+        document.getElementById('bdayBanner').innerHTML =
+          `🎉 <span class="bday-val">Happy Birthday Today!</span> 🎂`;
+      } else {
+        document.getElementById('bdayBanner').innerHTML =
+          `🎂 Next birthday: <span class="bday-val">${monthNames[bMonth]} ${bDay}, ${nextBday.getFullYear()}</span>
+           — in <span class="bday-val">${daysUntilBday} days</span>`;
+      }
+
+      // ---- SHOW RESULT SECTION ----
+      // .classList.add() adds a CSS class to the element
+      // The 'visible' class changes display from 'none' to 'block'
+      resultSection.classList.add('visible');
+
+      // Scroll result into view smoothly
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Console log for examiner demo (F12 → Console tab)
+      console.log('=== Age Calculation Result ===');
+      console.log(`Birth Date : ${birthDate.toDateString()}`);
+      console.log(`Today      : ${today.toDateString()}`);
+      console.log(`Age        : ${years} years, ${months} months, ${days} days`);
+      console.log(`Total Days : ${totalDaysLived}`);
+    }
+
+
+    // ================================================================
+    // BONUS: Allow pressing Enter key in the date field to calculate
+    // addEventListener('keydown', ...) — keyboard event handler
+    // event.key === 'Enter' — checks if Enter was pressed
+    // ================================================================
+    document.getElementById('birthDate').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {   // e.key gives the name of the pressed key
+        calculateAge();
+      }
+    });
+
+    // Also recalculate automatically when date is changed in the picker
+    document.getElementById('birthDate').addEventListener('change', function () {
+      // Only auto-calculate if result is already visible (user already clicked)
+      const resultSection = document.getElementById('resultSection');
+      if (resultSection.classList.contains('visible')) {
+        calculateAge();
+      }
+    });
+
+  </script>
+
+</body>
+</html>
